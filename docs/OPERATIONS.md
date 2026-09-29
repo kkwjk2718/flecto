@@ -58,6 +58,18 @@ npm run release:pack -- --revoke <extensionBuildSha256> --reason "안전 결함 
 - 추적 파일이 커밋과 다르면 UNVERIFIED로 제한한다. revoked: true 보고서나 --revoke로 등록된 빌드는 패키지를 만들지 않는다(종료 코드 2).
 - 운영 등급 MANAGED_TESTED는 OPER01–OPER15가 모두 FAULT_INJECTION PASS인 보고서에서만 나온다. 이 저장소의 단위 테스트 통과만으로는 부여하지 않는다.
 
+## 통합 전 patch 검사와 제한 실행 (OPS01 보조 도구)
+
+~~~sh
+npx tsx scripts/ops/check-patch.ts --base <rev> --head <rev> --allow 'scripts/ops/**' --allow 'tests/unit/ops*.test.ts' \
+  [--task OPS-01 --generation 1 --owner worker-a] [--record]
+npx tsx scripts/ops/run-bounded.ts --deadline-sec 600 -- npx vitest run
+~~~
+
+- check-patch는 실제 git diff로 lease 범위 밖 경로, 보호 경로(package/lock, packages/contracts, spec, ops, state, archive, sources, scripts/system.ts, AGENTS.md 등), 테스트 파일 삭제, 새로 추가된 .only/.skip/.todo를 거부한다. git patch-id로 같은 내용의 patch가 .flecto/ops/integrated.json에 이미 있으면 중복으로 거부한다. --task를 주면 .flecto/ops/leases/<task>.json의 generation·owner·만료를 확인해 늦게 도착한 이전 세대 결과를 거부한다. --record일 때만 ledger에 쓴다. 종료 코드 0=OK, 1=거부, 2=사용법/실행 오류.
+- run-bounded는 명령을 자기 프로세스 그룹에서 실행하고 기한이 지나거나 명령이 끝난 뒤 남은 하위 프로세스가 있으면 그 그룹에만 TERM→KILL을 보낸다. 다른 프로세스에는 신호를 보내지 않는다. 기한 초과 124, 시작 실패 125.
+- lease 발급(issueLease)은 모듈 함수로만 제공한다. 이 도구들은 스케줄러·데몬·agent 플랫폼이 아니며, 실제 supervisor에서 OPER01–OPER15 고장 주입을 수행한 것이 아니므로 MANAGED_TESTED 근거가 아니다.
+
 ## 검사 범위
 
 tests/unit/ops-*.test.ts는 임시 git 저장소와 실제 zip/unzip, 실제 소켓, scripts/system.ts로 띄운 실제 QA 서비스 프로세스를 사용한다. 이 테스트는 도구의 동작을 검증한다. 제품 T01–T40, 운영 OPER01–OPER15의 실행 결과로 집계하지 않는다.
