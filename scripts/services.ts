@@ -15,7 +15,7 @@ const server = role === 'planner' ? createPlannerServer({
   dbPath: resolve(dataDir, 'blueprints.sqlite'), token: process.env.FLECTO_TOKEN ?? '',
   provider: process.env.FLECTO_PROVIDER === 'codex' ? new CodexProvider({
     binary: process.env.FLECTO_CODEX_BIN ?? 'codex', model: process.env.FLECTO_MODEL ?? 'gpt-6-luna',
-    runtimeDir: resolve(dataDir, 'runtime'), effort: 'low',
+    runtimeDir: resolve(dataDir, 'runtime'), effort: 'low', serviceTier: 'fast',
   }) : process.env.FLECTO_PROVIDER === 'fixture' ? new FixtureProvider({
     delayMs: Number(process.env.FLECTO_FAULT_DELAY_MS ?? 0), fail: process.env.FLECTO_FAULT_PROVIDER_ERROR === '1',
   }) : (() => { throw new Error('Explicit product provider is required'); })(),
