@@ -140,6 +140,7 @@ export class FlectoController {
     if (!this.registry) return '';
     for (const option of control.options) {
       const element = this.registry.options.get(option.ref);
+      if (control.required && element instanceof HTMLOptionElement && element.value === '') continue;
       if (element instanceof HTMLOptionElement && element.selected || element instanceof HTMLInputElement && element.checked) return option.ref;
     }
     return '';
@@ -156,7 +157,8 @@ export class FlectoController {
         else if (this.drafts.has(control.ref)) value = this.drafts.get(control.ref)!;
         else value = readControlValue(binding, this.registry!);
       }
-      return { ...control, value, composing: this.composing.has(control.ref),
+      const options = control.kind === 'select' && control.required ? control.options.filter((option) => (this.registry!.options.get(option.ref) as HTMLOptionElement | undefined)?.value !== '') : control.options;
+      return { ...control, options, value, composing: this.composing.has(control.ref),
         error: this.model.controls.find((item) => item.ref === control.ref)?.error ?? null,
         description: null };
     });
@@ -278,7 +280,7 @@ export class FlectoController {
           control.options.find((option) => option.ref === control.value)?.label ?? String(control.value || '입력하지 않음'),
       }));
     this.patch({ phase: reviewing ? 'REVIEW' : 'READY', title: step.title, statusMessage: '', stepIndex: index,
-      controls, reviewRows: this.localSourceReview ? this.sourceReviewRows : rows,
+      controls, reviewRows: this.localSourceReview ? this.sourceReviewRows : rows, reviewEditMode: this.localSourceReview ? 'source' : 'local',
       canGoBack: index > 0 || this.localSourceReview, canGoNext: !reviewing, canSubmit: reviewing && !!this.review,
       sponsorVisible: false, error: null });
   }
@@ -320,6 +322,10 @@ export class FlectoController {
           const edit = this.snapshot.controls.find((control) => control.actionKind === 'navigate' && /수정|이전/.test(control.label) && this.registry!.bindings.get(control.ref)?.element.closest('main'));
           if (edit) await invokeSource(edit.ref, this.registry, 'navigate'); else await this.close();
           return;
+        }
+        if (action.targetRef) {
+          const target = this.plan.steps.findIndex((step) => step.controlRefs.includes(action.targetRef!));
+          if (target >= 0) { this.selectStep(target); return; }
         }
         this.selectStep(this.model.stepIndex - 1); return;
       }

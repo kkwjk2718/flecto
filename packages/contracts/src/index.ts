@@ -2,7 +2,7 @@ export { EXTENSION_ID, EXTENSION_ORIGIN } from './extension-id';
 import { z } from 'zod';
 
 export const SCHEMA_VERSION = 1 as const;
-export const CONTRACT_VERSION = '1.0.0';
+export const CONTRACT_VERSION = '1.0.1';
 export const PROMPT_VERSION = 'flecto-plan-v1';
 export const CACHE_VERSION = 'flecto-blueprint-v2';
 export const PREPARE_DEADLINE_MS = 10_000;
@@ -195,10 +195,11 @@ export type FlectoViewModel = {
   canGoNext: boolean; canSubmit: boolean; canGoBack: boolean;
   error: ErrorCode | null; resultText: string | null;
   sourceName: string;
+  reviewEditMode?: 'local' | 'source';
 };
 export type UserAction =
   | { kind: 'LOCAL_NEXT'; fromStep: string }
-  | { kind: 'LOCAL_BACK'; fromStep: string }
+  | { kind: 'LOCAL_BACK'; fromStep: string; targetRef?: string }
   | { kind: 'SET_TEXT'; ref: string; value: string }
   | { kind: 'SET_CHOICE'; ref: string; optionRef: string }
   | { kind: 'SET_CONSENT_FROM_USER'; ref: string; checked: boolean }
