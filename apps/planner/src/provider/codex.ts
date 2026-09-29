@@ -1,11 +1,14 @@
 import { spawn as nodeSpawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
-import { mkdir, writeFile } from 'node:fs/promises';
+import { readdirSync } from 'node:fs';
+import { mkdir, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   FlectoError, PREPARE_DEADLINE_MS, PagePlanSchema, publicSnapshot,
   type PagePlan, type PlanProvider, type PublicPageSnapshot,
 } from '@flecto/contracts';
-import { PAGE_PLAN_OUTPUT_SCHEMA, PLAN_PROMPT_VERSION, buildPlanPrompt } from './prompt';
+import {
+  PLANNER_INSTRUCTIONS, PLAN_PROMPT_VERSION, buildOutputSchema, decodePlan, encodePlanPrompt, type PromptEncoding,
+} from './prompt';
 
 export type SpawnFn = (command: string, args: string[], options: SpawnOptions) => ChildProcess;
 
@@ -14,10 +17,15 @@ export type CodexProviderOptions = {
   binary: string;
   /** Product model requested with `-m` (separate from any developer model). */
   model: string;
-  /** Dedicated empty runtime directory: no AGENTS.md, no repo, no skills. Only the output schema file is written here. */
+  /** Dedicated empty runtime directory: no AGENTS.md, no repo, no skills. Only the planner instructions and per-request schema files are written here. */
   runtimeDir: string;
   /** model_reasoning_effort forwarded to Codex. Default "low". */
   effort?: string;
+  /**
+   * Optional `service_tier` config of the pinned CLI. "fast" is the only value the runtime maps to priority processing
+   * (captured request carries service_tier "priority"). Off by default: it draws on the account's fast-mode allowance.
+   */
+  serviceTier?: 'fast';
   /** Grace period between SIGTERM and SIGKILL while cancelling our own child. */
   killGraceMs?: number;
   /** Unit-test seam only. Production code must leave this undefined so node:child_process.spawn is used. */
@@ -30,11 +38,16 @@ export type CodexPlanResult = {
   /** The exec JSONL stream does not echo the served model; null means "not reported by the runtime". */
   reportedModel: string | null;
   requestedEffort: string;
+  requestedServiceTier: 'fast' | null;
   budgetMs: number;
   durationMs: number;
   inputTokens: number | null;
   outputTokens: number | null;
   exitCode: number | null;
+  /** Controls/notices forwarded to the model after form selection (not the whole snapshot). */
+  forwardedControls: number;
+  forwardedNotices: number;
+  promptChars: number;
 };
 
 /** Feature flags switched off on every run. Verified against `codex features list` for codex-cli 0.158.0-alpha.2.1. */
@@ -48,9 +61,47 @@ export const DISABLED_FEATURES = [
 /** Environment keys forwarded to the child. Auth still resolves through CODEX_HOME (defaults to HOME/.codex). */
 const FORWARDED_ENV = ['PATH', 'HOME', 'CODEX_HOME', 'TMPDIR', 'LANG', 'LC_ALL'] as const;
 
-const SCHEMA_FILE = `flecto-page-plan.${PLAN_PROMPT_VERSION}.schema.json`;
+/**
+ * Host skills the pinned CLI discovers even with --ignore-user-config; each is switched off through `skills.config`
+ * so no <skills_instructions> block is sent. The static list is the state captured for codex-cli 0.158.0-alpha.2.1;
+ * discoverSkillNames() unions it with the directories currently present under CODEX_HOME/skills.
+ */
+export const KNOWN_HOST_SKILLS = ['imagegen', 'openai-docs', 'plugin-creator', 'review-agent', 'skill-creator', 'skill-installer'] as const;
+const SKILL_NAME = /^[A-Za-z0-9._-]+$/;
 
-export function buildExecArgs(options: { model: string; effort: string; schemaPath: string }): string[] {
+/** Directory names only (no file contents) from CODEX_HOME/skills and CODEX_HOME/skills/.system. */
+export function discoverSkillNames(env: NodeJS.ProcessEnv = process.env): string[] {
+  const codexHome = env.CODEX_HOME ?? (env.HOME ? path.join(env.HOME, '.codex') : null);
+  const names = new Set<string>(KNOWN_HOST_SKILLS);
+  if (codexHome) {
+    for (const dir of [path.join(codexHome, 'skills'), path.join(codexHome, 'skills', '.system')]) {
+      let entries: import('node:fs').Dirent[] = [];
+      try { entries = readdirSync(dir, { withFileTypes: true }); } catch { continue; }
+      for (const entry of entries) if (entry.isDirectory() && !entry.name.startsWith('.') && SKILL_NAME.test(entry.name)) names.add(entry.name);
+    }
+  }
+  return [...names].sort();
+}
+
+function skillsConfigToml(names: readonly string[]): string {
+  return 'skills.config=[' + names.filter((n) => SKILL_NAME.test(n)).map((n) => `{name=${JSON.stringify(n)},enabled=false}`).join(',') + ']';
+}
+
+const INSTRUCTIONS_FILE = `flecto-planner.${PLAN_PROMPT_VERSION}.instructions.md`;
+const schemaFileFor = (requestId: string) => `flecto-page-plan.${PLAN_PROMPT_VERSION}.${requestId}.schema.json`;
+
+export type ExecArgOptions = {
+  model: string; effort: string; schemaPath: string; instructionsPath: string;
+  /** Host skill names to disable through skills.config (default: discoverSkillNames()). */
+  skillNames?: readonly string[];
+  serviceTier?: 'fast' | null;
+};
+
+/**
+ * Verified against the captured request body of codex-cli 0.158.0-alpha.2.1 (scripts/probe-codex.ts --capture):
+ * the input becomes [empty additional_tools, planner instructions, user prompt]; `tools` is absent.
+ */
+export function buildExecArgs(options: ExecArgOptions): string[] {
   const args = [
     'exec',
     '--ignore-user-config', '--ignore-rules', '--ephemeral', '--skip-git-repo-check',
@@ -58,11 +109,20 @@ export function buildExecArgs(options: { model: string; effort: string; schemaPa
     '--output-schema', options.schemaPath,
     '-m', options.model,
     '-c', `model_reasoning_effort=${JSON.stringify(options.effort)}`,
+    // Replaces the built-in coding-agent base instructions with the planner-only text (verified config key of the pinned CLI).
+    '-c', `model_instructions_file=${JSON.stringify(options.instructionsPath)}`,
+    // Drops the <environment_context>, <permissions instructions>, apps and <collaboration_mode> developer/user blocks.
+    '-c', 'include_environment_context=false',
+    '-c', 'include_permissions_instructions=false',
+    '-c', 'include_apps_instructions=false',
+    '-c', 'include_collaboration_mode_instructions=false',
+    '-c', skillsConfigToml(options.skillNames ?? discoverSkillNames()),
     '-c', 'agents.enabled=false',
     '-c', 'project_doc_max_bytes=0',
     '-c', 'sandbox_mode="read-only"',
     '-c', 'web_search="disabled"',
   ];
+  if (options.serviceTier === 'fast') args.push('-c', 'service_tier="fast"');
   for (const feature of DISABLED_FEATURES) args.push('--disable', feature);
   args.push('-');
   return args;
@@ -76,12 +136,14 @@ export class CodexProvider implements PlanProvider {
   readonly mode = 'LIVE_CODEX' as const;
   readonly model: string;
   readonly effort: string;
+  readonly serviceTier: 'fast' | null;
   readonly promptVersion = PLAN_PROMPT_VERSION;
   private readonly binary: string;
   private readonly runtimeDir: string;
   private readonly killGraceMs: number;
   private readonly spawnImpl: SpawnFn;
-  private schemaReady: Promise<string> | null = null;
+  private readonly skillNames: readonly string[];
+  private instructionsReady: Promise<string> | null = null;
   private lastResult: CodexPlanResult | null = null;
 
   constructor(options: CodexProviderOptions) {
@@ -92,8 +154,10 @@ export class CodexProvider implements PlanProvider {
     this.model = options.model;
     this.runtimeDir = options.runtimeDir;
     this.effort = options.effort ?? 'low';
+    this.serviceTier = options.serviceTier ?? null;
     this.killGraceMs = options.killGraceMs ?? 1000;
     this.spawnImpl = options.spawnImpl ?? nodeSpawn;
+    this.skillNames = discoverSkillNames();
   }
 
   /** Metadata of the most recent completed or failed run (no prompt or model text). */
@@ -110,14 +174,18 @@ export class CodexProvider implements PlanProvider {
     if (!Number.isFinite(budgetMs) || budgetMs <= 0) throw new FlectoError('DEADLINE_EXCEEDED');
     // Strict parse: any private/extra field on the snapshot is rejected before it can reach the prompt.
     const publicOnly = publicSnapshot(snapshot);
-    const schemaPath = await this.ensureSchema();
-    const prompt = buildPlanPrompt(publicOnly);
+    const encoding = encodePlanPrompt(publicOnly);
+    const instructionsPath = await this.ensureInstructions();
+    const schemaPath = await this.writeSchema(publicOnly.requestId, encoding);
 
-    const outcome = await this.runChild(prompt, schemaPath, budgetMs, signal);
+    let outcome: ChildOutcome;
+    try { outcome = await this.runChild(encoding.prompt, schemaPath, instructionsPath, budgetMs, signal); }
+    finally { await unlink(schemaPath).catch(() => {}); }
     const durationMs = Math.round(performance.now() - started);
     const base = {
-      requestedModel: this.model, reportedModel: null, requestedEffort: this.effort, budgetMs, durationMs,
+      requestedModel: this.model, reportedModel: null, requestedEffort: this.effort, requestedServiceTier: this.serviceTier, budgetMs, durationMs,
       inputTokens: outcome.inputTokens, outputTokens: outcome.outputTokens, exitCode: outcome.exitCode,
+      forwardedControls: encoding.controlRefs.size, forwardedNotices: encoding.noticeRefs.size, promptChars: encoding.prompt.length,
     };
     if (outcome.kind === 'cancelled') throw new FlectoError('CANCELLED');
     if (outcome.kind === 'timeout') throw new FlectoError('DEADLINE_EXCEEDED');
@@ -125,29 +193,39 @@ export class CodexProvider implements PlanProvider {
 
     let parsed: unknown;
     try { parsed = JSON.parse(outcome.finalMessage); } catch { throw new FlectoError('SCHEMA_INVALID'); }
-    const result = PagePlanSchema.safeParse(parsed);
+    // Aliases are restored to actual refs strictly: any unknown alias/action is SCHEMA_INVALID. Zod re-validates the result.
+    const decoded = decodePlan(parsed, encoding);
+    if (decoded === null) throw new FlectoError('SCHEMA_INVALID');
+    const result = PagePlanSchema.safeParse(decoded);
     if (!result.success) throw new FlectoError('SCHEMA_INVALID');
     if (!refsBelongToSnapshot(result.data, publicOnly)) throw new FlectoError('SCHEMA_INVALID');
     this.lastResult = { plan: result.data, ...base };
     return this.lastResult;
   }
 
-  private ensureSchema(): Promise<string> {
-    if (!this.schemaReady) {
-      const target = path.join(this.runtimeDir, SCHEMA_FILE);
-      this.schemaReady = (async () => {
+  private ensureInstructions(): Promise<string> {
+    if (!this.instructionsReady) {
+      const target = path.join(this.runtimeDir, INSTRUCTIONS_FILE);
+      this.instructionsReady = (async () => {
         await mkdir(this.runtimeDir, { recursive: true });
-        await writeFile(target, JSON.stringify(PAGE_PLAN_OUTPUT_SCHEMA), 'utf8');
+        await writeFile(target, PLANNER_INSTRUCTIONS, 'utf8');
         return target;
-      })().catch((error) => { this.schemaReady = null; throw error; });
+      })().catch((error) => { this.instructionsReady = null; throw error; });
     }
-    return this.schemaReady;
+    return this.instructionsReady;
   }
 
-  private runChild(prompt: string, schemaPath: string, budgetMs: number, signal: AbortSignal): Promise<ChildOutcome> {
+  /** Per-request strict schema: only this snapshot's aliases are valid output. Removed after the run. */
+  private async writeSchema(requestId: string, encoding: PromptEncoding): Promise<string> {
+    const target = path.join(this.runtimeDir, schemaFileFor(requestId));
+    await writeFile(target, JSON.stringify(buildOutputSchema(encoding)), 'utf8');
+    return target;
+  }
+
+  private runChild(prompt: string, schemaPath: string, instructionsPath: string, budgetMs: number, signal: AbortSignal): Promise<ChildOutcome> {
     const env: Record<string, string> = {};
     for (const key of FORWARDED_ENV) { const value = process.env[key]; if (value !== undefined) env[key] = value; }
-    const args = buildExecArgs({ model: this.model, effort: this.effort, schemaPath });
+    const args = buildExecArgs({ model: this.model, effort: this.effort, schemaPath, instructionsPath, skillNames: this.skillNames, serviceTier: this.serviceTier });
 
     return new Promise<ChildOutcome>((resolve) => {
       let child: ChildProcess;
@@ -260,4 +338,3 @@ function refsBelongToSnapshot(plan: PagePlan, snapshot: PublicPageSnapshot): boo
   }
   return true;
 }
-
