@@ -120,8 +120,9 @@ export const FlectoAd: React.FC<Props> = (props) => {
       h: (SRC_FIELD.h + (DST_FIELD.h - SRC_FIELD.h) * p) * A.s,
     };
     // Short fade-through so the two labels never sit on top of each other for long.
-    const out01 = clamp01((f - T.b2XfadeFrom) / 10);
-    const in02 = clamp01((f - (T.b2XfadeFrom + 8)) / (T.b2XfadeTo - T.b2XfadeFrom - 8));
+    // 02 rises while 01 falls (overlap starts late so labels barely double, and total opacity never dips).
+    const in02 = clamp01((f - T.b2XfadeFrom) / 14);
+    const out01 = clamp01((f - (T.b2XfadeFrom + 6)) / 10);
     morph = (
       <>
         <Crop asset="01-source-benefits" crop={SRC_FIELD} rect={rect} opacity={1 - out01} />
