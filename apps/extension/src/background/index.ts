@@ -8,7 +8,7 @@ export function startBackground(api: typeof chrome) {
     void broker.handle(message, sender).then(reply);
     return true;
   });
-  api.action.onClicked.addListener((tab) => event(broker.activate(tab)));
+  api.action.onClicked.addListener((tab) => event(broker.activate(tab, true)));
   api.webNavigation.onCommitted.addListener((details) => event(broker.navigation(details)));
   api.webNavigation.onHistoryStateUpdated.addListener((details) => event(broker.navigation(details, true)));
   api.webNavigation.onReferenceFragmentUpdated.addListener((details) => event(broker.navigation(details, true)));

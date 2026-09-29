@@ -62,6 +62,19 @@ function harness(saved: Record<string, unknown> = {}) {
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 
 describe('background authorization and storage boundary', () => {
+  it('native toolbar opts into preparation but navigation does not replay it', async () => {
+    const h = harness();
+    const native = startBackground(h.api);
+    const activate = vi.spyOn(native, 'activate');
+    h.mock.action.onClicked.addListener.mock.calls[0][0](h.tabs.get(1)!);
+    await vi.waitFor(() => expect(h.mock.tabs.sendMessage).toHaveBeenCalledWith(1,
+      { type: 'FLECTO_ACTIVATE', pendingSubmit: false, autoPrepare: true }, { documentId: 'chrome-doc1', frameId: 0 }));
+    expect(activate).toHaveBeenCalledWith(h.tabs.get(1)!, true);
+    h.frames.get(1)!.documentId = 'chrome-doc2';
+    await native.navigation({ tabId: 1, frameId: 0, url: `${origin}/next`, documentId: 'chrome-doc2' });
+    expect(h.mock.tabs.sendMessage.mock.calls.at(-1)![1]).toEqual({ type: 'FLECTO_ACTIVATE', pendingSubmit: false });
+  });
+
   it('allows one static sponsor per active session across retries and worker restart', async () => {
     const h = harness(); await h.activate();
     expect(await h.broker.handle({ type: 'FLECTO_SPONSOR_CLAIM' }, h.sender())).toEqual({ ok: true, sponsorAllowed: true });

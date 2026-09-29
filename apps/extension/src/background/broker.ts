@@ -370,7 +370,7 @@ export class BackgroundBroker {
     finally { operation.dispose(); }
   }
 
-  async activate(tab: chrome.tabs.Tab) {
+  async activate(tab: chrome.tabs.Tab, autoPrepare = false) {
     await this.ready;
     const origin = httpOrigin(tab.url);
     if (tab.id === undefined || !origin) return;
@@ -387,16 +387,17 @@ export class BackgroundBroker {
     this.sessions.set(tabId, session);
     this.documents.set(tabId, { documentId: frame.documentId });
     await this.persist();
-    await this.inject(tabId, frame.documentId, session);
+    await this.inject(tabId, frame.documentId, session, autoPrepare);
   }
 
-  private async inject(tabId: number, documentId: string, session: Session) {
+  private async inject(tabId: number, documentId: string, session: Session, autoPrepare = false) {
     if (this.sessions.get(tabId) !== session || !session.active) return;
     await this.api.scripting.executeScript({ target: { tabId, documentIds: [documentId] }, files: ['content.js'] });
     if (this.sessions.get(tabId) !== session || !session.active) return;
     const frame = await this.api.webNavigation.getFrame({ tabId, frameId: 0 });
     if (frame?.documentId !== documentId || httpOrigin(frame.url) !== session.origin) return;
-    await this.api.tabs.sendMessage(tabId, { type: 'FLECTO_ACTIVATE', pendingSubmit: session.pendingSubmit }, { documentId, frameId: 0 });
+    await this.api.tabs.sendMessage(tabId, { type: 'FLECTO_ACTIVATE', pendingSubmit: session.pendingSubmit,
+      ...(autoPrepare ? { autoPrepare: true } : {}) }, { documentId, frameId: 0 });
   }
 
   async navigation(details: Navigation, history = false) {

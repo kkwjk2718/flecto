@@ -65,6 +65,8 @@ export class FlectoController {
   private lastUrl = location.href;
   private localSourceReview = false;
   private sourceReviewRows: FlectoViewModel['reviewRows'] = [];
+  private activation: Promise<void> | null = null;
+  private restoredSubmission = false;
 
   private layoutTasks = new Map<string, string>();
   private visionAvailableOrigin: string | null = null;
@@ -129,7 +131,29 @@ export class FlectoController {
     });
   };
 
-  async activate(restoredPending = false): Promise<void> {
+  async activate(restoredPending = false, autoPrepare = false): Promise<void> {
+    // Injection starts activation before the toolbar message arrives. Share its
+    // initialization so the native click can prepare once after extraction.
+    if (!this.activation) this.activation = this.activateView(restoredPending).finally(() => { this.activation = null; });
+    await this.activation;
+    if (!autoPrepare || restoredPending || this.restoredSubmission || !this.host || this.pendingSubmit || this.model.phase !== 'IDLE') return;
+    this.refreshExtraction();
+    if (this.model.phase !== 'IDLE' || !this.snapshot || !this.registry) return;
+    this.showTasks();
+    const actions = this.snapshot.controls.filter(control => control.actionKind === 'submit' && !control.disabled &&
+      control.formRef && this.registry!.bindings.get(control.ref)?.element.closest('main') &&
+      this.registry!.bindings.get(control.ref)?.form?.closest('main'));
+    if (actions.length !== 1) return;
+    const action = actions[0];
+    if (!this.snapshot.controls.some(field => field.formRef === action.formRef && field.actionKind === 'none' &&
+      inputKinds.has(field.kind) && !field.disabled)) return;
+    // Only plan the existing form. Input, consent, navigation and submission
+    // continue to require the person's explicit actions.
+    try { await this.prepare(action.ref); }
+    catch (error) { this.fail(error instanceof FlectoError ? error.code : 'SOURCE_REJECTED'); }
+  }
+
+  private async activateView(restoredPending: boolean): Promise<void> {
     if (this.host) { this.host.style.display = 'block'; void this.loadVisionAvailability(); return; }
     this.priorFocus = this.doc.activeElement instanceof HTMLElement ? this.doc.activeElement : null;
     const host = this.doc.createElement('div'); host.id = 'flecto-host';
@@ -145,6 +169,7 @@ export class FlectoController {
     ]);
     this.model.settings = settings.ok && 'settings' in settings ? settings.settings : { ...DEFAULT_SETTINGS };
     this.pendingSubmit = restoredPending || !!session.session?.pendingSubmit;
+    this.restoredSubmission = this.pendingSubmit;
     this.refreshExtraction();
     this.setupObservation();
     if (this.probeOutcome()) return;
