@@ -1,16 +1,17 @@
-# 실행 상태 — 문서 검토·GitHub 협업 기반 완료
+# 실행 상태 — 문서·협업 기반·재시작 환경 확인
 
-갱신일: 2026-09-29, Asia/Seoul. 사용자 요청은 전체 문서 검토·구현 계획과 공개 GitHub 저장소 초기 설정이다. 패키지의 기본값을 아래 실제 확인 상태로 갱신했다.
+갱신일: 2026-09-29, Asia/Seoul. 최신 요청은 재시작 후 컨텍스트·OpenCodex·Opus 확인과 개발 환경 준비다. [현재 환경 검사](ENVIRONMENT_CHECK.md)에 실제 확인값을 기록했다.
 
 | 항목 | 현재 |
 |---|---|
 | package | IMPORTED — 원본 Markdown 82개, 추출 직후 ZIP 바이트 일치·manifest 81개 해시 일치 |
-| 사용자 Mac 도구 설치 | macOS 26.5.1 arm64; Node 25.8.1; npm 11.11.0; Git 2.55.0; Chrome 앱 154.0.8037.58 |
-| client / development model | Codex desktop; CLI 0.147.0; 사용자 지정 gpt-6-astra/ultra + UI/UX anthropic/claude-opus-5-5 |
-| OpenCodex | 2.70.0, health ok=true; 네이티브 v1 위임 작업 생성 확인 |
-| model reporting | 요청 ID·작업 생성 결과 확인; 공급자 내부 실제 모델 보고는 별도 미확인 |
-| mode | PREPARE — 협업 기반 설정; 현장 제출/발표 시간 미확정 |
-| approved current scope | 자료 검토·계획·지정 모델 위임·공개 GitHub 저장소 생성/push·협업 초기 설정 |
+| 사용자 Mac 도구 설치 | 프로젝트 Node 24.21.0/npm 11.19.0 준비·검사 PASS; 전역 Node 25.8.1 유지; Git 2.55.0; Chrome 앱 154.0.8037.58 |
+| client / development model | Codex desktop 내 runtime 0.158.0-alpha.2.1; 별도 셸 CLI 0.147.0; gpt-6-astra/ultra + UI/UX anthropic/claude-opus-5-5 |
+| context | Astra 872,000 설정 / 현재 대화 828,400 가용 / 자동 압축 784,800; Opus 카탈로그 1,000,000 |
+| OpenCodex | 2.70.0, health ok=true, ready=true; 네이티브 v1 Opus 단문 실응답 PASS |
+| model reporting | OpenCodex requested/resolved Opus 5.5·HTTP 200 확인; 제품 런타임 검증과 분리 |
+| mode | PREPARE — 개발 환경 준비; 현장 제출/발표 시간 미확정 |
+| approved current scope | 자료·계획·공개 GitHub 협업 기반·컨텍스트 설정·지정 모델 시험·개발 환경 준비 |
 | GitHub 협업 | PUBLIC, main push 완료, 문서 CI PASS; [설정 기록](REPOSITORY_SETUP.md) |
 | 제품 코드·실행 | NOT_STARTED / NOT_RUN |
 | 제품 Codex | UNCONFIGURED / NOT_RUN |
