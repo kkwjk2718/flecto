@@ -114,6 +114,37 @@ describe('public extraction and source verification', () => {
 });
 
 describe('input adapters and review locks', () => {
+  it('refreshes dependent options only after a user action and preserves old review invalidation', async () => {
+    const { snapshot, registry } = page('<form><label>수업<select id="course"><option value="a">요가</option><option value="b">그림</option></select></label><label>시간<select id="time"><option value="one">오전</option></select></label><button>신청</button></form>');
+    const course = snapshot.controls[0], submit = snapshot.controls[2];
+    const review = createReviewToken(submit.ref, registry);
+    document.querySelector('#course')!.addEventListener('change', () => { document.querySelector('#time')!.innerHTML = '<option value="two">오후</option>'; });
+    expect((await applyUserInput({ kind: 'SET_CHOICE', ref: course.ref, optionRef: course.options[1].ref }, registry)).status).toBe('APPLIED');
+    expect(readControlValue(registry.bindings.get(snapshot.controls[1].ref)!, registry)).toBe('two');
+    expect((await invokeSource(submit.ref, registry, 'submit', review)).error).toBe('STALE_DOCUMENT');
+  });
+  it('does not reconcile a changed required field or notice during a source input event', async () => {
+    const { snapshot, registry } = page();
+    document.querySelector('input')!.addEventListener('input', () => { document.querySelector('p')!.textContent = '다른 필수 조건'; });
+    expect((await applyUserInput({ kind: 'SET_TEXT', ref: snapshot.controls[0].ref, value: '홍길동' }, registry)).error).toBe('STALE_DOCUMENT');
+  });
+  it('invalidates a submit token when private source-rendered review values change', async () => {
+    const { snapshot, registry } = page('<main><form><dl><dt>성명</dt><dd>PRIVATE_REVIEW_OLD</dd></dl><button>신청</button></form></main>');
+    expect(JSON.stringify(snapshot)).not.toContain('PRIVATE_REVIEW');
+    const submit = snapshot.controls[0].ref, review = createReviewToken(submit, registry);
+    document.querySelector('dd')!.textContent = 'PRIVATE_REVIEW_NEW';
+    expect((await invokeSource(submit, registry, 'submit', review)).error).toBe('STALE_DOCUMENT');
+  });
+  it('honors native constraints and the original submit handler on a noValidate source', async () => {
+    const { snapshot, registry } = page('<form novalidate><label>성명<input required></label><button>신청</button></form>');
+    let submits = 0; document.querySelector('form')!.addEventListener('submit', e => { e.preventDefault(); submits++; });
+    const submit = snapshot.controls[1].ref;
+    expect((await invokeSource(submit, registry, 'submit', createReviewToken(submit, registry))).error).toBe('SOURCE_REJECTED');
+    expect(submits).toBe(0);
+    await applyUserInput({ kind: 'SET_TEXT', ref: snapshot.controls[0].ref, value: '홍길동' }, registry);
+    expect((await invokeSource(submit, registry, 'submit', createReviewToken(submit, registry))).status).toBe('PENDING');
+    expect(submits).toBe(1);
+  });
   it('uses native events, consent click, local readback and normal submit; locks repeat submit', async () => {
     const { snapshot, registry } = page(), input = snapshot.controls[0], consent = snapshot.controls[1], submit = snapshot.controls[2];
     const events: string[] = []; let submits = 0;

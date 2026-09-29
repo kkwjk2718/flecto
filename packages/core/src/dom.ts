@@ -142,7 +142,12 @@ function scan(doc: Document, state: DocumentState): Scan {
     if (actionKind !== 'none') rawActions.push([r, e.getAttribute('href'), e.getAttribute('formaction'), e.getAttribute('formmethod'), e.hasAttribute('formnovalidate'), form?.getAttribute('action'), form?.method, form?.noValidate]);
   }
   // Private state signatures stay in memory; they are never fingerprint/cache input.
-  const values = JSON.stringify(elements.filter(e => e.matches('input,textarea,select')).map(e => [ref(e), (e as HTMLInputElement).value, (e as HTMLInputElement).checked]));
+  const values = JSON.stringify([
+    elements.filter(e => e.matches('input,textarea,select')).map(e => [ref(e), (e as HTMLInputElement).value, (e as HTMLInputElement).checked]),
+    // Source-rendered review values are private local state too. A changed
+    // confirmation must invalidate an already approved submit token.
+    Array.from(doc.querySelectorAll('main dl')).filter(isSource).map(e => [ref(e), e.textContent]),
+  ]);
   return { controls, notices, bindings, options, noticeBindings, semantic: JSON.stringify([rawStructure, [...noticeElements].map(n => [ref(n, 'n'), sourceText(n), formOf(n) ? ref(formOf(n)!, 'f') : null]), rawActions]), optionSignature: JSON.stringify(controls.map(c => [c.ref, c.options.map(o => { const e = options.get(o.ref)!; return [o.ref, e.tagName === 'OPTION' ? e.textContent : label(e), o.disabled, e.value]; })])), values, blocked: null };
 }
 function update(state: DocumentState, result: Scan): void {
@@ -176,3 +181,23 @@ export function refreshRegistry(registry: PrivateBindingRegistry): void {
   for (const [r, binding] of registry.bindings) if (!binding.element.isConnected || result.bindings.get(r)?.element !== binding.element || result.bindings.get(r)?.form !== binding.form) throw new FlectoError('STALE_DOCUMENT');
 }
 export function currentSnapshot(registry: PrivateBindingRegistry): PublicPageSnapshot { refreshRegistry(registry); return registryStates.get(registry)!.snapshot; }
+
+/** Only a direct user input may refresh dependent choices, never source semantics. */
+export function reconcileOptionsAfterInput(registry: PrivateBindingRegistry): PublicPageSnapshot {
+  const meta = registryStates.get(registry);
+  if (!meta || documents.get(meta.doc) !== meta.state || meta.doc.defaultView?.document !== meta.doc) throw new FlectoError('STALE_DOCUMENT');
+  const result = scan(meta.doc, meta.state); update(meta.state, result);
+  if (result.blocked) throw new FlectoError(result.blocked);
+  if (meta.semantic !== result.semantic) throw new FlectoError('STALE_DOCUMENT');
+  for (const [r, binding] of registry.bindings) {
+    if (!binding.element.isConnected || result.bindings.get(r)?.element !== binding.element || result.bindings.get(r)?.form !== binding.form) throw new FlectoError('STALE_DOCUMENT');
+  }
+  registry.semanticRevision = meta.state.semanticRevision;
+  registry.optionRevision = meta.state.optionRevision;
+  registry.privateValueRevision = meta.state.valueRevision;
+  registry.options = result.options;
+  meta.options = result.optionSignature;
+  meta.snapshot = PublicPageSnapshotSchema.parse({ ...meta.snapshot, controls: result.controls, notices: result.notices,
+    semanticRevision: registry.semanticRevision, optionRevision: registry.optionRevision });
+  return meta.snapshot;
+}

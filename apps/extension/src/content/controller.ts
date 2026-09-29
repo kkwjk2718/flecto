@@ -9,7 +9,7 @@ import {
   type PagePlan, type PrivateBindingRegistry, type PublicPageSnapshot,
   type ReviewToken, type UserAction, type ViewControl,
 } from '@flecto/contracts';
-import { applyUserInput, createReviewToken, extractPage, invokeSource, readControlValue, refreshRegistry, structuralFingerprint, verifyPlan } from '@flecto/core';
+import { applyUserInput, createReviewToken, extractPage, invokeSource, readControlValue, refreshRegistry, structuralFingerprint, verifyPlan, currentSnapshot } from '@flecto/core';
 
 const messages: Record<ErrorCode, string> = {
   AUTH_REQUIRED: '원래 화면에서 먼저 로그인해 주세요. 로그인 정보는 FLECTO가 읽지 않아요.',
@@ -43,6 +43,7 @@ export class FlectoController {
   private tick: ReturnType<typeof setInterval> | null = null;
   private mutationTimer: ReturnType<typeof setTimeout> | null = null;
   private deadlineTimer: ReturnType<typeof setTimeout> | null = null;
+  private sponsorTimer: ReturnType<typeof setTimeout> | null = null;
   private prepareStart = 0;
   private epoch = 0;
   private structuralKey = '';
@@ -62,7 +63,7 @@ export class FlectoController {
 
   constructor(private readonly doc: Document = document) {}
 
-  private async send(message: unknown): Promise<BackgroundReply & { session?: { active: boolean; pendingSubmit: boolean } }> {
+  private async send(message: unknown): Promise<BackgroundReply & { session?: { active: boolean; pendingSubmit: boolean }; sponsorAllowed?: boolean }> {
     try { return await chrome.runtime.sendMessage(message); }
     catch { return { ok: false, error: 'PROVIDER_ERROR' }; }
   }
@@ -196,6 +197,7 @@ export class FlectoController {
     this.deadlineTimer = setTimeout(() => {
       if (this.model.phase === 'PREPARING' && this.epoch === requestEpoch) this.cancelPrepare(true);
     }, PREPARE_DEADLINE_MS);
+    this.sponsorTimer = setTimeout(() => { void this.showSponsor(requestEpoch); }, SPONSOR_AFTER_MS + 1);
     const key = await structuralFingerprint(snapshot);
     const elapsed = performance.now() - this.prepareStart;
     if (this.epoch !== requestEpoch || this.model.phase !== 'PREPARING' || elapsed >= PREPARE_DEADLINE_MS) return;
@@ -222,7 +224,24 @@ export class FlectoController {
     if (parsed.data.blueprintId) void this.send({ type: 'FLECTO_VERIFY', requestId, snapshotId: snapshot.snapshotId, blueprintId: parsed.data.blueprintId });
   }
 
-  private clearDeadline(): void { if (this.deadlineTimer) clearTimeout(this.deadlineTimer); this.deadlineTimer = null; }
+  private async showSponsor(requestEpoch: number): Promise<void> {
+    if (this.model.phase !== 'PREPARING' || this.epoch !== requestEpoch || this.sponsorDismissed) return;
+    const elapsedMs = performance.now() - this.prepareStart;
+    if (elapsedMs <= SPONSOR_AFTER_MS) {
+      this.sponsorTimer = setTimeout(() => { void this.showSponsor(requestEpoch); }, SPONSOR_AFTER_MS + 1 - elapsedMs); return;
+    }
+    if (elapsedMs >= PREPARE_DEADLINE_MS) return;
+    const claim = await this.send({ type: 'FLECTO_SPONSOR_CLAIM' });
+    // Ready/cancel wins even when its resolution shares this timer's event turn.
+    if (this.model.phase === 'PREPARING' && this.epoch === requestEpoch && !this.sponsorDismissed &&
+      performance.now() - this.prepareStart < PREPARE_DEADLINE_MS && claim.ok && claim.sponsorAllowed) {
+      this.patch({ sponsorVisible: true });
+    }
+  }
+  private clearDeadline(): void {
+    if (this.deadlineTimer) clearTimeout(this.deadlineTimer); this.deadlineTimer = null;
+    if (this.sponsorTimer) clearTimeout(this.sponsorTimer); this.sponsorTimer = null;
+  }
   private cancelPrepare(timedOut: boolean): void {
     if (this.model.phase === 'PREPARING' && this.snapshot) {
       this.epoch += 1;
@@ -368,6 +387,17 @@ export class FlectoController {
     try {
       const receipt = await applyUserInput(action, this.registry);
       if (receipt.status === 'REJECTED') { this.fail(receipt.error ?? 'SOURCE_REJECTED'); return; }
+      const fresh = currentSnapshot(this.registry);
+      if (this.snapshot?.optionRevision !== fresh.optionRevision) {
+        this.snapshot = fresh;
+        if (this.plan) {
+          this.plan = { ...this.plan, steps: this.plan.steps.map(step => step.template === 'item_selection'
+            ? { ...step, title: '항목을 선택해 주세요' } : step) };
+          verifyPlan(this.plan, this.snapshot, this.registry);
+          this.model.steps = this.plan.steps;
+        }
+        this.structuralKey = await structuralFingerprint(fresh);
+      }
       this.drafts.delete(action.ref); this.review = null; this.captureValues();
       const controls = this.viewControls().map((control) => control.ref === action.ref ? { ...control, error: null } : control);
       this.patch({ controls, canSubmit: false, statusMessage: '' });
@@ -386,12 +416,15 @@ export class FlectoController {
       this.registry?.bindings.get(control.ref)?.element.closest('main'));
   }
   /** A source-rendered confirmation is local private data; it needs no AI transport. */
-  private async trySourceReview(): Promise<boolean> {
-    if (!this.snapshot || !this.registry || this.model.phase === 'AUTH_REQUIRED') return false;
-    const definitions = [...this.doc.querySelectorAll<HTMLElement>('main dl dt')].map((term, index) => ({
+  private readSourceReviewRows(): FlectoViewModel['reviewRows'] {
+    return [...this.doc.querySelectorAll<HTMLElement>('main dl dt')].map((term, index) => ({
       ref: `source_review_${index}`, label: term.textContent?.trim() ?? '',
       value: term.nextElementSibling?.tagName === 'DD' ? term.nextElementSibling.textContent?.trim() ?? '' : '',
     })).filter((row) => row.label && row.value);
+  }
+  private async trySourceReview(): Promise<boolean> {
+    if (!this.snapshot || !this.registry || this.model.phase === 'AUTH_REQUIRED') return false;
+    const definitions = this.readSourceReviewRows();
     if (!definitions.length) return false;
     const actions = this.snapshot.controls.filter((control) => control.actionKind === 'submit' && !control.disabled &&
       this.registry!.bindings.get(control.ref)?.element.closest('main') &&
@@ -472,6 +505,12 @@ export class FlectoController {
         return;
       }
       if (!this.registry || !this.snapshot) return;
+      if (this.localSourceReview && JSON.stringify(this.readSourceReviewRows()) !== JSON.stringify(this.sourceReviewRows)) {
+        this.review = null;
+        this.patch({ phase: 'CONFLICT', canSubmit: false, canGoNext: false,
+          statusMessage: '원래 사이트의 확인 내용이 바뀌었어요. 원래 화면에서 다시 확인해 주세요.' });
+        return;
+      }
       const current = this.currentExtraction();
       if (current.blocked) { this.cancelPrepare(false); this.fail(current.blocked); return; }
       if (await structuralFingerprint(current.snapshot) !== this.structuralKey) {
@@ -531,7 +570,7 @@ export class FlectoController {
       if (this.model.phase === 'PREPARING') {
         const elapsedMs = performance.now() - this.prepareStart;
         if (elapsedMs >= PREPARE_DEADLINE_MS) { this.cancelPrepare(true); return; }
-        this.patch({ elapsedMs, sponsorVisible: elapsedMs > SPONSOR_AFTER_MS && !this.sponsorDismissed,
+        this.patch({ elapsedMs,
           statusMessage: elapsedMs > SPONSOR_AFTER_MS ? '필요한 입력과 버튼을 정리하고 있어요. 준비되면 바로 열어드릴게요.' : '사용하기 쉬운 화면을 준비하고 있어요.' });
       } else if (this.pendingSubmit) {
         if (!this.probeOutcome() && this.submitStart && performance.now() - this.submitStart > 10_000) this.fail('OUTCOME_UNKNOWN');

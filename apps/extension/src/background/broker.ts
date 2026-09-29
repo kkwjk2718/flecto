@@ -5,7 +5,7 @@ import {
 } from '@flecto/contracts';
 import { httpOrigin, MessageSchema, plannerOrigin, SessionSchema, sourceIdentity, type Session } from './validation';
 
-type Reply = BackgroundReply | { ok: true; session: Pick<Session, 'active' | 'pendingSubmit'> };
+type Reply = BackgroundReply | { ok: true; session: Pick<Session, 'active' | 'pendingSubmit'> } | { ok: true; sponsorAllowed: boolean };
 type Connection = { plannerUrl: string; token: string };
 type Owner = { tabId: number; documentId: string; session: Session; epoch: number; windowId: number };
 type TrackedRequest = {
@@ -258,6 +258,13 @@ export class BackgroundBroker {
         operation.check();
         switch (message.type) {
           case 'FLECTO_SESSION_GET': return { ok: true, session: { active: owner.session.active, pendingSubmit: owner.session.pendingSubmit } };
+          case 'FLECTO_SPONSOR_CLAIM': {
+            await operation.wait(this.current(owner, sender));
+            const sponsorAllowed = !owner.session.sponsorShown;
+            owner.session.sponsorShown = true;
+            await operation.wait(this.persist());
+            return { ok: true, sponsorAllowed };
+          }
           case 'FLECTO_SETTINGS_GET': {
             const stored = await operation.wait(this.api.storage.local.get('flectoSettings'));
             await operation.wait(this.authorize(sender, true));
@@ -323,6 +330,7 @@ export class BackgroundBroker {
     const session: Session = {
       origin, active: true, pendingSubmit: previous?.origin === origin ? previous.pendingSubmit : false,
       epoch: (previous?.epoch ?? 0) + 1,
+      sponsorShown: previous?.origin === origin && previous.active ? previous.sponsorShown : false,
     };
     this.sessions.set(tabId, session);
     this.documents.set(tabId, { documentId: frame.documentId });

@@ -23,6 +23,7 @@ export function plannerOrigin(value: unknown): string | null {
 export const SessionSchema = z.strictObject({
   origin: z.string().refine((value) => httpOrigin(value) === value),
   active: z.boolean(), pendingSubmit: z.boolean(), epoch: z.number().int().nonnegative(),
+  sponsorShown: z.boolean().default(false),
 });
 export type Session = z.infer<typeof SessionSchema>;
 export const MessageSchema = z.discriminatedUnion('type', [
@@ -33,6 +34,7 @@ export const MessageSchema = z.discriminatedUnion('type', [
   z.strictObject({ type: z.literal('FLECTO_SETTINGS_GET') }),
   z.strictObject({ type: z.literal('FLECTO_SETTINGS_SET'), settings: UserSettingsSchema }),
   z.strictObject({ type: z.literal('FLECTO_SESSION_GET') }),
+  z.strictObject({ type: z.literal('FLECTO_SPONSOR_CLAIM') }),
 ]);
 
 export function sourceIdentity(sender: chrome.runtime.MessageSender, runtimeId: string) {

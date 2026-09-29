@@ -62,6 +62,17 @@ function harness(saved: Record<string, unknown> = {}) {
 afterEach(() => { vi.useRealTimers(); vi.restoreAllMocks(); });
 
 describe('background authorization and storage boundary', () => {
+  it('allows one static sponsor per active session across retries and worker restart', async () => {
+    const h = harness(); await h.activate();
+    expect(await h.broker.handle({ type: 'FLECTO_SPONSOR_CLAIM' }, h.sender())).toEqual({ ok: true, sponsorAllowed: true });
+    expect(await h.broker.handle({ type: 'FLECTO_SPONSOR_CLAIM' }, h.sender())).toEqual({ ok: true, sponsorAllowed: false });
+    const restarted = new BackgroundBroker(h.api, h.fetcher);
+    expect(await restarted.handle({ type: 'FLECTO_SPONSOR_CLAIM' }, h.sender())).toEqual({ ok: true, sponsorAllowed: false });
+    expect(h.fetcher).not.toHaveBeenCalled();
+    await restarted.handle({ type: 'FLECTO_STATE', documentInstanceId: 'instance1', active: false, pendingSubmit: false }, h.sender());
+    await restarted.activate(h.tabs.get(1)!);
+    expect(await restarted.handle({ type: 'FLECTO_SPONSOR_CLAIM' }, h.sender())).toEqual({ ok: true, sponsorAllowed: true });
+  });
   it('registers MV3 listeners synchronously while storage is loading', () => {
     const h = harness();
     startBackground(h.api);
@@ -88,7 +99,7 @@ describe('background authorization and storage boundary', () => {
     expect(h.mock.storage.local.setAccessLevel).toHaveBeenCalledWith({ accessLevel: 'TRUSTED_CONTEXTS' });
     expect(h.mock.storage.session.setAccessLevel).toHaveBeenCalledWith({ accessLevel: 'TRUSTED_CONTEXTS' });
     expect(h.mock.storage.local.setAccessLevel.mock.invocationCallOrder[0]).toBeLessThan(h.mock.scripting.executeScript.mock.invocationCallOrder[0]);
-    expect(h.session).toEqual({ flectoSessions: { '1': { origin, active: true, pendingSubmit: false, epoch: 1 } } });
+    expect(h.session).toEqual({ flectoSessions: { '1': { origin, active: true, pendingSubmit: false, epoch: 1, sponsorShown: false } } });
     expect(h.mock.scripting.executeScript).toHaveBeenCalledWith({ target: { tabId: 1, documentIds: ['chrome-doc1'] }, files: ['content.js'] });
     expect(h.mock.tabs.sendMessage).toHaveBeenCalledWith(1, { type: 'FLECTO_ACTIVATE', pendingSubmit: false }, { documentId: 'chrome-doc1', frameId: 0 });
   });
@@ -349,7 +360,7 @@ describe('background N02 navigation and restart', () => {
     const restarted = new BackgroundBroker(h.api, h.fetcher);
     expect(await restarted.handle({ type: 'FLECTO_SESSION_GET' }, h.sender())).toEqual({ ok: true, session: { active: true, pendingSubmit: true } });
     expect(h.fetcher).not.toHaveBeenCalled();
-    expect(h.session).toEqual({ flectoSessions: { '1': { origin, active: true, pendingSubmit: true, epoch: 2 } } });
+    expect(h.session).toEqual({ flectoSessions: { '1': { origin, active: true, pendingSubmit: true, epoch: 2, sponsorShown: false } } });
   });
 
   it('invalidates old references on full navigation and requires a new instance', async () => {

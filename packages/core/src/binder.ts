@@ -1,5 +1,5 @@
 import { FlectoError, type ActionReceipt, type PrivateBinding, type PrivateBindingRegistry, type ReviewToken, type UserAction } from '@flecto/contracts';
-import { currentSnapshot, isDisabled, isVisible, refreshRegistry, registryStates } from './dom';
+import { currentSnapshot, isDisabled, isVisible, refreshRegistry, registryStates, reconcileOptionsAfterInput } from './dom';
 
 const receipt = (ref: string, registry: PrivateBindingRegistry, status: ActionReceipt['status'], evidence: ActionReceipt['evidence'], error?: ActionReceipt['error']): ActionReceipt => ({ actionId: `a_${crypto.randomUUID()}`, documentInstanceId: registry.documentInstanceId, targetRef: ref, status, evidence, ...(error ? { error } : {}) });
 function checkedBinding(ref: string, registry: PrivateBindingRegistry): PrivateBinding {
@@ -55,6 +55,7 @@ export async function applyUserInput(action: Extract<UserAction, { kind: 'SET_TE
       else throw new FlectoError('UNSUPPORTED_CONTROL');
     }
     await settle(element.ownerDocument);
+    reconcileOptionsAfterInput(registry);
     if (readControlValue(binding, registry) !== expected) throw new FlectoError('SOURCE_REJECTED');
     if (action.kind === 'SET_CHOICE') {
       // Native values may coincide (especially radios). Receipt verification
