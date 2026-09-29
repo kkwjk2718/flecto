@@ -1,13 +1,17 @@
 import { EventEmitter } from 'node:events';
 import { PassThrough } from 'node:stream';
 import { mkdtemp, readdir, readFile } from 'node:fs/promises';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
+import { deflateSync } from 'node:zlib';
 import os from 'node:os';
 import path from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { ChildProcess, SpawnOptions } from 'node:child_process';
 import { FlectoError, type PublicControl, type PublicPageSnapshot } from '@flecto/contracts';
 import { verifyPlan } from '@flecto/core';
-import { CodexProvider, DISABLED_FEATURES, KNOWN_HOST_SKILLS, buildExecArgs, discoverSkillNames, type SpawnFn } from '../../apps/planner/src/provider/codex';
+import {
+  CodexProvider, DISABLED_FEATURES, KNOWN_HOST_SKILLS, MAX_PLAN_IMAGE_BYTES, buildExecArgs, decodePngDataUrl, discoverSkillNames, type SpawnFn,
+} from '../../apps/planner/src/provider/codex';
 import {
   NOTICE_TEXT_LIMIT, PAGE_PLAN_OUTPUT_SCHEMA, PLANNER_INSTRUCTIONS, buildOutputSchema, buildPlanPrompt, decodePlan, encodePlanPrompt,
 } from '../../apps/planner/src/provider/prompt';
@@ -15,6 +19,22 @@ import {
 // UNIT ONLY: these tests stub child_process.spawn. They are not a LIVE_CODEX check.
 
 const BINARY = '/opt/fake/codex';
+
+/** Minimal valid 2x2 grayscale PNG (signature + IHDR + IDAT + IEND) built in-test; no capture involved. */
+function tinyPng(): Buffer {
+  const crcTable = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+  const crc32 = (buf: Buffer) => { let c = 0xffffffff; for (const b of buf) c = crcTable[(c ^ b) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+  const chunk = (type: string, data: Buffer) => {
+    const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
+    const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
+    const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(body));
+    return Buffer.concat([len, body, crc]);
+  };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(2, 0); ihdr.writeUInt32BE(2, 4); ihdr[8] = 8; ihdr[9] = 0; ihdr[10] = 0; ihdr[11] = 0; ihdr[12] = 0;
+  const raw = Buffer.from([0, 0x80, 0x80, 0, 0x80, 0x80]);
+  return Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+}
+const pngDataUrl = () => 'data:image/png;base64,' + tinyPng().toString('base64');
 
 const snapshot: PublicPageSnapshot = {
   schemaVersion: 1, requestId: 'r1', snapshotId: 's1', documentInstanceId: 'd1',
@@ -175,6 +195,8 @@ describe('CodexProvider (unit, spawn stubbed)', () => {
     const result = await instance.planDetailed(snapshot, 10_000, new AbortController().signal);
     expect(result.plan).toEqual(validPlan);
     expect(result.inputTokens).toBe(700);
+    expect(result.imageAttached).toBe(false);
+    expect(record.args).not.toContain('-i');
     expect(result.outputTokens).toBe(40);
     expect(result.exitCode).toBe(0);
     expect(result.budgetMs).toBe(10_000);
@@ -212,6 +234,59 @@ describe('CodexProvider (unit, spawn stubbed)', () => {
     expect(schemaDuringRun).toEqual(buildOutputSchema(encodePlanPrompt(snapshot)));
     // The per-request schema is removed once the run settles; only the instructions file remains.
     expect(await readdir(runtimeDir)).toEqual([path.basename(instructionsPath)]);
+  });
+
+  it('planWithImage writes only the validated PNG into a unique runtime dir, passes it with -i first, and removes it on settlement', async () => {
+    let imageArg: string | null = null;
+    let bytesAtSpawn: Buffer | null = null;
+    let dirsAtSpawn: string[] = [];
+    const { instance, record } = provider({ events: completedEvents(JSON.stringify(modelAnswer)) }, {}, (rec) => {
+      const index = rec.args.indexOf('-i');
+      imageArg = index >= 0 ? rec.args[index + 1] : null;
+      if (imageArg) bytesAtSpawn = readFileSync(imageArg);
+      dirsAtSpawn = readdirSync(runtimeDir).filter((name) => name.startsWith('img-'));
+    });
+    const plan = await instance.planWithImage(snapshot, 10_000, new AbortController().signal, { dataUrl: pngDataUrl(), mimeType: 'image/png' });
+    expect(plan).toEqual(validPlan);
+    expect(instance.last?.imageAttached).toBe(true);
+    expect(record.args.slice(0, 3)).toEqual(['exec', '-i', imageArg]);
+    expect(record.args[3]).toBe('--ignore-user-config');
+    expect(record.args.at(-1)).toBe('-');
+    expect(path.dirname(path.dirname(imageArg!))).toBe(runtimeDir);
+    expect(path.basename(imageArg!)).toBe('masked.png');
+    expect(bytesAtSpawn!.equals(tinyPng())).toBe(true);
+    expect(dirsAtSpawn).toHaveLength(1);
+    expect(existsSync(imageArg!)).toBe(false);
+    expect((await readdir(runtimeDir)).filter((name) => name.startsWith('img-'))).toHaveLength(0);
+    expect(record.args).toContain('view_image');
+    expect(record.args.join(' ')).not.toMatch(/--enable/);
+    expect(record.stdin).toBe(buildPlanPrompt(snapshot));
+  });
+
+  it('planWithImage rejects anything that is not a bounded PNG data URL before spawning, and cleans up on failure', async () => {
+    const bad: Array<Parameters<CodexProvider['planWithImage']>[3]> = [
+      { dataUrl: 'data:image/jpeg;base64,' + tinyPng().toString('base64'), mimeType: 'image/png' },
+      { dataUrl: pngDataUrl(), mimeType: 'image/jpeg' as 'image/png' },
+      { dataUrl: 'data:image/png;base64,' + Buffer.from('GIF89a not a png at all, really not').toString('base64'), mimeType: 'image/png' },
+      { dataUrl: 'data:image/png;base64,###', mimeType: 'image/png' },
+      { dataUrl: '/tmp/masked.png', mimeType: 'image/png' },
+      { dataUrl: 'data:image/png;base64,' + Buffer.concat([tinyPng(), Buffer.alloc(MAX_PLAN_IMAGE_BYTES)]).toString('base64'), mimeType: 'image/png' },
+    ];
+    for (const image of bad) {
+      const { instance, record } = provider({ events: completedEvents(JSON.stringify(modelAnswer)) });
+      await expect(instance.planWithImage(snapshot, 10_000, new AbortController().signal, image)).rejects.toMatchObject({ code: 'SCHEMA_INVALID' });
+      expect(record.command).toBe('');
+    }
+    expect(decodePngDataUrl({ dataUrl: pngDataUrl(), mimeType: 'image/png' })?.equals(tinyPng())).toBe(true);
+    const { instance: failing } = provider({ events: [], exitCode: 1 });
+    await expect(failing.planWithImage(snapshot, 10_000, new AbortController().signal, { dataUrl: pngDataUrl(), mimeType: 'image/png' })).rejects.toMatchObject({ code: 'PROVIDER_ERROR' });
+    expect((await readdir(runtimeDir)).filter((name) => name.startsWith('img-') || name.endsWith('.schema.json'))).toHaveLength(0);
+    const { instance: cancelled } = provider({ hangs: true });
+    const controller = new AbortController();
+    const pending = cancelled.planWithImage(snapshot, 10_000, controller.signal, { dataUrl: pngDataUrl(), mimeType: 'image/png' });
+    setTimeout(() => controller.abort(), 20);
+    await expect(pending).rejects.toMatchObject({ code: 'CANCELLED' });
+    expect((await readdir(runtimeDir)).filter((name) => name.startsWith('img-'))).toHaveLength(0);
   });
 
   it('adds service_tier="fast" only when requested', async () => {
@@ -423,4 +498,3 @@ describe('buildExecArgs / instructions', () => {
     expect(prompt.split('\n')[0]).toBe('goal: complete_form');
   });
 });
-

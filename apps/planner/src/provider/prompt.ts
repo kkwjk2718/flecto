@@ -21,6 +21,7 @@ export const PLANNER_INSTRUCTIONS = [
   '## Input legend',
   'Each control line: `<alias> <kind>[*] <label> [(N options)] [(disabled)] [-> n1,n2]`. `*` = required. `-> nX` = notices attached to that control.',
   'Each notice line: `<alias> <kind> <text>`. Aliases are the only identifiers you may output.',
+  'A masked screenshot of the same page may be attached. Use it only to understand layout and grouping; aliases still come from the text lines only.',
   '',
   '## Rules',
   '- Use every listed control exactly once across all steps, in the order a person fills a form. Never invent, rename or omit an alias.',

@@ -7,6 +7,7 @@
  * Usage: tsx scripts/probe-codex.ts [--model gpt-6-astra] [--model gpt-6-luna] [--effort low]
  *        [--binary /abs/path/codex] [--runtime /abs/empty/dir] [--budget 10000] [--skip-cancel]
  *        [--shape small|large] [--repeat N] [--fast]   (--fast sets service_tier="fast"; uses the account's fast-mode allowance)
+ *        [--with-image]   attach a synthetic in-memory 64x64 PNG through planWithImage (VIS01 seam check; no screen capture)
  *        --capture   Request-body capture only: points the runtime at a dummy loopback endpoint that records
  *                    instructions size, input items and tools[] and answers 400. No model call, no credential read.
  *        --extra <cli arg>   (capture only, repeatable) extra runtime argument to compare request shapes, e.g. --extra --enable --extra x
@@ -17,6 +18,7 @@ import { mkdir, writeFile, rm } from 'node:fs/promises';
 import http from 'node:http';
 import os from 'node:os';
 import path from 'node:path';
+import { deflateSync } from 'node:zlib';
 import { FlectoError, PREPARE_DEADLINE_MS, type PublicControl, type PublicPageSnapshot } from '@flecto/contracts';
 import { verifyPlan } from '@flecto/core';
 import { CodexProvider, DISABLED_FEATURES, buildExecArgs } from '../apps/planner/src/provider/codex';
@@ -25,7 +27,7 @@ import { PLANNER_INSTRUCTIONS, buildOutputSchema, encodePlanPrompt } from '../ap
 const DEFAULT_BINARY = '/Applications/ChatGPT.app/Contents/Resources/codex-cli/CodexCLI.app/Contents/MacOS/codex';
 
 function parseArgs(argv: string[]) {
-  const out = { models: [] as string[], effort: 'low', binary: DEFAULT_BINARY, runtime: '', budget: PREPARE_DEADLINE_MS, skipCancel: false, shape: 'small' as 'small' | 'large', repeat: 1, capture: false, extra: [] as string[], fast: false };
+  const out = { models: [] as string[], effort: 'low', binary: DEFAULT_BINARY, runtime: '', budget: PREPARE_DEADLINE_MS, skipCancel: false, shape: 'small' as 'small' | 'large', repeat: 1, capture: false, extra: [] as string[], fast: false, withImage: false };
   for (let i = 0; i < argv.length; i += 1) {
     const key = argv[i];
     const next = () => { i += 1; return argv[i] ?? ''; };
@@ -40,6 +42,7 @@ function parseArgs(argv: string[]) {
     else if (key === '--capture') out.capture = true;
     else if (key === '--extra') out.extra.push(next());
     else if (key === '--fast') out.fast = true;
+    else if (key === '--with-image') out.withImage = true;
   }
   if (out.models.length === 0) out.models = ['gpt-6-astra', 'gpt-6-luna'];
   if (!out.runtime) out.runtime = path.join(os.tmpdir(), 'flecto-codex-runtime');
@@ -47,6 +50,24 @@ function parseArgs(argv: string[]) {
 }
 
 const base = { formRef: 'f1', disabled: false, constraints: {}, options: [], noticeRefs: [], actionKind: 'none' as const };
+
+/** Synthetic 64x64 grayscale PNG generated in memory (no screen or page capture). */
+function syntheticPngDataUrl(): string {
+  const size = 64;
+  const crcTable = Array.from({ length: 256 }, (_, n) => { let c = n; for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+  const crc32 = (buf: Buffer) => { let c = 0xffffffff; for (const b of buf) c = crcTable[(c ^ b) & 0xff] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+  const chunk = (type: string, data: Buffer) => {
+    const len = Buffer.alloc(4); len.writeUInt32BE(data.length);
+    const body = Buffer.concat([Buffer.from(type, 'ascii'), data]);
+    const crc = Buffer.alloc(4); crc.writeUInt32BE(crc32(body));
+    return Buffer.concat([len, body, crc]);
+  };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(size, 0); ihdr.writeUInt32BE(size, 4); ihdr[8] = 8;
+  const raw = Buffer.alloc((size + 1) * size);
+  for (let y = 0; y < size; y += 1) for (let x = 0; x < size; x += 1) raw[y * (size + 1) + 1 + x] = (y >> 3) % 2 === 0 ? 0xe0 : 0x90;
+  const png = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), chunk('IHDR', ihdr), chunk('IDAT', deflateSync(raw)), chunk('IEND', Buffer.alloc(0))]);
+  return 'data:image/png;base64,' + png.toString('base64');
+}
 
 function syntheticSnapshot(requestId: string): PublicPageSnapshot {
   return {
@@ -210,12 +231,13 @@ async function main() {
       const controller = new AbortController();
       const started = performance.now();
       try {
-        const result = await provider.planDetailed(snapshot, args.budget, controller.signal);
+        const result = await provider.planDetailed(snapshot, args.budget, controller.signal,
+          args.withImage ? { dataUrl: syntheticPngDataUrl(), mimeType: 'image/png' } : undefined);
         let verify = 'PASS';
         try { verifyPlan(result.plan, snapshot); } catch (error) { verify = 'FAIL:' + errorCode(error); }
         console.log(JSON.stringify({
           model, ok: true, mode: provider.mode, requestedEffort: result.requestedEffort, requestedServiceTier: result.requestedServiceTier, reportedModel: result.reportedModel,
-          durationMs: result.durationMs, budgetMs: result.budgetMs, inputTokens: result.inputTokens, outputTokens: result.outputTokens, verifyPlan: verify,
+          durationMs: result.durationMs, budgetMs: result.budgetMs, inputTokens: result.inputTokens, outputTokens: result.outputTokens, verifyPlan: verify, imageAttached: result.imageAttached,
           promptChars: result.promptChars, forwardedControls: result.forwardedControls, forwardedNotices: result.forwardedNotices,
           exitCode: result.exitCode, steps: result.plan.steps.map((s) => ({ id: s.id, template: s.template, title: s.title, controls: s.controlRefs.length, notices: s.noticeRefs.length })),
           sourceActionRef: result.plan.sourceActionRef,

@@ -1,6 +1,6 @@
 import { spawn as nodeSpawn, type ChildProcess, type SpawnOptions } from 'node:child_process';
 import { readdirSync } from 'node:fs';
-import { mkdir, unlink, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, unlink, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import {
   FlectoError, PREPARE_DEADLINE_MS, PagePlanSchema, publicSnapshot,
@@ -48,7 +48,27 @@ export type CodexPlanResult = {
   forwardedControls: number;
   forwardedNotices: number;
   promptChars: number;
+  /** True when a masked PNG was attached through the CLI's -i argument. */
+  imageAttached: boolean;
 };
+
+/** VIS01 seam: masked PNG supplied by a trusted caller (the provider never captures images itself). */
+export type PlanImageInput = { dataUrl: string; mimeType: 'image/png' };
+/** Upper bound for the decoded PNG written to the runtime directory. */
+export const MAX_PLAN_IMAGE_BYTES = 4 * 1024 * 1024;
+const PNG_DATA_URL = /^data:image\/png;base64,([A-Za-z0-9+/]+={0,2})$/;
+const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+/** Decodes a PNG data URL strictly (mime, base64 alphabet, PNG signature, size bound); null when anything is off. */
+export function decodePngDataUrl(image: PlanImageInput): Buffer | null {
+  if (image.mimeType !== 'image/png' || typeof image.dataUrl !== 'string') return null;
+  const match = PNG_DATA_URL.exec(image.dataUrl);
+  if (!match || match[1].length % 4 !== 0) return null;
+  const bytes = Buffer.from(match[1], 'base64');
+  if (bytes.length < PNG_SIGNATURE.length + 16 || bytes.length > MAX_PLAN_IMAGE_BYTES) return null;
+  if (!bytes.subarray(0, PNG_SIGNATURE.length).equals(PNG_SIGNATURE)) return null;
+  return bytes;
+}
 
 /** Feature flags switched off on every run. Verified against `codex features list` for codex-cli 0.158.0-alpha.2.1. */
 export const DISABLED_FEATURES = [
@@ -95,6 +115,8 @@ export type ExecArgOptions = {
   /** Host skill names to disable through skills.config (default: discoverSkillNames()). */
   skillNames?: readonly string[];
   serviceTier?: 'fast' | null;
+  /** Absolute path of a masked PNG to attach with the CLI's verified `-i` argument. */
+  imagePath?: string | null;
 };
 
 /**
@@ -104,6 +126,10 @@ export type ExecArgOptions = {
 export function buildExecArgs(options: ExecArgOptions): string[] {
   const args = [
     'exec',
+  ];
+  // `-i <FILE>...` is variadic: it goes first so the next flag ends the list and the trailing '-' stays the prompt marker.
+  if (options.imagePath) args.push('-i', options.imagePath);
+  args.push(
     '--ignore-user-config', '--ignore-rules', '--ephemeral', '--skip-git-repo-check',
     '--json', '--color', 'never',
     '--output-schema', options.schemaPath,
@@ -121,7 +147,7 @@ export function buildExecArgs(options: ExecArgOptions): string[] {
     '-c', 'project_doc_max_bytes=0',
     '-c', 'sandbox_mode="read-only"',
     '-c', 'web_search="disabled"',
-  ];
+  );
   if (options.serviceTier === 'fast') args.push('-c', 'service_tier="fast"');
   for (const feature of DISABLED_FEATURES) args.push('--disable', feature);
   args.push('-');
@@ -167,25 +193,50 @@ export class CodexProvider implements PlanProvider {
     return (await this.planDetailed(snapshot, remainingBudgetMs, signal)).plan;
   }
 
-  async planDetailed(snapshot: PublicPageSnapshot, remainingBudgetMs: number, signal: AbortSignal): Promise<CodexPlanResult> {
+  /**
+   * VIS01 seam: same run as plan(), plus one validated masked PNG attached through `-i`. The PNG is written into a
+   * unique directory under runtimeDir and removed on every settlement; the write and spawn share the 10 s budget.
+   * The image is structured model input only: view_image and every other tool stay disabled.
+   */
+  async planWithImage(snapshot: PublicPageSnapshot, remainingBudgetMs: number, signal: AbortSignal, image: PlanImageInput): Promise<PagePlan> {
+    return (await this.planDetailed(snapshot, remainingBudgetMs, signal, image)).plan;
+  }
+
+  async planDetailed(snapshot: PublicPageSnapshot, remainingBudgetMs: number, signal: AbortSignal, image?: PlanImageInput): Promise<CodexPlanResult> {
     const started = performance.now();
     if (signal.aborted) throw new FlectoError('CANCELLED');
     const budgetMs = Math.min(Math.floor(remainingBudgetMs), PREPARE_DEADLINE_MS);
     if (!Number.isFinite(budgetMs) || budgetMs <= 0) throw new FlectoError('DEADLINE_EXCEEDED');
     // Strict parse: any private/extra field on the snapshot is rejected before it can reach the prompt.
     const publicOnly = publicSnapshot(snapshot);
+    const imageBytes = image === undefined ? null : decodePngDataUrl(image);
+    if (image !== undefined && imageBytes === null) throw new FlectoError('SCHEMA_INVALID');
     const encoding = encodePlanPrompt(publicOnly);
     const instructionsPath = await this.ensureInstructions();
     const schemaPath = await this.writeSchema(publicOnly.requestId, encoding);
+    let imageDir: string | null = null;
+    let imagePath: string | null = null;
 
     let outcome: ChildOutcome;
-    try { outcome = await this.runChild(encoding.prompt, schemaPath, instructionsPath, budgetMs, signal); }
-    finally { await unlink(schemaPath).catch(() => {}); }
+    try {
+      if (imageBytes !== null) {
+        imageDir = await mkdtemp(path.join(this.runtimeDir, 'img-'));
+        imagePath = path.join(imageDir, 'masked.png');
+        await writeFile(imagePath, imageBytes, { mode: 0o600 });
+      }
+      const elapsed = Math.round(performance.now() - started);
+      if (elapsed >= budgetMs) throw new FlectoError('DEADLINE_EXCEEDED');
+      outcome = await this.runChild(encoding.prompt, schemaPath, instructionsPath, budgetMs - elapsed, signal, imagePath);
+    } finally {
+      await unlink(schemaPath).catch(() => {});
+      if (imageDir) await rm(imageDir, { recursive: true, force: true }).catch(() => {});
+    }
     const durationMs = Math.round(performance.now() - started);
     const base = {
       requestedModel: this.model, reportedModel: null, requestedEffort: this.effort, requestedServiceTier: this.serviceTier, budgetMs, durationMs,
       inputTokens: outcome.inputTokens, outputTokens: outcome.outputTokens, exitCode: outcome.exitCode,
       forwardedControls: encoding.controlRefs.size, forwardedNotices: encoding.noticeRefs.size, promptChars: encoding.prompt.length,
+      imageAttached: imagePath !== null,
     };
     if (outcome.kind === 'cancelled') throw new FlectoError('CANCELLED');
     if (outcome.kind === 'timeout') throw new FlectoError('DEADLINE_EXCEEDED');
@@ -222,10 +273,10 @@ export class CodexProvider implements PlanProvider {
     return target;
   }
 
-  private runChild(prompt: string, schemaPath: string, instructionsPath: string, budgetMs: number, signal: AbortSignal): Promise<ChildOutcome> {
+  private runChild(prompt: string, schemaPath: string, instructionsPath: string, budgetMs: number, signal: AbortSignal, imagePath: string | null = null): Promise<ChildOutcome> {
     const env: Record<string, string> = {};
     for (const key of FORWARDED_ENV) { const value = process.env[key]; if (value !== undefined) env[key] = value; }
-    const args = buildExecArgs({ model: this.model, effort: this.effort, schemaPath, instructionsPath, skillNames: this.skillNames, serviceTier: this.serviceTier });
+    const args = buildExecArgs({ model: this.model, effort: this.effort, schemaPath, instructionsPath, skillNames: this.skillNames, serviceTier: this.serviceTier, imagePath });
 
     return new Promise<ChildOutcome>((resolve) => {
       let child: ChildProcess;
