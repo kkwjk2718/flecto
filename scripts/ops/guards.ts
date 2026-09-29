@@ -36,7 +36,8 @@ export function scopeViolations(changes: FileChange[], allowed: readonly string[
   return out;
 }
 
-const FOCUS_OR_SKIP = /^\+(?!\+\+).*\b(?:it|test|describe)\.(?:only|skip|todo)\s*\(|^\+(?!\+\+).*\b(?:xit|xdescribe|fit|fdescribe)\s*\(/m;
+// Anchored to a test call that starts an added line, so fixture strings mentioning ".only(" do not match.
+const FOCUS_OR_SKIP = /^\+(?!\+\+)\s*(?:(?:it|test|describe|suite)(?:\.\w+)*\.(?:only|skip|todo)\b|(?:xit|xtest|xdescribe|fit|fdescribe)\s*\()/m;
 
 /** OPER10 at patch level: added focused/skipped tests are rejected before integration. */
 export function addedFocusOrSkip(diffText: string): boolean { return FOCUS_OR_SKIP.test(diffText); }

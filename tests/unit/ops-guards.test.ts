@@ -39,6 +39,8 @@ describe('patch guards (OPER09/OPER10/OPER05 inputs)', () => {
     put('tests/unit/ops-x.test.ts', "it('ok', () => {});\n"); const clean = commit('clean');
     expect(addedFocusOrSkip(git('diff', head, clean))).toBe(false);
     expect(addedFocusOrSkip("+  describe.skip('x', () => {})")).toBe(true);
+    expect(addedFocusOrSkip("+  test.skip.each([1])('x', () => {})")).toBe(true);
+    expect(addedFocusOrSkip("+  put('a.test.ts', \"it.only('fixture string')\");")).toBe(false);
   });
 
   it('identifies the same patch re-delivered on another base and records it only once, even concurrently', async () => {
