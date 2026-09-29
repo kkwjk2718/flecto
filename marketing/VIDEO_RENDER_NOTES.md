@@ -5,9 +5,10 @@ Source: `marketing/remotion/` (isolated Remotion 4.0.529 package, outside the ro
 ## Build
 
 ```sh
-export PATH=/Users/kkwjk2718/Documents/kakao-ralphthon-main/.flecto/toolchains/node-v24.21.0-darwin-arm64/bin:$PATH
+export PATH="$PWD/.flecto/toolchains/node-v24.21.0-darwin-arm64/bin:$PATH"   # from the main checkout root (Node 24)
 cd marketing/remotion
-npm run sync          # copies captures, Pretendard, chosen ElevenLabs takes into public/ (gitignored)
+npm run sync          # copies captures (+ sidecar JSON), Pretendard, chosen ElevenLabs takes into public/ (gitignored)
+# from a separate worktree: FLECTO_CREATIVE_DIR=/path/to/main/.flecto/creative npm run sync
 npx tsc --noEmit
 node scripts/render-stills.mjs FlectoAd30 24,150,190,378,530,640,700,872   # QA stills -> out/stills
 npm run render        # out/flecto-30s.mp4 (h264 CRF 18, AAC 256k, concurrency 1 via remotion.config.ts)
