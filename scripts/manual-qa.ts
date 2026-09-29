@@ -255,7 +255,7 @@ async function main() {
     }
     if (ending) return;
     context = await chromium.launchPersistentContext(resolve(runDir, 'profile'), {
-      channel: 'chromium', headless: false, viewport: { width: 1440, height: 1100 },
+      channel: 'chromium', headless: false, viewport: null,
       args: [`--disable-extensions-except=${resolve(root, 'dist/extension')}`, `--load-extension=${resolve(root, 'dist/extension')}`],
     });
     context.setDefaultTimeout(10000);
@@ -284,13 +284,18 @@ async function main() {
       if (value === 'diagnostics') {
         void (async () => {
           const worker = context!.serviceWorkers()[0];
-          diagnostics = await worker.evaluate(async (sourceUrl) => {
-            const broker = (globalThis as unknown as Record<symbol, { lastVisionDiagnostic?: unknown }>)[Symbol.for('flecto.background')];
-            const tab = (await chrome.tabs.query({})).find(t => t.url === sourceUrl);
-            const content = tab?.id === undefined ? null : (await chrome.scripting.executeScript({ target: { tabId: tab.id },
-              func: () => (globalThis as unknown as { __flectoController?: { lastVisionDiagnostic?: unknown } }).__flectoController?.lastVisionDiagnostic ?? null }))[0]?.result;
+          // A literal evaluation avoids transpiler helper closures inside nested injected functions.
+          diagnostics = await worker.evaluate(`(async () => {
+            const broker = globalThis[Symbol.for('flecto.background')];
+            const tab = (await chrome.tabs.query({})).find(t => t.url === ${JSON.stringify(page.url())});
+            let content = null;
+            if (tab && tab.id !== undefined) {
+              const results = await chrome.scripting.executeScript({ target: { tabId: tab.id },
+                func: function () { return globalThis.__flectoController?.lastVisionDiagnostic ?? null; } });
+              content = results[0]?.result ?? null;
+            }
             return { background: broker?.lastVisionDiagnostic ?? null, content };
-          }, page.url());
+          })()`);
           console.log(JSON.stringify(diagnostics)); await checkpoint();
         })().catch(() => console.log('Bounded diagnostics unavailable'));
         return;
