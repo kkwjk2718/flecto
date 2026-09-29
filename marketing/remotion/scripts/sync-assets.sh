@@ -17,3 +17,4 @@ for w in Regular Medium SemiBold Bold ExtraBold; do
   done
 done
 ls "$HERE/public/assets" "$HERE/public/audio" "$HERE/public/fonts"
+sh "$HERE/scripts/prep-mix.sh"

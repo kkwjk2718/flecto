@@ -4,7 +4,7 @@ import {FlectoAd, flectoAdSchema} from './FlectoAd';
 import {FPS, HEIGHT, TOTAL_FRAMES, WIDTH} from './timeline';
 
 const base = {
-  voFile: 'audio/vo-sara-4.mp3',
+  voFile: 'audio/vo-sara-4-mix.wav', // made by scripts/prep-mix.sh from vo-sara-4.mp3
   musicFile: 'audio/music-1.mp3',
   sfxDir: 'audio',
   voOffsetFrames: 0,

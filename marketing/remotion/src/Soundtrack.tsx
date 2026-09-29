@@ -3,8 +3,10 @@ import {Audio} from '@remotion/media';
 import {Sequence, interpolate, staticFile} from 'remotion';
 import {T, TOTAL_FRAMES, VO_SEGMENTS, VO_START} from './timeline';
 
-const MUSIC_OPEN = 0.34; // gaps
-const MUSIC_DUCKED = 0.21; // ~-4 dB under VO
+// music-1.mp3 measures -22.2 LUFS / -4.2 dBTP; levelled VO is -16.8 LUFS.
+const MUSIC_OPEN = 0.8; // gaps: ~-24 LUFS
+const MUSIC_DUCKED = 0.45; // under VO: ~-29 LUFS, about 11 LU below the voice
+const VO_GAIN = 0.9; // keeps master true peak near -2 dBTP (measured -14.1 LUFS / -1.0 dBTP at 1.0)
 
 /** 0..1 amount of ducking: 6f attack before speech, 18f release after. */
 const duckAt = (f: number, offset: number) => {
@@ -37,12 +39,12 @@ export const Soundtrack: React.FC<{voFile: string; musicFile: string; sfxDir: st
       <Audio src={staticFile(musicFile)} volume={(f) => musicVolume(f, voOffsetFrames)} />
     </Sequence>
     <Sequence from={VO_START + voOffsetFrames} durationInFrames={TOTAL_FRAMES - 4 - VO_START - voOffsetFrames} layout="none">
-      <Audio src={staticFile(voFile)} volume={1} />
+      <Audio src={staticFile(voFile)} volume={VO_GAIN} />
     </Sequence>
     {/* The tick only plays when a real captured selection change is on screen. */}
     {choiceChanges ? <Sfx at={T.sfxSelect} file={sfxDir + '/sfx-select_tick-1.mp3'} volume={0.3} /> : null}
-    <Sfx at={T.sfxPress} file={sfxDir + '/sfx-press_soft-1.mp3'} volume={0.22} />
-    <Sfx at={T.sfxDone} file={sfxDir + '/sfx-done_soft-1.mp3'} volume={0.32} />
-    <Sfx at={T.sfxBrand} file={sfxDir + '/sfx-brand_ending-1.mp3'} volume={0.45} />
+    <Sfx at={T.sfxPress} file={sfxDir + '/sfx-press_soft-1.mp3'} volume={0.6} />
+    <Sfx at={T.sfxDone} file={sfxDir + '/sfx-done_soft-1-mix.wav'} volume={0.8} />
+    <Sfx at={T.sfxBrand} file={sfxDir + '/sfx-brand_ending-1.mp3'} volume={0.9} />
   </>
 );

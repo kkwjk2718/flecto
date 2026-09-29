@@ -25,7 +25,8 @@ Compositions: `FlectoAd30` (main), `FlectoAd30Captions` (VO captions on), `Flect
 - 04 → 05 is abridged (the 04 local review button is not the final submit). The result scenes carry the footnote "일부 과정 축약".
 - End-card footnote per brief: "화면은 시연용 사이트에서 설치된 확장 프로그램으로 캡처한 실제 화면이며, 접수 번호는 시연 데이터입니다."
 - Captures are drawn at 1440 CSS width whatever their pixel density, so 2x DPR replacements (2880x2200) keep the same crop coordinates.
-- Audio: VO `vo-sara-4.mp3` at f24 (voOffsetFrames prop 0); music `music-1.mp3` (48s) cut at 30s, ducked ~4 dB under VO (6f attack, 18f release), faded f822–f885; SFX press_soft f580, done_soft f604, brand_ending f840, select_tick f356 (conditional). Mix levels are set by volume multipliers, not measured LUFS.
+- Audio: VO starts at f24 (0.8s, voOffsetFrames 0) and runs 27.77s to 28.57s. `scripts/prep-mix.sh` (called by `npm run sync`) makes `vo-sara-4-mix.wav` with bundled-ffmpeg loudnorm (measured -16.8 LUFS / -2.5 dBTP; source was -21.4 / -4.6) and `sfx-done_soft-1-mix.wav` (+14 dB; source peaks at -32 dBTP). VO gain 0.9. Music `music-1.mp3` (-22.2 LUFS source) at 0.8 in gaps and 0.45 under VO (6f attack, 18f release), faded f822–f885, cut at 30s. SFX press_soft f580 (0.6), done_soft f604 (0.8), brand_ending f840 (0.9), select_tick f356 (only with a real 03-empty capture).
+- Measured master (`out/flecto-30s.mp4`, bundled ffmpeg loudnorm summary, 14:41 KST): integrated -15.1 LUFS, true peak -2.0 dBTP, LRA 5.8 LU. 29.5–30.0s: -63 LUFS (effectively silent). First pass without leveling measured -18.8 LUFS / -4.4 dBTP. ebur128/volumedetect are not in the bundled ffmpeg.
 - Listening was not verified: the agent cannot hear audio. Sync was set from the manifest's silence-gap measurements; a human must listen before release.
 
 ## Not in git
