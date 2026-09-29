@@ -38,7 +38,7 @@ export const TEMPLATE_INTRO: Record<Template, { brief: string; detailed: string 
   },
   final_review: {
     brief: '지금 원래 사이트에 들어간 실제 값이에요.',
-    detailed: '지금 원래 사이트에 실제로 들어간 값이에요. 맞으면 아래 신청 버튼을 눌러 주세요. 버튼을 누르기 전에는 신청되지 않아요.',
+    detailed: '지금 원래 사이트에 실제로 들어간 값이에요. 맞으면 아래 버튼을 눌러 주세요. 버튼을 누르기 전에는 신청되지 않아요.',
   },
   result: {
     brief: '원래 사이트가 알려준 결과만 보여드려요.',
@@ -47,6 +47,28 @@ export const TEMPLATE_INTRO: Record<Template, { brief: string; detailed: string 
 };
 
 export type Tone = 'success' | 'danger' | 'warning' | 'info';
+
+// Review copy never promises a final submission: the source action may open another source
+// confirmation screen. Source-rendered review edits happen in the original flow.
+export const REVIEW_COPY = {
+  local: {
+    section: '원래 사이트에 들어간 내용',
+    help: (label: string) => '아래 ‘' + label + '’ 버튼은 원래 사이트의 같은 버튼이에요. 누르면 원래 사이트가 다음 화면이나 결과를 보여줘요.',
+  },
+  source: {
+    intro: {
+      brief: '원래 사이트가 보여준 신청 내용이에요.',
+      detailed: '원래 사이트가 보여준 신청 내용을 그대로 옮겼어요. 고칠 내용이 있으면 원래 화면에서 직접 고쳐 주세요.',
+    },
+    section: '원래 사이트가 보여준 신청 내용',
+    help: (label: string) => '아직 접수 전이에요. 내용이 맞으면 아래 ‘' + label + '’ 버튼을 눌러 주세요.',
+    edit: '원래 화면에서 고치기',
+    editHelp: '고칠 내용이 있으면 원래 사이트 화면에서 직접 고쳐 주세요.',
+  },
+  missingAction: '원래 사이트에서 누를 버튼을 찾지 못했어요. 원래 화면에서 계속해 주세요.',
+  editLabel: '수정',
+} as const;
+
 export type StatusAction = { label: string; action: 'RETRY' | 'SHOW_ORIGINAL' | 'CLOSE' | 'CANCEL' | 'BACK'; primary?: boolean };
 export type StatusCopy = { tone: Tone; badge: string; title: string; body: string; actions: StatusAction[] };
 
@@ -57,8 +79,8 @@ export const STATUS: Partial<Record<UiPhase, StatusCopy>> = {
   },
   SUCCESS: {
     tone: 'success', badge: '완료', title: '원래 사이트에서 처리되었어요',
-    body: '아래는 원래 사이트가 보여준 안내예요.',
-    actions: [{ label: '원래 화면에서 내역 보기', action: 'SHOW_ORIGINAL' }, { label: '쉬운 화면 닫기', action: 'CLOSE', primary: true }],
+    body: '원래 사이트가 보여준 접수 결과예요.',
+    actions: [{ label: '원래 화면에서 확인하기', action: 'SHOW_ORIGINAL' }, { label: '쉬운 화면 닫기', action: 'CLOSE', primary: true }],
   },
   SOURCE_REJECTED: {
     tone: 'danger', badge: '수정 필요', title: '원래 사이트가 고칠 부분을 알려줬어요',
@@ -115,4 +137,3 @@ export const MODE_LABEL: Record<PlanMode, string> = {
   LIVE_CODEX: '실시간 Codex 계획 (LIVE_CODEX)',
   CACHE: '검증된 저장 계획 (CACHE)',
 };
-

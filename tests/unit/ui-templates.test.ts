@@ -296,12 +296,53 @@ describe('final review', () => {
     expect(actions).toEqual([{ kind: 'INVOKE_SOURCE', ref: 'act1', intent: 'submit' }]);
   });
 
-  it('each review row offers 수정 that goes back locally from the current step', () => {
+  it('each review row offers 수정 that goes back locally to the step owning that field', () => {
     const { shadow, actions } = mount(review());
     const edit = q<HTMLButtonElement>(shadow, 'button[aria-label="연락처 수정"]')!;
     expect(edit.textContent).toBe('수정');
     act(() => edit.click());
+    expect(actions).toEqual([{ kind: 'LOCAL_BACK', fromStep: 's4', targetRef: 'phone' }]);
+  });
+
+  it('local review help does not promise that the source action is the final submission', () => {
+    const { shadow } = mount(review());
+    const root = q<HTMLElement>(shadow, '.fl-root')!;
+    expect(root.dataset.phase).toBe('REVIEW');
+    expect(root.dataset.template).toBe('final_review');
+    expect(root.dataset.reviewMode).toBe('local');
+    expect(shadow.textContent).not.toContain('신청이 전송');
+    expect(shadow.textContent).toContain('다음 화면이나 결과');
+  });
+
+  it('a source-rendered review sends edits to the original flow instead of per-row local edits', () => {
+    const { shadow, actions } = mount(review({
+      reviewEditMode: 'source',
+      reviewRows: [{ ref: 'source_review_0', label: '주문번호', value: 'FLECTO-2026-001' }],
+    }));
+    expect(q<HTMLElement>(shadow, '.fl-root')!.dataset.reviewMode).toBe('source');
+    expect(q(shadow, 'button[aria-label="주문번호 수정"]')).toBeNull();
+    expect(q(shadow, '[data-testid="flecto-review-edit"]')).toBeNull();
+    expect(shadow.textContent).toContain('FLECTO-2026-001');
+    expect(shadow.textContent).toContain('아직 접수 전이에요');
+    act(() => byText(shadow, '.fl-footer button', '원래 화면에서 고치기')!.click());
     expect(actions).toEqual([{ kind: 'LOCAL_BACK', fromStep: 's4' }]);
+  });
+
+  it('marks the one primary action with stable QA hooks that name the action only', () => {
+    const ready = mount(formModel());
+    const next = qa<HTMLElement>(ready.shadow, '[data-testid="flecto-primary-action"]');
+    expect(next).toHaveLength(1);
+    expect(next[0].textContent).toBe('다음');
+    expect(next[0].dataset.action).toBe('LOCAL_NEXT');
+    expect(q<HTMLElement>(ready.shadow, '.fl-root')!.dataset.template).toBe('grouped_form');
+    const toReview = mount(formModel({ stepIndex: 2 }));
+    expect(q<HTMLElement>(toReview.shadow, '[data-testid="flecto-primary-action"]')!.textContent).toBe('입력 내용 확인하기');
+    const submit = mount(review());
+    const primary = qa<HTMLElement>(submit.shadow, '[data-testid="flecto-primary-action"]');
+    expect(primary).toHaveLength(1);
+    expect(primary[0].dataset.action).toBe('INVOKE_SOURCE');
+    expect(primary[0].dataset.intent).toBe('submit');
+    expect(primary[0].textContent).toBe('혜택 신청하기');
   });
 
   it('keeps the review values visible without edit buttons when back is not allowed', () => {
@@ -364,6 +405,24 @@ describe('outcomes and status', () => {
     expect(shadow.textContent).toContain('완료');
     expect(shadow.textContent).toContain('접수번호 A-102 신청이 접수되었습니다.');
     expect(shadow.textContent).not.toMatch(/축하|🎉/);
+  });
+
+  it('SUCCESS lays out the source receipt rows and offers to check the original screen', () => {
+    const { shadow, actions } = mount({
+      ...formModel(), phase: 'SUCCESS',
+      resultText: '구매 혜택 신청이 접수되었습니다\n접수 번호: BEN-1AEA3D35',
+      reviewRows: [{ ref: 'result_0', label: '접수번호', value: 'BEN-1AEA3D35' }, { ref: 'result_1', label: '상품분류', value: '가전' }],
+    });
+    const rows = qa<HTMLElement>(shadow, '.fl-receipt-row');
+    expect(rows.map((r) => r.querySelector('dt')!.textContent)).toEqual(['접수 번호', '상품분류']);
+    expect(rows[0].querySelector('dd')!.textContent).toBe('BEN-1AEA3D35');
+    expect(q(shadow, '.fl-receipt-head')!.textContent).toBe('구매 혜택 신청이 접수되었습니다');
+    expect(q<HTMLElement>(shadow, '.fl-root')!.dataset.phase).toBe('SUCCESS');
+    act(() => byText(shadow, '.fl-footer button', '원래 화면에서 확인하기')!.click());
+    expect(actions).toEqual([{ kind: 'SHOW_ORIGINAL' }]);
+    const close = q<HTMLElement>(shadow, '[data-testid="flecto-primary-action"]')!;
+    expect(close.dataset.action).toBe('CLOSE');
+    expect(close.textContent).toBe('쉬운 화면 닫기');
   });
 
   it('OUTCOME_UNKNOWN asks to check the source and offers no resubmit', () => {

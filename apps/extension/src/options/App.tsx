@@ -185,7 +185,7 @@ export function OptionsApp({ storage = getExtensionStorage(), fetchImpl }: { sto
           <StatusBox status={status} />
           <ol className="fl-steps">
             <li><span>이 컴퓨터에서 도우미를 켜 주세요. 터미널에 <span className="fl-code">npm run demo:start</span> 를 입력하면 돼요.</span></li>
-            <li><span>도우미 창에 보이는 <b>연결 토큰</b>을 아래 칸에 입력하고 ‘연결하기’를 눌러 주세요.</span></li>
+            <li><span>도우미가 켜지면 연결 정보가 <span className="fl-code">.flecto/demo/connection.txt</span> 파일에 저장돼요. 이 파일의 세 번째 줄(<b>연결 토큰</b>)을 복사해 아래 칸에 붙여 넣고 ‘연결하기’를 눌러 주세요. 이 파일은 다른 사람과 공유하지 마세요.</span></li>
             <li><span>원래 사이트를 열고, 브라우저 오른쪽 위의 <b>FLECTO</b> 버튼을 눌러 주세요.</span></li>
           </ol>
 

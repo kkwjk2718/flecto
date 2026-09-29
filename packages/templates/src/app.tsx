@@ -1,10 +1,10 @@
 import { Fragment, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
 import type {
-  FlectoViewModel, PlanStep, PublicNotice, SourceTask, Template, UserAction, UserSettings, ViewControl,
+  FlectoViewModel, PlanStep, PublicNotice, ReviewRow, SourceTask, Template, UserAction, UserSettings, ViewControl,
 } from '@flecto/contracts';
 import {
-  DIALOG_NAME, ERROR_BANNER, LOADING, MODE_LABEL, SPONSOR_LABEL, SPONSOR_NOTE, STATUS, TEMPLATE_INTRO, TEMPLATE_TITLE,
+  DIALOG_NAME, ERROR_BANNER, LOADING, MODE_LABEL, REVIEW_COPY, SPONSOR_LABEL, SPONSOR_NOTE, STATUS, TEMPLATE_INTRO, TEMPLATE_TITLE,
 } from './copy';
 import type { StatusAction, StatusCopy } from './copy';
 import { ControlField, NoticeBlock } from './fields';
@@ -89,6 +89,28 @@ function findSubmitTarget(model: FlectoViewModel, step: PlanStep | null): Submit
   return null;
 }
 const FALLBACK_SUBMIT_LABEL = '신청하기';
+
+// Stable QA hooks: they name the action a button emits, never an answer or a value.
+const PRIMARY_TESTID = 'flecto-primary-action';
+
+const labelKey = (value: string) => value.normalize('NFC').replace(/\s+/g, '');
+
+// SUCCESS: the controller's resultText is "<source heading>\n<label>: <value>" plus the source's
+// own result rows. Lay them out as a receipt without inventing or recomputing anything.
+export function receiptParts(resultText: string | null, rows: ReviewRow[]) {
+  const lines = (resultText ?? '').split('\n').map((line) => line.trim()).filter(Boolean);
+  const headline = lines[0] ?? null;
+  const parsed: ReviewRow[] = [];
+  const notes: string[] = [];
+  lines.slice(1).forEach((line, index) => {
+    const match = /^([^:：]{1,40})[:：]\s*(.+)$/.exec(line);
+    if (match) parsed.push({ ref: 'line_' + index, label: match[1].trim(), value: match[2].trim() });
+    else notes.push(line);
+  });
+  const extra = rows.filter((row) => row.label && row.value && !parsed.some((p) => labelKey(p.label) === labelKey(row.label)));
+  return { headline, notes, rows: [...parsed, ...extra] };
+}
+const RECEIPT_KEY = /(접수|예약|신청|주문)\s*번호/;
 
 function BrandMark() {
   return (
@@ -351,7 +373,26 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
           <p className="fl-banner"><span aria-hidden="true">⚠</span><span>쉬운 화면은 자동으로 다시 신청하지 않아요. 원래 사이트의 신청 내역에서 결과를 먼저 확인해 주세요.</span></p>
         ) : null}
         <p>{copy.body}</p>
-        {isResult && model.resultText ? (
+        {model.phase === 'SUCCESS' ? (() => {
+          const receipt = receiptParts(model.resultText, model.reviewRows);
+          if (!receipt.headline && receipt.rows.length === 0) return null;
+          return (
+            <section className="fl-receipt" aria-label="원래 사이트의 접수 정보">
+              {receipt.headline ? <p className="fl-receipt-head">{receipt.headline}</p> : null}
+              {receipt.notes.map((note, i) => <p key={i} className="fl-help">{note}</p>)}
+              {receipt.rows.length > 0 ? (
+                <dl className="fl-receipt-rows">
+                  {receipt.rows.map((row) => (
+                    <div className="fl-receipt-row" key={row.ref} data-key={RECEIPT_KEY.test(row.label) || undefined}>
+                      <dt>{row.label}</dt>
+                      <dd>{row.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ) : null}
+            </section>
+          );
+        })() : isResult && model.resultText ? (
           <div>
             <p className="fl-section-title">원래 사이트의 안내</p>
             <p className="fl-quote">{model.resultText}</p>
@@ -380,6 +421,8 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
               type="button"
               className={'fl-btn' + (a.primary ? ' fl-btn-primary' : '')}
               disabled={a.primary && !actionsArmed}
+              data-testid={a.primary ? PRIMARY_TESTID : undefined}
+              data-action={act!.kind}
               onClick={a.primary ? primary(act!) : () => emit(act!)}
             >
               {a.label}
@@ -395,8 +438,13 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
     const noticeNodes = notices.map((n) => <NoticeBlock key={n.ref} notice={n} />);
     const fieldNodes = controls.map((c) => <ControlField key={c.ref} control={c} ctx={ctx} />);
     const nextStep = model.steps[model.stepIndex + 1] ?? null;
+    const sourceReview = template === 'final_review' && model.reviewEditMode === 'source';
     const back = step && model.canGoBack
-      ? <button type="button" className="fl-btn" onClick={() => emit({ kind: 'LOCAL_BACK', fromStep: step.id })}>이전</button>
+      ? (
+        <button type="button" className="fl-btn" data-action="LOCAL_BACK" onClick={() => emit({ kind: 'LOCAL_BACK', fromStep: step.id })}>
+          {sourceReview ? REVIEW_COPY.source.edit : '이전'}
+        </button>
+      )
       : null;
 
     if (template === 'task_selection') {
@@ -427,36 +475,44 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
     } else if (template === 'final_review') {
       const submit = findSubmitTarget(model, step);
       const reviewReady = model.phase === 'REVIEW';
+      const reviewCopy = sourceReview ? REVIEW_COPY.source : REVIEW_COPY.local;
+      if (sourceReview) intro = REVIEW_COPY.source.intro[explain];
+      // Local edits jump to the step that owns the field; a source-rendered review can only be
+      // corrected in the original flow, so it gets one honest footer action instead of per-row edits.
+      const canEditRow = Boolean(step && model.canGoBack && reviewReady && !sourceReview);
       body = (
         <>
           {noticeNodes}
           <section className="fl-section" aria-labelledby={'fl' + uid + '-review'}>
-            <h2 className="fl-section-title" id={'fl' + uid + '-review'}>원래 사이트에 들어간 내용</h2>
+            <h2 className="fl-section-title" id={'fl' + uid + '-review'}>{reviewCopy.section}</h2>
             {model.reviewRows.length > 0 ? (
               <dl className="fl-review">
                 {model.reviewRows.map((row) => (
                   <div className="fl-review-row" key={row.ref}>
-                    <dt className="fl-review-label">
-                      <span>{row.label}</span>
-                      {step && model.canGoBack && reviewReady ? (
+                    <dt className="fl-review-label">{row.label}</dt>
+                    <dd className="fl-review-value">
+                      <span>{row.value ? row.value : <span className="fl-review-empty">입력하지 않음</span>}</span>
+                      {canEditRow && step ? (
                         <button
                           type="button"
-                          className="fl-btn fl-btn-small"
+                          className="fl-btn fl-btn-small fl-btn-edit"
                           aria-label={row.label + ' 수정'}
-                          onClick={() => emit({ kind: 'LOCAL_BACK', fromStep: step.id })}
+                          data-action="LOCAL_BACK"
+                          data-testid="flecto-review-edit"
+                          onClick={() => emit({ kind: 'LOCAL_BACK', fromStep: step.id, targetRef: row.ref })}
                         >
-                          수정
+                          {REVIEW_COPY.editLabel}
                         </button>
                       ) : null}
-                    </dt>
-                    <dd>{row.value ? row.value : <span className="fl-review-empty">입력하지 않음</span>}</dd>
+                    </dd>
                   </div>
                 ))}
               </dl>
             ) : <p className="fl-help">원래 사이트의 실제 값을 확인하고 있어요.</p>}
           </section>
-          {!submit ? <p className="fl-banner">원래 사이트의 신청 버튼을 찾지 못했어요. 원래 화면에서 신청해 주세요.</p> : null}
-          {submit && reviewReady ? <p className="fl-help">아래 “{submit.label}” 버튼을 누르면 원래 사이트로 신청이 전송돼요.</p> : null}
+          {sourceReview && step && model.canGoBack ? <p className="fl-help">{REVIEW_COPY.source.editHelp}</p> : null}
+          {!submit ? <p className="fl-banner">{REVIEW_COPY.missingAction}</p> : null}
+          {submit && reviewReady ? <p className="fl-help fl-review-help">{reviewCopy.help(submit.label)}</p> : null}
         </>
       );
       footer = (
@@ -469,12 +525,15 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
               className="fl-btn fl-btn-primary"
               disabled={!model.canSubmit || submit.disabled || !actionsArmed}
               data-flecto-ref={submit.ref}
+              data-testid={PRIMARY_TESTID}
+              data-action="INVOKE_SOURCE"
+              data-intent="submit"
               onClick={primary({ kind: 'INVOKE_SOURCE', ref: submit.ref, intent: 'submit' })}
             >
               {submit.label}
             </button>
           ) : step ? (
-            <button type="button" className="fl-btn fl-btn-primary" disabled={!model.canGoNext || !actionsArmed} onClick={primary({ kind: 'LOCAL_NEXT', fromStep: step.id })}>
+            <button type="button" className="fl-btn fl-btn-primary" data-testid={PRIMARY_TESTID} data-action="LOCAL_NEXT" disabled={!model.canGoNext || !actionsArmed} onClick={primary({ kind: 'LOCAL_NEXT', fromStep: step.id })}>
               실제 값 확인하기
             </button>
           ) : null}
@@ -489,9 +548,9 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
       );
       footer = (
         <>
-          <button type="button" className="fl-btn" onClick={() => emit({ kind: 'SHOW_ORIGINAL' })}>원래 화면에서 내역 보기</button>
+          <button type="button" className="fl-btn" data-action="SHOW_ORIGINAL" onClick={() => emit({ kind: 'SHOW_ORIGINAL' })}>원래 화면에서 확인하기</button>
           <span className="fl-spacer" />
-          <button type="button" className="fl-btn fl-btn-primary" disabled={!actionsArmed} onClick={primary({ kind: 'CLOSE' })}>쉬운 화면 닫기</button>
+          <button type="button" className="fl-btn fl-btn-primary" data-testid={PRIMARY_TESTID} data-action="CLOSE" disabled={!actionsArmed} onClick={primary({ kind: 'CLOSE' })}>쉬운 화면 닫기</button>
         </>
       );
     } else {
@@ -507,7 +566,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
           {back ?? <span />}
           <span className="fl-spacer" />
           {step ? (
-            <button type="button" className="fl-btn fl-btn-primary" disabled={!model.canGoNext || !actionsArmed} onClick={primary({ kind: 'LOCAL_NEXT', fromStep: step.id })}>
+            <button type="button" className="fl-btn fl-btn-primary" data-testid={PRIMARY_TESTID} data-action="LOCAL_NEXT" disabled={!model.canGoNext || !actionsArmed} onClick={primary({ kind: 'LOCAL_NEXT', fromStep: step.id })}>
               {nextLabel}
             </button>
           ) : null}
@@ -528,6 +587,9 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
       data-contrast={s.contrast}
       data-motion={s.reducedMotion ? 'reduce' : 'normal'}
       data-phase={model.phase}
+      data-view={view.kind}
+      data-template={view.kind === 'template' ? view.template : undefined}
+      data-review-mode={view.kind === 'template' && view.template === 'final_review' ? (model.reviewEditMode ?? 'local') : undefined}
       lang="ko"
       onKeyDown={onKeyDown}
     >
@@ -545,8 +607,8 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
             <button type="button" className="fl-btn fl-btn-small" aria-expanded={settingsOpen} aria-controls={'fl' + uid + 'settings'} onClick={() => setSettingsOpen((v) => !v)}>
               글자·화면 설정
             </button>
-            <button type="button" className="fl-btn fl-btn-small" onClick={() => emit({ kind: 'SHOW_ORIGINAL' })}>원래 화면 보기</button>
-            <button type="button" className="fl-btn fl-btn-small" onClick={() => emit({ kind: 'CLOSE' })}>닫기</button>
+            <button type="button" className="fl-btn fl-btn-small" data-action="SHOW_ORIGINAL" onClick={() => emit({ kind: 'SHOW_ORIGINAL' })}>원래 화면 보기</button>
+            <button type="button" className="fl-btn fl-btn-small" data-action="CLOSE" onClick={() => emit({ kind: 'CLOSE' })}>닫기</button>
           </div>
         </div>
       </header>
