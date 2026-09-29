@@ -121,6 +121,18 @@ test('T11 T25 partial: actual worker stop preserves settings/cache, restores sam
   await expect(page.locator('body > main input[name="orderNumber"]')).toHaveValue(privateMarker);
   const settingsToggle = dialog(page).locator('button[aria-controls][aria-expanded]');
   await settingsToggle.click();
+  // A displayed default of 30 need not exist in storage. First select 26 so
+  // selecting 30 below is a real user change, not a no-op on a checked radio.
+  const normal = dialog(page).getByRole('radio', { name: '보통', exact: true });
+  if (!await normal.isChecked()) {
+    await normal.click();
+    await expect.poll(() => worker.evaluate(async () => {
+      const stored = await chrome.storage.local.get('flectoSettings');
+      return (stored.flectoSettings as { fontSize?: number } | undefined)?.fontSize;
+    })).toBe(26);
+  }
+  await expect(normal).toBeChecked();
+  await expect(dialog(page)).toHaveAttribute('data-font', '26');
   const large = dialog(page).getByRole('radio', { name: '크게', exact: true });
   if (!await large.isChecked()) await large.click();
   await expect(large).toBeChecked(); await expect(dialog(page)).toHaveAttribute('data-font', '30');
