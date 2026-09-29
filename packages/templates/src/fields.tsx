@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
-import type { KeyboardEvent as ReactKeyboardEvent, ReactElement } from 'react';
+import type { KeyboardEvent as ReactKeyboardEvent, ReactElement, ReactNode } from 'react';
 import { Check, CircleAlert, FileText, Info, TriangleAlert } from 'lucide-react';
 import type { PublicNotice, UserAction, ViewControl } from '@flecto/contracts';
+import { GUIDE_TAG, GUIDE_TEXT } from './copy';
+import type { GuideKind } from './copy';
 
 export type Emit = (action: UserAction) => void;
 export type FieldContext = {
@@ -24,6 +26,32 @@ export function textOf(value: string | boolean): string {
 export function RequiredBadge({ required, showOptional }: { required: boolean; showOptional?: boolean }) {
   if (required) return <span className="fl-badge fl-badge-required">필수</span>;
   return showOptional ? <span className="fl-badge fl-badge-optional">선택</span> : null;
+}
+
+// Visual assistant callout: an arrow + line + short Korean note next to the one place to act.
+// aria-hidden so accessible names and aria-describedby stay exactly as before; purely local UI.
+export function Guide({ kind }: { kind: GuideKind }) {
+  return (
+    <span className="fl-guide" data-guide-kind={kind} data-testid="flecto-guide" aria-hidden="true">
+      <span className="fl-guide-arrow" />
+      <span className="fl-guide-line" />
+      <span className="fl-guide-bubble">
+        <span className="fl-guide-tag">{GUIDE_TAG}</span>
+        <span className="fl-guide-text">{GUIDE_TEXT[kind]}</span>
+      </span>
+    </span>
+  );
+}
+
+// The anchor is always rendered (guided or not) so moving the guide never remounts the input,
+// which would drop focus or split an active Korean composition.
+export function GuideAnchor({ kind, active, children }: { kind: GuideKind; active: boolean; children: ReactNode }) {
+  return (
+    <div className="fl-guide-anchor" data-guide-kind={kind} data-guided={active || undefined}>
+      {children}
+      {active ? <Guide kind={kind} /> : null}
+    </div>
+  );
 }
 
 const NOTICE_META: Record<PublicNotice['kind'], { label: string; icon: IconType }> = {
@@ -86,7 +114,7 @@ const AUTOCOMPLETE: Partial<Record<ViewControl['kind'], string>> = { email: 'ema
 // controller round-trips SET_TEXT. Echoes of values we already sent never overwrite typing;
 // A focused editor owns its visible draft. Source-side conflicts are handled by
 // the controller; a late acknowledgement must not split an active Korean syllable.
-export function TextField({ control, ctx }: { control: ViewControl; ctx: FieldContext }) {
+export function TextField({ control, ctx, guided = false }: { control: ViewControl; ctx: FieldContext; guided?: boolean }) {
   const external = textOf(control.value);
   const [draft, setDraft] = useState(external);
   const composing = useRef(false);
@@ -156,18 +184,20 @@ export function TextField({ control, ctx }: { control: ViewControl; ctx: FieldCo
         <RequiredBadge required={control.required} />
       </label>
       {nodes}
-      {control.kind === 'textarea'
-        ? <textarea {...common} rows={4} />
-        : (
-          <input
-            {...common}
-            type={INPUT_TYPE[control.kind] ?? 'text'}
-            inputMode={control.kind === 'number' ? 'numeric' : undefined}
-            autoComplete={AUTOCOMPLETE[control.kind] ?? 'on'}
-            min={control.kind === 'date' ? control.constraints.min : undefined}
-            max={control.kind === 'date' ? control.constraints.max : undefined}
-          />
-        )}
+      <GuideAnchor kind="input" active={guided}>
+        {control.kind === 'textarea'
+          ? <textarea {...common} rows={4} />
+          : (
+            <input
+              {...common}
+              type={INPUT_TYPE[control.kind] ?? 'text'}
+              inputMode={control.kind === 'number' ? 'numeric' : undefined}
+              autoComplete={AUTOCOMPLETE[control.kind] ?? 'on'}
+              min={control.kind === 'date' ? control.constraints.min : undefined}
+              max={control.kind === 'date' ? control.constraints.max : undefined}
+            />
+          )}
+      </GuideAnchor>
       {error}
     </div>
   );
@@ -175,7 +205,7 @@ export function TextField({ control, ctx }: { control: ViewControl; ctx: FieldCo
 
 // select and radio: big cards, nothing preselected by FLECTO; the checked state mirrors the
 // controller's current source value (option ref).
-export function ChoiceField({ control, ctx }: { control: ViewControl; ctx: FieldContext }) {
+export function ChoiceField({ control, ctx, guided = false }: { control: ViewControl; ctx: FieldContext; guided?: boolean }) {
   const selected = textOf(control.value);
   const selectedOption = control.options.find((o) => o.ref === selected) ?? null;
   const { describedBy, nodes, error } = helpParts(control, ctx);
@@ -191,6 +221,7 @@ export function ChoiceField({ control, ctx }: { control: ViewControl; ctx: Field
       <p className="fl-help">
         {selectedOption ? '원래 화면에 선택된 항목: ' + selectedOption.label : '아직 선택하지 않았어요.'}
       </p>
+      <GuideAnchor kind="choice" active={guided}>
       <div className="fl-choices" role="radiogroup" aria-labelledby={legendId} aria-required={control.required || undefined} aria-invalid={control.error ? true : undefined}>
         {control.options.map((option) => {
           const checked = option.ref === selected;
@@ -216,19 +247,21 @@ export function ChoiceField({ control, ctx }: { control: ViewControl; ctx: Field
           );
         })}
       </div>
+      </GuideAnchor>
       {error}
     </fieldset>
   );
 }
 
 // Each checkbox stands alone; checked mirrors the source and only changes through the user's click.
-export function CheckField({ control, ctx }: { control: ViewControl; ctx: FieldContext }) {
+export function CheckField({ control, ctx, guided = false }: { control: ViewControl; ctx: FieldContext; guided?: boolean }) {
   const checked = control.value === true;
   const { describedBy, nodes, error } = helpParts(control, ctx);
   const id = ctx.idFor(control.ref);
   return (
     <div className="fl-field">
       {nodes}
+      <GuideAnchor kind="consent" active={guided}>
       <label className="fl-check" htmlFor={id} data-checked={checked}>
         <input
           id={id}
@@ -247,6 +280,7 @@ export function CheckField({ control, ctx }: { control: ViewControl; ctx: FieldC
           <span className="fl-check-state">{checked ? <><Icon icon={Check} />동의함</> : '아직 동의하지 않음'}</span>
         </span>
       </label>
+      </GuideAnchor>
       {error}
     </div>
   );
@@ -268,19 +302,20 @@ export function SourceButton({ control, ctx }: { control: ViewControl; ctx: Fiel
   );
 }
 
-export function ControlField({ control, ctx }: { control: ViewControl; ctx: FieldContext }) {
+export function ControlField({ control, ctx, guided = false }: { control: ViewControl; ctx: FieldContext; guided?: boolean }) {
   switch (control.kind) {
     case 'select':
     case 'radio':
-      return <ChoiceField control={control} ctx={ctx} />;
+      return <ChoiceField control={control} ctx={ctx} guided={guided} />;
     case 'checkbox':
-      return <CheckField control={control} ctx={ctx} />;
+      return <CheckField control={control} ctx={ctx} guided={guided} />;
     case 'submit':
       return null; // only offered as the explicit final button on review
     case 'button':
     case 'link':
       return control.actionKind === 'navigate' ? <SourceButton control={control} ctx={ctx} /> : null;
     default:
-      return <TextField control={control} ctx={ctx} />;
+      return <TextField control={control} ctx={ctx} guided={guided} />;
   }
 }
+

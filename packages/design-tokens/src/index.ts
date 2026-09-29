@@ -260,4 +260,27 @@ export const FLECTO_CSS = [
   '.fl-tech summary{cursor:pointer;min-height:var(--fl-target);display:inline-flex;align-items:center;gap:8px;font-weight:700;border-radius:10px;padding:0 4px;}',
   '.fl-tech dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;padding:8px 0 0;}',
   '.fl-tech dt{font-weight:700;}',
+  // assistant guide: one arrow + line + short note beside the single place to act next.
+  // Styled as a sticky note (never like a button); pointer-events:none so it can never take a click.
+  '.fl-guide-anchor{position:relative;min-width:0;}',
+  '.fl-footer-in{position:relative;}',
+  '.fl-guide{display:flex;flex-direction:column;align-items:flex-start;margin-top:10px;pointer-events:none;user-select:none;font-size:max(20px, 0.8em);line-height:1.3;font-weight:800;color:var(--fl-text);}',
+  '.fl-guide-arrow{flex:none;width:0;height:0;margin-left:28px;border-left:12px solid transparent;border-right:12px solid transparent;border-bottom:14px solid var(--fl-warning);}',
+  '.fl-guide-line{display:none;flex:none;background:var(--fl-warning);}',
+  '.fl-guide-bubble{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;max-width:100%;padding:10px 16px;border:3px solid var(--fl-warning);border-radius:14px;background:var(--fl-warning-soft);box-shadow:0 4px 14px rgba(23,32,51,0.12);}',
+  '.fl-guide-tag{display:inline-flex;align-items:center;min-height:1.5em;padding:0 0.5em;border-radius:999px;background:var(--fl-warning);color:#FFFFFF;font-size:max(20px, 0.8em);font-weight:800;line-height:1.2;}',
+  HC + ' .fl-guide-bubble{box-shadow:none;}',
+  // footer action guide in the narrow layout: its own row above the buttons, arrow pointing down
+  '.fl-footer-in > .fl-guide{order:-1;flex:1 1 100%;flex-direction:column-reverse;align-items:flex-end;margin:0;}',
+  '.fl-footer-in > .fl-guide .fl-guide-arrow{margin:0 40px 0 0;border-bottom:0;border-top:14px solid var(--fl-warning);}',
+  // wide screens: the guide sits in the empty margin beside the card, connected by a line to the
+  // field or button. Its width is capped by the real margin so it never clips or scrolls sideways.
+  '@media (min-width: 1320px){' +
+    '.fl-guide,.fl-footer-in > .fl-guide{position:absolute;left:100%;top:50%;transform:translateY(-50%);margin:0;flex-direction:row;align-items:center;order:0;flex:none;}' +
+    '.fl-guide-anchor[data-guide-kind="choice"] > .fl-guide,.fl-guide-anchor[data-guide-kind="consent"] > .fl-guide{top:calc(var(--fl-card) / 2);}' +
+    '.fl-footer-in > .fl-guide{left:calc(100% - 20px);}' +
+    '.fl-guide-arrow,.fl-footer-in > .fl-guide .fl-guide-arrow{margin:0;border-top:12px solid transparent;border-bottom:12px solid transparent;border-left:0;border-right:16px solid var(--fl-warning);}' +
+    '.fl-guide-line{display:block;width:48px;height:4px;}' +
+    '.fl-guide-bubble{width:max-content;max-width:min(320px, calc((100vw - var(--fl-read)) / 2 - 96px));}' +
+  '}',
 ].join('\n');

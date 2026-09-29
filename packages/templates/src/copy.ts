@@ -137,3 +137,14 @@ export const MODE_LABEL: Record<PlanMode, string> = {
   LIVE_CODEX: '실시간 Codex 계획 (LIVE_CODEX)',
   CACHE: '검증된 저장 계획 (CACHE)',
 };
+
+// One short assistant note beside the single place the user should act next. It points; it
+// never chooses, types, checks, or clicks anything for the user.
+export type GuideKind = 'input' | 'choice' | 'consent' | 'action';
+export const GUIDE_TAG = '도우미';
+export const GUIDE_TEXT: Record<GuideKind, string> = {
+  input: '여기에 입력하세요',
+  choice: '원하시는 항목을 누르세요',
+  consent: '안내를 읽고 직접 체크하세요',
+  action: '확인 후 여기를 누르세요',
+};

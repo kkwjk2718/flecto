@@ -10,8 +10,8 @@ import type {
 import {
   DIALOG_NAME, ERROR_BANNER, LOADING, MODE_LABEL, REVIEW_COPY, SPONSOR_LABEL, SPONSOR_NOTE, STATUS, TEMPLATE_INTRO, TEMPLATE_TITLE,
 } from './copy';
-import type { StatusAction, StatusCopy, Tone } from './copy';
-import { ControlField, Icon, NoticeBlock } from './fields';
+import type { GuideKind, StatusAction, StatusCopy, Tone } from './copy';
+import { ControlField, Guide, GuideAnchor, Icon, NoticeBlock, textOf } from './fields';
 import type { Emit, FieldContext, IconType } from './fields';
 
 export type FlectoAppProps = { model: FlectoViewModel; onAction: (action: UserAction) => void };
@@ -97,6 +97,33 @@ function findSubmitTarget(model: FlectoViewModel, step: PlanStep | null): Submit
 }
 const FALLBACK_SUBMIT_LABEL = '신청하기';
 
+// Exactly one contextual guide per step. Purely local: it reads the current model values and the
+// field the user focused; it never picks an answer, types, checks, or clicks.
+export type GuideTarget = { kind: GuideKind; ref: string | null };
+const NON_FIELD = new Set<ViewControl['kind']>(['submit', 'button', 'link']);
+export function guideKindOf(control: ViewControl): GuideKind {
+  if (control.kind === 'select' || control.kind === 'radio') return 'choice';
+  if (control.kind === 'checkbox') return 'consent';
+  return 'input';
+}
+function isEmptyControl(control: ViewControl): boolean {
+  if (control.kind === 'checkbox') return control.value !== true;
+  return textOf(control.value).trim() === '';
+}
+export function guideFields(controls: ViewControl[]): ViewControl[] {
+  return controls.filter((c) => !NON_FIELD.has(c.kind) && !c.disabled);
+}
+export function pickGuide(controls: ViewControl[], focusedRef: string | null, canAdvance: boolean): GuideTarget | null {
+  const fields = guideFields(controls);
+  const pick = (c: ViewControl | undefined) => (c ? { kind: guideKindOf(c), ref: c.ref } : null);
+  const focused = focusedRef ? fields.find((c) => c.ref === focusedRef) : undefined;
+  return pick(focused)
+    ?? pick(fields.find((c) => c.error))
+    ?? pick(fields.find((c) => c.required && isEmptyControl(c)))
+    ?? (canAdvance ? { kind: 'action', ref: null } : null)
+    ?? pick(fields.find(isEmptyControl));
+}
+
 const labelKey = (value: string) => value.normalize('NFC').replace(/\s+/g, '');
 
 // SUCCESS: the controller's resultText is "<source heading>\n<label>: <value>" plus the source's
@@ -173,8 +200,8 @@ export function matchTasks(tasks: SourceTask[], query: string): SourceTask[] {
   });
 }
 
-function TaskList({ tasks, onPick, onOriginal, idBase }: {
-  tasks: SourceTask[]; onPick: (task: SourceTask) => void; onOriginal: () => void; idBase: string;
+function TaskList({ tasks, onPick, onOriginal, idBase, guided = false }: {
+  tasks: SourceTask[]; onPick: (task: SourceTask) => void; onOriginal: () => void; idBase: string; guided?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const [searching, setSearching] = useState(false);
@@ -197,7 +224,9 @@ function TaskList({ tasks, onPick, onOriginal, idBase }: {
   );
   return (
     <>
-      <ul className="fl-tasks" role="list">{first.map(item)}</ul>
+      <GuideAnchor kind="choice" active={guided && !searching}>
+        <ul className="fl-tasks" role="list">{first.map(item)}</ul>
+      </GuideAnchor>
       {rest.length > 0 && !expanded ? (
         <button type="button" className="fl-btn fl-btn-soft fl-more" aria-expanded={false} onClick={() => setExpanded(true)}>
           <Icon icon={ChevronDown} />다른 작업 보기 ({rest.length}개)
@@ -254,6 +283,11 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
   const prevPhase = useRef(model.phase);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [armTick, refreshArmedState] = useState(0);
+  // Field the user last focused (local UI only). Updates wait for the pointer to lift so a guide
+  // that moves never shifts a card or button under a press in progress.
+  const [focusedRef, setFocusedRef] = useState<string | null>(null);
+  const pointerDown = useRef(false);
+  const pendingFocus = useRef<{ ref: string | null } | null>(null);
 
   const emit = useCallback<Emit>((action) => onActionRef.current(action), [onActionRef]);
   const setComposing = useCallback((ref: string, composing: boolean) => {
@@ -293,6 +327,23 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
   const explain = model.settings.explanation;
   const errorsKey = controls.filter((c) => c.error).map((c) => c.ref).join('|');
   const viewKey = model.phase + ':' + model.stepIndex + ':' + (view.kind === 'template' ? view.template : view.kind);
+  const [guideKey, setGuideKey] = useState(viewKey);
+  if (guideKey !== viewKey) { setGuideKey(viewKey); setFocusedRef(null); pendingFocus.current = null; }
+  const fieldRefs = new Set(guideFields(controls).map((c) => c.ref));
+  const noteFocus = (target: EventTarget | null) => {
+    const el = target instanceof Element ? target.closest('[data-flecto-ref]') : null;
+    const ref = el?.getAttribute('data-flecto-ref') ?? null;
+    const next = ref && fieldRefs.has(ref) ? ref : null;
+    if (pointerDown.current) { pendingFocus.current = { ref: next }; return; }
+    setFocusedRef(next);
+  };
+  const releasePointer = () => {
+    pointerDown.current = false;
+    const pending = pendingFocus.current;
+    pendingFocus.current = null;
+    // after the click that belongs to this press has been dispatched
+    if (pending) setTimeout(() => setFocusedRef(pending.ref), 0);
+  };
 
   // Focus: on each screen/step change (and when new errors arrive) move to the first errored
   // control, otherwise to the screen heading. Never while an IME composition is active.
@@ -448,8 +499,17 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
     const fieldNotices = new Set(['grouped_form', 'item_selection', 'consent'].includes(template)
       ? controls.filter(c => !['submit', 'button', 'link'].includes(c.kind)).flatMap(c => c.noticeRefs) : []);
     const noticeNodes = notices.filter(n => !fieldNotices.has(n.ref)).map((n) => <NoticeBlock key={n.ref} notice={n} />);
-    const fieldNodes = controls.map((c) => <ControlField key={c.ref} control={c} ctx={ctx} />);
     const nextStep = model.steps[model.stepIndex + 1] ?? null;
+    const reviewCta = template === 'final_review' && model.phase === 'REVIEW';
+    const reviewSubmit = template === 'final_review' ? findSubmitTarget(model, step) : null;
+    const canAdvance = actionsArmed && (reviewCta
+      ? Boolean(reviewSubmit && model.canSubmit && !reviewSubmit.disabled)
+      : Boolean(step && model.canGoNext && template !== 'task_selection' && template !== 'result'));
+    const guide = template === 'result' || (template === 'task_selection' && model.phase === 'IDLE') ? null
+      : template === 'final_review' ? (canAdvance ? { kind: 'action' as const, ref: null } : null)
+      : pickGuide(controls, focusedRef, canAdvance);
+    const ctaGuide = guide?.kind === 'action' ? <Guide kind="action" /> : null;
+    const fieldNodes = controls.map((c) => <ControlField key={c.ref} control={c} ctx={ctx} guided={guide?.ref === c.ref} />);
     const sourceReview = template === 'final_review' && model.reviewEditMode === 'source';
     const back = step && model.canGoBack
       ? (
@@ -469,6 +529,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
             <TaskList
               tasks={model.tasks}
               idBase={'fl' + uid}
+              guided={!guide}
               onOriginal={() => emit({ kind: 'SHOW_ORIGINAL' })}
               onPick={(task) => emit(inIdle || task.kind !== 'navigate'
                 ? { kind: 'START_GOAL', ref: task.ref }
@@ -486,7 +547,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
       );
       footer = back ? <>{back}<span className="fl-spacer" /></> : null;
     } else if (template === 'final_review') {
-      const submit = findSubmitTarget(model, step);
+      const submit = reviewSubmit;
       const reviewReady = model.phase === 'REVIEW';
       const reviewCopy = sourceReview ? REVIEW_COPY.source : REVIEW_COPY.local;
       if (sourceReview) intro = REVIEW_COPY.source.intro[explain];
@@ -550,6 +611,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
               실제 값 확인하기
             </button>
           ) : null}
+          {ctaGuide}
         </>
       );
     } else if (template === 'result') {
@@ -583,6 +645,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
               {nextLabel}<Icon icon={ArrowRight} />
             </button>
           ) : null}
+          {step ? ctaGuide : null}
         </>
       );
     }
@@ -605,6 +668,10 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
       data-review-mode={view.kind === 'template' && view.template === 'final_review' ? (model.reviewEditMode ?? 'local') : undefined}
       lang="ko"
       onKeyDown={onKeyDown}
+      onFocusCapture={(e) => noteFocus(e.target)}
+      onPointerDownCapture={() => { pointerDown.current = true; }}
+      onPointerUpCapture={releasePointer}
+      onPointerCancelCapture={releasePointer}
     >
       <header className="fl-header">
         <div className="fl-header-in">
