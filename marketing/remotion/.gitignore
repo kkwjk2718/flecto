@@ -1,0 +1,7 @@
+# Local-only inputs copied by scripts/sync-assets.sh and local renders.
+node_modules/
+out/
+public/assets/
+public/audio/
+public/fonts/
+.remotion/
