@@ -1,0 +1,3848 @@
+{
+  "schema": "flecto.qa-map.v1",
+  "gateFile": "ops/02_GATES_AND_TESTS.md",
+  "gateSha256": "0b0c6d288257f1202c03588107a7ff6c0c16fe83cf70a7330637083c34394f44",
+  "checks": {
+    "T01": {
+      "kind": "FIXTURE",
+      "coverage": "complete",
+      "requirements": [
+        "구매 정상 흐름: 원본 저장값 일치",
+        "완료 화면의 접수 번호와 원본 DB 일치"
+      ],
+      "assertions": [
+        {
+          "requirement": "구매 정상 흐름: 원본 저장값 일치",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/benefits.spec.ts",
+          "sourceSha256": "9cf5481b6afda0ff235a0c0939ca1c853339735c5e8281ad6e87f786b6b1bab9",
+          "titlePath": [
+            "T01 T09: FLECTO source handlers and full-navigation confirmation reach the original database"
+          ],
+          "assertion": "expect(result.count).toBe(1); expect(result.insertionCount).toBe(1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "구매 정상 흐름: 원본 저장값 일치",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/benefits.spec.ts",
+          "sourceSha256": "9cf5481b6afda0ff235a0c0939ca1c853339735c5e8281ad6e87f786b6b1bab9",
+          "titlePath": [
+            "T01 T09: FLECTO source handlers and full-navigation confirmation reach the original database"
+          ],
+          "assertion": "expect(result.records[0]).toMatchObject({ orderNumber: 'FLECTO-2026-001', purchaseDate: '2026-09-01', category: '가전' });",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "완료 화면의 접수 번호와 원본 DB 일치",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T07: pointer-first rapid clicks and Enter presses save exactly one original record"
+          ],
+          "assertion": "await expect(page.locator('body > main output[aria-label=\"접수 번호\"]')).toHaveText(String(original.records[0].id));",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T02": {
+      "kind": "LIVE_CODEX",
+      "coverage": "complete",
+      "requirements": [
+        "선택 강좌·시간과 원본 저장 결과 일치"
+      ],
+      "assertions": [
+        {
+          "requirement": "선택 강좌·시간과 원본 저장 결과 일치",
+          "run": "live-final",
+          "file": "tests/e2e-live/product.spec.ts",
+          "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
+          "titlePath": [
+            "LIVE culture: cold React-controlled application stores the selected course and time"
+          ],
+          "assertion": "await expect(page.locator('main select[name=\"timeId\"]')).toHaveValue('yoga-tue-thu-1000');",
+          "project": "",
+          "instances": 3
+        },
+        {
+          "requirement": "선택 강좌·시간과 원본 저장 결과 일치",
+          "run": "live-final",
+          "file": "tests/e2e-live/product.spec.ts",
+          "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
+          "titlePath": [
+            "LIVE culture: cold React-controlled application stores the selected course and time"
+          ],
+          "assertion": "expect(outcome.count).toBe(1);",
+          "project": "",
+          "instances": 3
+        },
+        {
+          "requirement": "선택 강좌·시간과 원본 저장 결과 일치",
+          "run": "live-final",
+          "file": "tests/e2e-live/product.spec.ts",
+          "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
+          "titlePath": [
+            "LIVE culture: cold React-controlled application stores the selected course and time"
+          ],
+          "assertion": "expect(outcome.reservations[0]).toMatchObject({ courseId: 'yoga', timeId: 'yoga-tue-thu-1000', applicantName: '김하늘' });",
+          "project": "",
+          "instances": 3
+        },
+        {
+          "requirement": "선택 강좌·시간과 원본 저장 결과 일치",
+          "run": "live-final",
+          "file": "tests/e2e-live/product.spec.ts",
+          "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
+          "titlePath": [
+            "LIVE culture: cold React-controlled application stores the selected course and time"
+          ],
+          "assertion": "await expect(page).toHaveURL(/\\/reservations\\/HB-/);",
+          "project": "",
+          "instances": 3
+        }
+      ],
+      "requestedModel": "gpt-6-luna"
+    },
+    "T03": {
+      "kind": "FIXTURE",
+      "coverage": "complete",
+      "requirements": [
+        "필수 항목을 비우면 제출 안 됨",
+        "해당 필드의 원본 검증 오류 안내"
+      ],
+      "assertions": [
+        {
+          "requirement": "필수 항목을 비우면 제출 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "expect(posts).toEqual([]);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "필수 항목을 비우면 제출 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "expect((await benefitsRecords(system)).count).toBe(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "해당 필드의 원본 검증 오류 안내",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "await expect(ui.getByLabel('주문번호', { exact: false })).toHaveAttribute('aria-invalid', 'true');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "해당 필드의 원본 검증 오류 안내",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "await expect(ui.getByLabel('구매일', { exact: false })).toHaveAttribute('aria-invalid', 'true');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "해당 필드의 원본 검증 오류 안내",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "expect(nativeError).not.toBe('');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "해당 필드의 원본 검증 오류 안내",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "await expect(ui.locator('.fl-error').first()).toContainText(nativeError);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T04": {
+      "kind": "FIXTURE",
+      "coverage": "partial",
+      "requirements": [
+        "합성 한국어 조합·문자 삽입에서 값·커서 보존 및 Enter 제출 차단",
+        "실제 Mac 한국어 입력기 및 OS 붙여넣기에서 문자 손실·커서 점프 없음"
+      ],
+      "assertions": [
+        {
+          "requirement": "합성 한국어 조합·문자 삽입에서 값·커서 보존 및 Enter 제출 차단",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T04 partial: synthetic Korean composition preserves draft and caret without an Enter submission"
+          ],
+          "assertion": "expect(allowed, 'composition Enter must be prevented before any source submit').toBe(false);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 한국어 조합·문자 삽입에서 값·커서 보존 및 Enter 제출 차단",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T04 partial: synthetic Korean composition preserves draft and caret without an Enter submission"
+          ],
+          "assertion": "await expect(original).toHaveValue('한글 신청'); await expect(input).toHaveValue('한글 신청');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 한국어 조합·문자 삽입에서 값·커서 보존 및 Enter 제출 차단",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T04 partial: synthetic Korean composition preserves draft and caret without an Enter submission"
+          ],
+          "assertion": "expect(await input.evaluate((element: HTMLInputElement) => [element.selectionStart, element.selectionEnd])).toEqual([2, 2]);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 한국어 조합·문자 삽입에서 값·커서 보존 및 Enter 제출 차단",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T04 partial: synthetic Korean composition preserves draft and caret without an Enter submission"
+          ],
+          "assertion": "await expect(input).toHaveValue('한글 붙여넣기 확인'); await expect(original).toHaveValue('한글 붙여넣기 확인');",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T05": {
+      "kind": "FIXTURE",
+      "coverage": "complete",
+      "requirements": [
+        "React controlled field가 다음 렌더 후 값 유지",
+        "원본 제출 handler와 원본 저장 결과에도 입력값 유지"
+      ],
+      "assertions": [
+        {
+          "requirement": "React controlled field가 다음 렌더 후 값 유지",
+          "run": "unit-final",
+          "file": "tests/unit/core.test.ts",
+          "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
+          "titlePath": [
+            "input adapters and review locks",
+            "reaches React controlled handler, rerender and submit state through prototype setter"
+          ],
+          "assertion": "expect(observed).toBe('홍길동'); expect(document.querySelector('input')!.value).toBe('홍길동');",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 제출 handler와 원본 저장 결과에도 입력값 유지",
+          "run": "unit-final",
+          "file": "tests/unit/core.test.ts",
+          "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
+          "titlePath": [
+            "input adapters and review locks",
+            "reaches React controlled handler, rerender and submit state through prototype setter"
+          ],
+          "assertion": "expect(submitted).toBe('홍길동');",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 제출 handler와 원본 저장 결과에도 입력값 유지",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/culture.spec.ts",
+          "sourceSha256": "d3f99e4a63bc5fb4034ecb8c8b616f311dece6ae39af5485396caf08ebee4b92",
+          "titlePath": [
+            "T02 T05 T10: React culture application preserves values across source SPA steps and saves once"
+          ],
+          "assertion": "await expect(page.locator('main input[name=\"applicantName\"]')).toHaveValue('김하늘');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 제출 handler와 원본 저장 결과에도 입력값 유지",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/culture.spec.ts",
+          "sourceSha256": "d3f99e4a63bc5fb4034ecb8c8b616f311dece6ae39af5485396caf08ebee4b92",
+          "titlePath": [
+            "T02 T05 T10: React culture application preserves values across source SPA steps and saves once"
+          ],
+          "assertion": "expect(oracle.reservations[0]).toMatchObject({ courseId: 'yoga', timeId: 'yoga-tue-thu-1000', applicantName: '김하늘' });",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T06": {
+      "kind": "FIXTURE",
+      "coverage": "complete",
+      "requirements": [
+        "사용자 선택 전 동의 체크박스 변경 안 됨",
+        "명시적 사용자 클릭만 원본 동의에 반영"
+      ],
+      "assertions": [
+        {
+          "requirement": "사용자 선택 전 동의 체크박스 변경 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "await expect(consent).not.toBeChecked();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "사용자 선택 전 동의 체크박스 변경 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "await expect(page.locator('main input[name=\"consent\"]')).not.toBeChecked();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "사용자 선택 전 동의 체크박스 변경 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "await expect(consent).toHaveAttribute('aria-invalid', 'true');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "명시적 사용자 클릭만 원본 동의에 반영",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "await consent.click();\n  await expect(page.locator('main input[name=\"consent\"]')).toBeChecked();",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T07": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "중복 클릭·Enter 연타에도 원본 POST와 DB 삽입 한 건"
+      ],
+      "assertions": [
+        {
+          "requirement": "중복 클릭·Enter 연타에도 원본 POST와 DB 삽입 한 건",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T07: pointer-first rapid clicks and Enter presses save exactly one original record"
+          ],
+          "assertion": "expect(posts).toEqual(['/apply/submit']);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "중복 클릭·Enter 연타에도 원본 POST와 DB 삽입 한 건",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T07: pointer-first rapid clicks and Enter presses save exactly one original record"
+          ],
+          "assertion": "expect(original.count).toBe(1); expect(original.insertionCount).toBe(1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "중복 클릭·Enter 연타에도 원본 POST와 DB 삽입 한 건",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T07: keyboard-first rapid clicks and Enter presses save exactly one original record"
+          ],
+          "assertion": "expect(posts).toEqual(['/apply/submit']);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "중복 클릭·Enter 연타에도 원본 POST와 DB 삽입 한 건",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T07: keyboard-first rapid clicks and Enter presses save exactly one original record"
+          ],
+          "assertion": "expect(original.count).toBe(1); expect(original.insertionCount).toBe(1);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T08": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "원본 오류에서 거짓 성공·자동 재제출 없음",
+        "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음"
+      ],
+      "assertions": [
+        {
+          "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T08: source rejection never becomes success or an automatic resubmission"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'SOURCE_REJECTED');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T08: source rejection never becomes success or an automatic resubmission"
+          ],
+          "assertion": "expect(posts).toEqual(['/apply/submit']);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T08: source rejection never becomes success or an automatic resubmission"
+          ],
+          "assertion": "expect((await benefitsRecords(system)).count).toBe(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T08: source rejection never becomes success or an automatic resubmission"
+          ],
+          "assertion": "await expect(dialog(page)).not.toHaveAttribute('data-phase', 'SUCCESS');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T08 partial: response lost after commit creates one record and never auto-replays"
+          ],
+          "assertion": "expect(posts).toEqual(['/apply/submit']);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T08 partial: response lost after commit creates one record and never auto-replays"
+          ],
+          "assertion": "expect(intercepted).toBe(1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T08 partial: response lost after commit creates one record and never auto-replays"
+          ],
+          "assertion": "expect((await benefitsRecords(system)).insertionCount).toBe(1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T08 partial: response lost after commit creates one record and never auto-replays"
+          ],
+          "assertion": "await expect(page.locator('#flecto-host [data-phase=\"SUCCESS\"]')).toHaveCount(0);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T09": {
+      "kind": "FIXTURE",
+      "coverage": "complete",
+      "requirements": [
+        "전체 페이지 이동 후 재주입·상태 복구",
+        "이전 document/ref 폐기 및 새 instance 요구"
+      ],
+      "assertions": [
+        {
+          "requirement": "전체 페이지 이동 후 재주입·상태 복구",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/benefits.spec.ts",
+          "sourceSha256": "9cf5481b6afda0ff235a0c0939ca1c853339735c5e8281ad6e87f786b6b1bab9",
+          "titlePath": [
+            "T01 T09: FLECTO source handlers and full-navigation confirmation reach the original database"
+          ],
+          "assertion": "await expect(page).toHaveURL(/\\/apply\\/review\\?draft=/);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "전체 페이지 이동 후 재주입·상태 복구",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/benefits.spec.ts",
+          "sourceSha256": "9cf5481b6afda0ff235a0c0939ca1c853339735c5e8281ad6e87f786b6b1bab9",
+          "titlePath": [
+            "T01 T09: FLECTO source handlers and full-navigation confirmation reach the original database"
+          ],
+          "assertion": "await expect(dialog(page).getByRole('button', { name: '혜택 신청 제출', exact: true })).toBeVisible();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "전체 페이지 이동 후 재주입·상태 복구",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/benefits.spec.ts",
+          "sourceSha256": "9cf5481b6afda0ff235a0c0939ca1c853339735c5e8281ad6e87f786b6b1bab9",
+          "titlePath": [
+            "T01 T09: FLECTO source handlers and full-navigation confirmation reach the original database"
+          ],
+          "assertion": "await expect(dialog(page)).toContainText('접수 번호');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 document/ref 폐기 및 새 instance 요구",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background N02 navigation and restart",
+            "invalidates old references on full navigation and requires a new instance"
+          ],
+          "assertion": "expect(await h.broker.handle({ type: 'FLECTO_STATE', documentInstanceId: 'instance1', active: true, pendingSubmit: true }, oldSender)).toEqual({ ok: false, error: 'STALE_DOCUMENT' });",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 document/ref 폐기 및 새 instance 요구",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background N02 navigation and restart",
+            "invalidates old references on full navigation and requires a new instance"
+          ],
+          "assertion": "expect(await h.broker.handle(prepare(request), h.sender())).toEqual({ ok: true, result: result(request) });",
+          "instances": 1
+        }
+      ]
+    },
+    "T10": {
+      "kind": "FIXTURE",
+      "coverage": "complete",
+      "requirements": [
+        "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결"
+      ],
+      "assertions": [
+        {
+          "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T10 T05 partial: actual SPA back/forward rebinds the correct step and controlled time"
+          ],
+          "assertion": "await expect(page).toHaveURL(/\\/apply\\/course/);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T10 T05 partial: actual SPA back/forward rebinds the correct step and controlled time"
+          ],
+          "assertion": "await expect(dialog(page).getByRole('radio', { name: /10:00/ }).first()).toBeChecked();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T10 T05 partial: actual SPA back/forward rebinds the correct step and controlled time"
+          ],
+          "assertion": "await expect(page.locator('main select[name=\"timeId\"]')).toHaveValue('yoga-tue-thu-1000');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T10 T05 partial: actual SPA back/forward rebinds the correct step and controlled time"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('신청자 이름', { exact: false })).toHaveCount(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T10 T05 partial: actual SPA back/forward rebinds the correct step and controlled time"
+          ],
+          "assertion": "await expect(page).toHaveURL(/\\/apply\\/applicant/);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T10 T05 partial: actual SPA back/forward rebinds the correct step and controlled time"
+          ],
+          "assertion": "expect(new Set(documents).size).toBe(documents.length);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T11": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "실제 service worker 중지·재시작 후 비개인 상태 복구",
+        "이전 계획·제출 동작 자동 재실행 없음"
+      ],
+      "assertions": [
+        {
+          "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
+          ],
+          "assertion": "expect(after).toEqual(before);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-font', '30');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
+          ],
+          "assertion": "expect((await storedState(options, tabId, [privateMarker])).privateMarkerFound).toBe(false);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 계획·제출 동작 자동 재실행 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 계획·제출 동작 자동 재실행 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
+          ],
+          "assertion": "expect((await benefitsRecords(system)).count).toBe(0); expect(posts).toEqual([]);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 계획·제출 동작 자동 재실행 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11: stopping the worker after an actual submit preserves pending state without replaying the source action"
+          ],
+          "assertion": "expect(pending.session).toMatchObject({ active: true, origin: sourceOrigin, pendingSubmit: true });",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 계획·제출 동작 자동 재실행 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11: stopping the worker after an actual submit preserves pending state without replaying the source action"
+          ],
+          "assertion": "expect(saved.count).toBe(1); expect(saved.insertionCount).toBe(1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 계획·제출 동작 자동 재실행 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11: stopping the worker after an actual submit preserves pending state without replaying the source action"
+          ],
+          "assertion": "expect(posts).toEqual(['/apply/submit']);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T12": {
+      "kind": "FIXTURE",
+      "coverage": "complete",
+      "requirements": [
+        "필수 입력 추가 시 오래된 계획 거부",
+        "재분석한 UI에 새 필수 입력·오류 반영"
+      ],
+      "assertions": [
+        {
+          "requirement": "필수 입력 추가 시 오래된 계획 거부",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T12 T26 partial: newly required holdout field invalidates the installed extension plan"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'STALE_DOCUMENT');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "필수 입력 추가 시 오래된 계획 거부",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T12 T26 partial: newly required holdout field invalidates the installed extension plan"
+          ],
+          "assertion": "await expect(dialog(page).getByRole('button', { name: '신청 내용 확인', exact: true })).toHaveCount(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "필수 입력 추가 시 오래된 계획 거부",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T12 T26 partial: newly required holdout field invalidates the installed extension plan"
+          ],
+          "assertion": "expect(posts).toEqual([]); expect((await benefitsRecords(system)).count).toBe(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "재분석한 UI에 새 필수 입력·오류 반영",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T12 T26 partial: newly required holdout field invalidates the installed extension plan"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('신청 구분 확인', { exact: false })).toBeVisible();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "재분석한 UI에 새 필수 입력·오류 반영",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T12 T26 partial: newly required holdout field invalidates the installed extension plan"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('신청 구분 확인', { exact: false })).toHaveAttribute('aria-invalid', 'true');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "재분석한 UI에 새 필수 입력·오류 반영",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T12 T26 partial: newly required holdout field invalidates the installed extension plan"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(2);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T13": {
+      "kind": "FIXTURE",
+      "coverage": "complete",
+      "requirements": [
+        "동일 라벨 복수 form에서 다른 form의 버튼·입력 선택 거부",
+        "선택한 form의 원본 action으로만 저장"
+      ],
+      "assertions": [
+        {
+          "requirement": "동일 라벨 복수 form에서 다른 form의 버튼·입력 선택 거부",
+          "run": "unit-final",
+          "file": "tests/unit/core.test.ts",
+          "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
+          "titlePath": [
+            "public extraction and source verification",
+            "does not mix identically named actions and inputs from different forms"
+          ],
+          "assertion": "code(() => verifyPlan({ ...valid, steps: [{ ...valid.steps[0], controlRefs: [foreign.ref] }] }, snapshot), 'SCHEMA_INVALID');",
+          "instances": 1
+        },
+        {
+          "requirement": "선택한 form의 원본 action으로만 저장",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T13: duplicate-labelled actions remain in the selected form through full-navigation save"
+          ],
+          "assertion": "expect(posts).toEqual(['/apply', '/apply/submit']);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "선택한 form의 원본 action으로만 저장",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T13: duplicate-labelled actions remain in the selected form through full-navigation save"
+          ],
+          "assertion": "expect(saved.count).toBe(1); expect(saved.records[0]).toMatchObject({ orderNumber: 'FLECTO-2026-001' });",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T14": {
+      "kind": "CACHE",
+      "coverage": "complete",
+      "requirements": [
+        "동의·중요 원문 변경으로 기존 계획·notice cache 무효화",
+        "새 원문을 재분석한 UI에 표시"
+      ],
+      "assertions": [
+        {
+          "requirement": "동의·중요 원문 변경으로 기존 계획·notice cache 무효화",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T14: changed important notice rejects prior review and generates the new notice"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'STALE_DOCUMENT');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "동의·중요 원문 변경으로 기존 계획·notice cache 무효화",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T14: changed important notice rejects prior review and generates the new notice"
+          ],
+          "assertion": "expect(JSON.parse(qa.exchanges[1].response!).mode).toBe('FIXTURE');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "동의·중요 원문 변경으로 기존 계획·notice cache 무효화",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "candidate ACK and semantic cache (T21/T37/T39)",
+            "does not reuse a changed notice structure"
+          ],
+          "assertion": "expect((await h.post(current)).json().mode).toBe('FIXTURE'); expect(h.plan).toHaveBeenCalledTimes(2);",
+          "instances": 1
+        },
+        {
+          "requirement": "새 원문을 재분석한 UI에 표시",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T14: changed important notice rejects prior review and generates the new notice"
+          ],
+          "assertion": "await expect(dialog(page)).toContainText(updated);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "새 원문을 재분석한 UI에 표시",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T14: changed important notice rejects prior review and generates the new notice"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(2);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T15": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "2.9초 준비 완료 시 광고 없음",
+        "준비 완료 즉시 READY 및 입력 가능"
+      ],
+      "assertions": [
+        {
+          "requirement": "2.9초 준비 완료 시 광고 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T15 T21 partial: 2.9s cold transport and warm cache record real readiness with no ad"
+          ],
+          "assertion": "expect(cold.some(x => x.ad)).toBe(false);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "준비 완료 즉시 READY 및 입력 가능",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T15 T21 partial: 2.9s cold transport and warm cache record real readiness with no ad"
+          ],
+          "assertion": "expect(cold.some(x => x.phase === 'READY')).toBe(true);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "준비 완료 즉시 READY 및 입력 가능",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T15 T21 partial: 2.9s cold transport and warm cache record real readiness with no ad"
+          ],
+          "assertion": "expect(coldReady).toBeLessThan(3000);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "준비 완료 즉시 READY 및 입력 가능",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T15 T21 partial: 2.9s cold transport and warm cache record real readiness with no ad"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('주문번호', { exact: false })).toBeEditable();",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T16": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "3.1초 이후 완료 시 준비 중에만 광고 표시",
+        "완료 즉시 광고 종료"
+      ],
+      "assertions": [
+        {
+          "requirement": "3.1초 이후 완료 시 준비 중에만 광고 표시",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
+          ],
+          "assertion": "expect(samples.some(x => x.ad)).toBe(true);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "3.1초 이후 완료 시 준비 중에만 광고 표시",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
+          ],
+          "assertion": "expect(samples.filter(x => x.ad).every(x => x.phase === 'PREPARING')).toBe(true);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "완료 즉시 광고 종료",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('주문번호', { exact: false })).toBeEditable();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "완료 즉시 광고 종료",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
+          ],
+          "assertion": "await expect(dialog(page).getByRole('complementary', { name: 'FLECTO 후원 광고' })).toHaveCount(0);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T17": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "10초 대기 상한 후 원본 선택 제공",
+        "11초 늦은 결과를 READY/UI로 적용하지 않음"
+      ],
+      "assertions": [
+        {
+          "requirement": "10초 대기 상한 후 원본 선택 제공",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T17: 10s timeout offers original and rejects the 11s late planner response"
+          ],
+          "assertion": "await expect(dialog(page).getByRole('button', { name: '원래 화면에서 계속하기', exact: true })).toBeEnabled();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "10초 대기 상한 후 원본 선택 제공",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T17: 10s timeout offers original and rejects the 11s late planner response"
+          ],
+          "assertion": "expect(elapsed).toBeGreaterThanOrEqual(9900); expect(elapsed).toBeLessThan(10500);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "11초 늦은 결과를 READY/UI로 적용하지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T17: 10s timeout offers original and rejects the 11s late planner response"
+          ],
+          "assertion": "await expect.poll(() => qa.exchanges[0]?.releasedAt).toBeTruthy();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "11초 늦은 결과를 READY/UI로 적용하지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T17: 10s timeout offers original and rejects the 11s late planner response"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'TIMED_OUT');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "11초 늦은 결과를 READY/UI로 적용하지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T17: 10s timeout offers original and rejects the 11s late planner response"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('주문번호', { exact: false })).toHaveCount(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "11초 늦은 결과를 READY/UI로 적용하지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T17: 10s timeout offers original and rejects the 11s late planner response"
+          ],
+          "assertion": "expect(samples.some(x => x.phase === 'READY')).toBe(false);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T18": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
+        "실제 다른 목표 선택과 캡처 경합에서도 다른 탭 캡처 안 됨"
+      ],
+      "assertions": [
+        {
+          "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result"
+          ],
+          "assertion": "expect(next.sessionEpoch).toBeGreaterThan(first.sessionEpoch);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result"
+          ],
+          "assertion": "expect(next.snapshot.requestId).not.toBe(first.snapshot.requestId);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('주문번호', { exact: false })).toHaveValue('FLECTO-2026-009');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T18 T38 partial: changing tabs cancels the old preparation and confines new bindings to the new tab"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'CANCELLED');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T18 T38 partial: changing tabs cancels the old preparation and confines new bindings to the new tab"
+          ],
+          "assertion": "expect(documents[0].documentInstanceId).not.toBe(documents[1].documentInstanceId);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T18 T38 partial: changing tabs cancels the old preparation and confines new bindings to the new tab"
+          ],
+          "assertion": "expect(documents[0].requestId).not.toBe(documents[1].requestId);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T19": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "광고 닫기가 준비 요청과 입력 가능 상태를 방해하지 않음",
+        "광고 자체가 누락·실패한 상태에서도 동일한 준비 기능 유지"
+      ],
+      "assertions": [
+        {
+          "requirement": "광고 닫기가 준비 요청과 입력 가능 상태를 방해하지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T19 partial: dismissing the sponsor preserves the same preparation request"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'PREPARING');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "광고 닫기가 준비 요청과 입력 가능 상태를 방해하지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T19 partial: dismissing the sponsor preserves the same preparation request"
+          ],
+          "assertion": "await expect(dialog(page).getByRole('complementary', { name: 'FLECTO 후원 광고' })).toHaveCount(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "광고 닫기가 준비 요청과 입력 가능 상태를 방해하지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T19 partial: dismissing the sponsor preserves the same preparation request"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('주문번호', { exact: false })).toBeEditable();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "광고 닫기가 준비 요청과 입력 가능 상태를 방해하지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T19 partial: dismissing the sponsor preserves the same preparation request"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(1);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T20": {
+      "kind": "FIXTURE",
+      "coverage": "partial",
+      "requirements": [
+        "입력·쿠키·숨김 sentinel의 extension 저장소 유출 없음",
+        "prompt·planner DB·로그 전체 sentinel 비유출",
+        "광고가 실제 표시되는 동안에도 sentinel 비유출"
+      ],
+      "assertions": [
+        {
+          "requirement": "입력·쿠키·숨김 sentinel의 extension 저장소 유출 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T20 T29 partial: private values and QA tokens never enter planner transport, cache, or service logs"
+          ],
+          "assertion": "for (const sentinel of ['QA_PRIVATE_709134_ORDER', 'QA_EDIT_481731_PRIVATE', 'QA_COOKIE_718341_SECRET', 'QA_HIDDEN_871341_SECRET']) expect(storage).not.toContain(sentinel);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T21": {
+      "kind": "LIVE_CODEX",
+      "coverage": "partial",
+      "requirements": [
+        "cold와 warm 측정·provider/cache 경로 구분",
+        "따뜻한 cache의 최신 선택지 반영"
+      ],
+      "assertions": [
+        {
+          "requirement": "cold와 warm 측정·provider/cache 경로 구분",
+          "run": "live-final",
+          "file": "tests/e2e-live/product.spec.ts",
+          "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
+          "titlePath": [
+            "LIVE benefits: cold original storage and separate warm controlsReady"
+          ],
+          "assertion": "expect((await diagnostics(system)).misses).toBeGreaterThan(0);",
+          "project": "",
+          "instances": 3
+        },
+        {
+          "requirement": "cold와 warm 측정·provider/cache 경로 구분",
+          "run": "live-final",
+          "file": "tests/e2e-live/product.spec.ts",
+          "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
+          "titlePath": [
+            "LIVE benefits: cold original storage and separate warm controlsReady"
+          ],
+          "assertion": "expect(after.providerCalls).toBe(before.providerCalls);",
+          "project": "",
+          "instances": 3
+        },
+        {
+          "requirement": "cold와 warm 측정·provider/cache 경로 구분",
+          "run": "live-final",
+          "file": "tests/e2e-live/product.spec.ts",
+          "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
+          "titlePath": [
+            "LIVE benefits: cold original storage and separate warm controlsReady"
+          ],
+          "assertion": "expect(after.exactHits + after.compatibleHits).toBeGreaterThan(before.exactHits + before.compatibleHits);",
+          "project": "",
+          "instances": 3
+        },
+        {
+          "requirement": "cold와 warm 측정·provider/cache 경로 구분",
+          "run": "live-final",
+          "file": "tests/e2e-live/product.spec.ts",
+          "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
+          "titlePath": [
+            "LIVE benefits: cold original storage and separate warm controlsReady"
+          ],
+          "assertion": "expect(result.count).toBe(1); expect(result.insertionCount).toBe(1);",
+          "project": "",
+          "instances": 3
+        }
+      ],
+      "requestedModel": "gpt-6-luna"
+    },
+    "T22": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "현재 화면의 plan endpoint 차단 후 입력·수정·제출에 추가 계획 요청 없음",
+        "원본 handler를 통한 저장 성공"
+      ],
+      "assertions": [
+        {
+          "requirement": "현재 화면의 plan endpoint 차단 후 입력·수정·제출에 추가 계획 요청 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T22: blocking only the plan endpoint after READY still permits input, correction, and source save"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(requestsAtReady);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 handler를 통한 저장 성공",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T22: blocking only the plan endpoint after READY still permits input, correction, and source save"
+          ],
+          "assertion": "expect(saved.count).toBe(1); expect(saved.insertionCount).toBe(1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 handler를 통한 저장 성공",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T22: blocking only the plan endpoint after READY still permits input, correction, and source save"
+          ],
+          "assertion": "expect(saved.records[0]).toMatchObject({ orderNumber: 'FLECTO-2026-001', consent: true });",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T23": {
+      "kind": "FIXTURE",
+      "coverage": "complete",
+      "requirements": [
+        "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
+        "원본 복귀 후 계속 입력 가능"
+      ],
+      "assertions": [
+        {
+          "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T23: visible unsupported iframe blocks planning and leaves the original usable"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'UNSUPPORTED');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T23: visible unsupported iframe blocks planning and leaves the original usable"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(0); expect(posts).toEqual([]);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T23: visible unsupported iframe blocks planning and leaves the original usable"
+          ],
+          "assertion": "await expect(page.locator(`[data-qa-obstruction=\"${obstruction}\"]`)).toHaveCount(1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T23: visible unsupported captcha blocks planning and leaves the original usable"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'UNSUPPORTED');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T23: visible unsupported captcha blocks planning and leaves the original usable"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(0); expect(posts).toEqual([]);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T23: visible unsupported captcha blocks planning and leaves the original usable"
+          ],
+          "assertion": "await expect(page.locator(`[data-qa-obstruction=\"${obstruction}\"]`)).toHaveCount(1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 복귀 후 계속 입력 가능",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T23: visible unsupported iframe blocks planning and leaves the original usable"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveCount(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 복귀 후 계속 입력 가능",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T23: visible unsupported iframe blocks planning and leaves the original usable"
+          ],
+          "assertion": "await expect(page.locator('body > main input[name=\"orderNumber\"]')).toHaveValue('FLECTO-2026-013');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 복귀 후 계속 입력 가능",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T23: visible unsupported captcha blocks planning and leaves the original usable"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveCount(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "원본 복귀 후 계속 입력 가능",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T23: visible unsupported captcha blocks planning and leaves the original usable"
+          ],
+          "assertion": "await expect(page.locator('body > main input[name=\"orderNumber\"]')).toHaveValue('FLECTO-2026-013');",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T24": {
+      "kind": "FIXTURE",
+      "coverage": "partial",
+      "requirements": [
+        "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
+        "실제 Google Chrome 200% 확대·설정·포커스 사용 가능"
+      ],
+      "assertions": [
+        {
+          "requirement": "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T24 partial: keyboard loop and source return work in a synthetic 200%-equivalent viewport"
+          ],
+          "assertion": "expect(wrapped, 'Tab must return to the first control instead of escaping to source/browser').toBe(true);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T24 partial: keyboard loop and source return work in a synthetic 200%-equivalent viewport"
+          ],
+          "assertion": "expect((await focus()).key).toBe(trace.at(-1)!.key);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T24 partial: keyboard loop and source return work in a synthetic 200%-equivalent viewport"
+          ],
+          "assertion": "expect(widths.scroll).toBeLessThanOrEqual(widths.client + 1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T24 partial: keyboard loop and source return work in a synthetic 200%-equivalent viewport"
+          ],
+          "assertion": "await expect(original).toHaveValue('FLECTO-2026-017');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T24 partial: keyboard loop and source return work in a synthetic 200%-equivalent viewport"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveCount(0);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T25": {
+      "kind": "CACHE",
+      "coverage": "partial",
+      "requirements": [
+        "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
+        "브라우저·프로필 전체 재시작에서도 타인 입력 복원 없음"
+      ],
+      "assertions": [
+        {
+          "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-font', '30');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('주문번호', { exact: false })).toHaveValue('');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
+          ],
+          "assertion": "expect(JSON.parse(latest.response!).mode).toBe('CACHE');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "titlePath": [
+            "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
+          ],
+          "assertion": "expect((await storedState(options, tabId, [privateMarker])).privateMarkerFound).toBe(false);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T26": {
+      "kind": "FIXTURE",
+      "coverage": "partial",
+      "requirements": [
+        "추가 필수 구조·오류에 안전하게 재분석 대응",
+        "디버깅에 노출되지 않은 새 holdout에서 숨은 정답 없이 전체 대응"
+      ],
+      "assertions": [
+        {
+          "requirement": "추가 필수 구조·오류에 안전하게 재분석 대응",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T12 T26 partial: newly required holdout field invalidates the installed extension plan"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'STALE_DOCUMENT');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "추가 필수 구조·오류에 안전하게 재분석 대응",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T12 T26 partial: newly required holdout field invalidates the installed extension plan"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('신청 구분 확인', { exact: false })).toHaveAttribute('aria-invalid', 'true');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "추가 필수 구조·오류에 안전하게 재분석 대응",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T12 T26 partial: newly required holdout field invalidates the installed extension plan"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(2);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T27": {
+      "kind": "FIXTURE",
+      "coverage": "partial",
+      "requirements": [
+        "LOCAL_NEXT/LOCAL_BACK가 로컬 UI action만 발행",
+        "로컬 단계 이동 중 원본 저장 POST 없음",
+        "controller에서 원본 click/submit 호출 자체가 없음을 직접 검증"
+      ],
+      "assertions": [
+        {
+          "requirement": "LOCAL_NEXT/LOCAL_BACK가 로컬 UI action만 발행",
+          "run": "unit-final",
+          "file": "tests/unit/ui-templates.test.ts",
+          "sourceSha256": "e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276",
+          "titlePath": [
+            "grouped form",
+            "next and back send local step actions; next respects canGoNext"
+          ],
+          "assertion": "expect(actions).toEqual([{ kind: 'LOCAL_BACK', fromStep: 's1' }, { kind: 'LOCAL_NEXT', fromStep: 's1' }]);",
+          "instances": 1
+        },
+        {
+          "requirement": "로컬 단계 이동 중 원본 저장 POST 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "expect(posts).toEqual([]);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "로컬 단계 이동 중 원본 저장 POST 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "expect((await benefitsRecords(system)).count).toBe(0);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T28": {
+      "kind": "FIXTURE",
+      "coverage": "complete",
+      "requirements": [
+        "값·중요조건·대상·document 변경 시 기존 review token 무효",
+        "최신 실제 값·조건으로 다시 확인"
+      ],
+      "assertions": [
+        {
+          "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
+          "run": "unit-final",
+          "file": "tests/unit/core.test.ts",
+          "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
+          "titlePath": [
+            "input adapters and review locks",
+            "invalidates review token after value revision change"
+          ],
+          "assertion": "expect((await invokeSource(submit, registry, 'submit', review)).error).toBe('STALE_DOCUMENT'); expect(count).toBe(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
+          "run": "unit-final",
+          "file": "tests/unit/core.test.ts",
+          "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
+          "titlePath": [
+            "input adapters and review locks",
+            "invalidates review token after semantic revision change"
+          ],
+          "assertion": "expect((await invokeSource(submit, registry, 'submit', review)).error).toBe('STALE_DOCUMENT'); expect(count).toBe(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
+          "run": "unit-final",
+          "file": "tests/unit/core.test.ts",
+          "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
+          "titlePath": [
+            "input adapters and review locks",
+            "invalidates review token after option revision change"
+          ],
+          "assertion": "expect((await invokeSource(submit, registry, 'submit', review)).error).toBe('STALE_DOCUMENT'); expect(count).toBe(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
+          "run": "unit-final",
+          "file": "tests/unit/core.test.ts",
+          "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
+          "titlePath": [
+            "input adapters and review locks",
+            "invalidates review token after document revision change"
+          ],
+          "assertion": "expect((await invokeSource(submit, registry, 'submit', review)).error).toBe('STALE_DOCUMENT'); expect(count).toBe(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
+          "run": "unit-final",
+          "file": "tests/unit/core.test.ts",
+          "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
+          "titlePath": [
+            "input adapters and review locks",
+            "invalidates review token after target revision change"
+          ],
+          "assertion": "expect((await invokeSource(submit, registry, 'submit', review)).error).toBe('STALE_DOCUMENT'); expect(count).toBe(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T28: original value changes after review revoke submission until latest values are reviewed"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'CONFLICT');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T28: original value changes after review revoke submission until latest values are reviewed"
+          ],
+          "assertion": "expect(posts).toEqual([]);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "최신 실제 값·조건으로 다시 확인",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T28: original value changes after review revoke submission until latest values are reviewed"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('주문번호', { exact: false })).toHaveValue('FLECTO-2026-002');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "최신 실제 값·조건으로 다시 확인",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T14: changed important notice rejects prior review and generates the new notice"
+          ],
+          "assertion": "await expect(dialog(page)).toContainText(updated);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T29": {
+      "kind": "FIXTURE",
+      "coverage": "partial",
+      "requirements": [
+        "provider/prompt/cache에 QA oracle sentinel 없음",
+        "extension/planner의 QA token·원본 DB·oracle 접근 불가를 실제 권한 경계에서 확인"
+      ],
+      "assertions": [
+        {
+          "requirement": "provider/prompt/cache에 QA oracle sentinel 없음",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "validates coverage and sends only public snapshot to provider/prompt/cache"
+          ],
+          "assertion": "expect(h.plan.mock.calls[0][0]).toEqual(s); expect(h.rows()[0].status).toBe('CANDIDATE');",
+          "instances": 1
+        },
+        {
+          "requirement": "provider/prompt/cache에 QA oracle sentinel 없음",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "validates coverage and sends only public snapshot to provider/prompt/cache"
+          ],
+          "assertion": "for (const sentinel of Object.values(privateSentinels)) { expect(prompt).not.toContain(sentinel); expect(persisted).not.toContain(sentinel); }",
+          "instances": 1
+        }
+      ]
+    },
+    "T30": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "unknown refs·필수/notice 누락·잘못된 schema를 거부",
+        "HTML/JS 실행 금지 및 plain text 렌더",
+        "임의 URL을 포함한 모델 action 출력의 직접 거부 사례"
+      ],
+      "assertions": [
+        {
+          "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "rejects malformed model plan unknownRef before SQLite writes"
+          ],
+          "assertion": "expect(response.statusCode).toBe(422); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "rejects malformed model plan missingRequired before SQLite writes"
+          ],
+          "assertion": "expect(response.statusCode).toBe(422); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "rejects malformed model plan missingNotice before SQLite writes"
+          ],
+          "assertion": "expect(response.statusCode).toBe(422); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "rejects malformed model plan wrongSnapshot before SQLite writes"
+          ],
+          "assertion": "expect(response.statusCode).toBe(422); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "rejects malformed model plan extraCode before SQLite writes"
+          ],
+          "assertion": "expect(response.statusCode).toBe(422); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "rejects malformed model plan wrongForm before SQLite writes"
+          ],
+          "assertion": "expect(response.statusCode).toBe(422); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "rejects malformed model plan duplicate before SQLite writes"
+          ],
+          "assertion": "expect(response.statusCode).toBe(422); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "rejects malformed model plan wrongConsent before SQLite writes"
+          ],
+          "assertion": "expect(response.statusCode).toBe(422); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
+          "run": "unit-final",
+          "file": "tests/unit/contracts.test.ts",
+          "sourceSha256": "6cf24bf99313657ecd203e01b10de0408479c22f36040994bf80e988486a10af",
+          "titlePath": [
+            "strict public contracts",
+            "rejects executable output, unsupported templates and repeated references"
+          ],
+          "assertion": "expect(PagePlanSchema.safeParse({ ...plan, javascript: 'alert(1)' }).success).toBe(false);",
+          "instances": 1
+        },
+        {
+          "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
+          "run": "unit-final",
+          "file": "tests/unit/contracts.test.ts",
+          "sourceSha256": "6cf24bf99313657ecd203e01b10de0408479c22f36040994bf80e988486a10af",
+          "titlePath": [
+            "strict public contracts",
+            "rejects executable output, unsupported templates and repeated references"
+          ],
+          "assertion": "expect(PagePlanSchema.safeParse({ ...plan, steps: [{ ...plan.steps[0], template: 'custom_html' }] }).success).toBe(false);",
+          "instances": 1
+        },
+        {
+          "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
+          "run": "unit-final",
+          "file": "tests/unit/ui-templates.test.ts",
+          "sourceSha256": "e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276",
+          "titlePath": [
+            "FLECTO shell",
+            "renders model text as plain text, never as HTML"
+          ],
+          "assertion": "expect(q(shadow, 'img')).toBeNull();",
+          "instances": 1
+        },
+        {
+          "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
+          "run": "unit-final",
+          "file": "tests/unit/ui-templates.test.ts",
+          "sourceSha256": "e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276",
+          "titlePath": [
+            "FLECTO shell",
+            "renders model text as plain text, never as HTML"
+          ],
+          "assertion": "expect(q(shadow, 'b')).toBeNull();",
+          "instances": 1
+        },
+        {
+          "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
+          "run": "unit-final",
+          "file": "tests/unit/ui-templates.test.ts",
+          "sourceSha256": "e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276",
+          "titlePath": [
+            "FLECTO shell",
+            "renders model text as plain text, never as HTML"
+          ],
+          "assertion": "expect(shadow.textContent).toContain(evil);",
+          "instances": 1
+        }
+      ]
+    },
+    "T31": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "미승인 loopback Host·Origin·token 요청 거부",
+        "위조 sender의 tab·frame·document 요청 거부"
+      ],
+      "assertions": [
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {\"host\":\"evil.example\"} before provider or DB"
+          ],
+          "assertion": "expect([401, 403]).toContain(response.statusCode); expect(response.json()).toEqual({ error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {\"host\":\"evil.example\"} before provider or DB"
+          ],
+          "assertion": "expect(h.plan).not.toHaveBeenCalled(); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {\"host\":\"localhost:4317\"} before provider or DB"
+          ],
+          "assertion": "expect([401, 403]).toContain(response.statusCode); expect(response.json()).toEqual({ error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {\"host\":\"localhost:4317\"} before provider or DB"
+          ],
+          "assertion": "expect(h.plan).not.toHaveBeenCalled(); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {\"origin\":\"https://evil.example\"} before provider or DB"
+          ],
+          "assertion": "expect([401, 403]).toContain(response.statusCode); expect(response.json()).toEqual({ error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {\"origin\":\"https://evil.example\"} before provider or DB"
+          ],
+          "assertion": "expect(h.plan).not.toHaveBeenCalled(); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {\"origin\":\"null\"} before provider or DB"
+          ],
+          "assertion": "expect([401, 403]).toContain(response.statusCode); expect(response.json()).toEqual({ error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {\"origin\":\"null\"} before provider or DB"
+          ],
+          "assertion": "expect(h.plan).not.toHaveBeenCalled(); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {\"authorization\":\"Bearer wrong-token\"} before provider or DB"
+          ],
+          "assertion": "expect([401, 403]).toContain(response.statusCode); expect(response.json()).toEqual({ error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {\"authorization\":\"Bearer wrong-token\"} before provider or DB"
+          ],
+          "assertion": "expect(h.plan).not.toHaveBeenCalled(); expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {} before provider or DB"
+          ],
+          "assertion": "expect([401, 403]).toContain(response.statusCode); expect(response.json()).toEqual({ error: 'AUTH_REQUIRED' });",
+          "instances": 2
+        },
+        {
+          "requirement": "미승인 loopback Host·Origin·token 요청 거부",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
+            "rejects unauthenticated/forged access {} before provider or DB"
+          ],
+          "assertion": "expect(h.plan).not.toHaveBeenCalled(); expect(h.rows()).toHaveLength(0);",
+          "instances": 2
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects foreign extension without planner access"
+          ],
+          "assertion": "expect(reply).toEqual({ ok: false, error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects foreign extension without planner access"
+          ],
+          "assertion": "expect(h.fetcher).not.toHaveBeenCalled();",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects missing tab without planner access"
+          ],
+          "assertion": "expect(reply).toEqual({ ok: false, error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects missing tab without planner access"
+          ],
+          "assertion": "expect(h.fetcher).not.toHaveBeenCalled();",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects subframe without planner access"
+          ],
+          "assertion": "expect(reply).toEqual({ ok: false, error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects subframe without planner access"
+          ],
+          "assertion": "expect(h.fetcher).not.toHaveBeenCalled();",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects missing document without planner access"
+          ],
+          "assertion": "expect(reply).toEqual({ ok: false, error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects missing document without planner access"
+          ],
+          "assertion": "expect(h.fetcher).not.toHaveBeenCalled();",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects opaque origin without planner access"
+          ],
+          "assertion": "expect(reply).toEqual({ ok: false, error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects opaque origin without planner access"
+          ],
+          "assertion": "expect(h.fetcher).not.toHaveBeenCalled();",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects cached document without planner access"
+          ],
+          "assertion": "expect(reply).toEqual({ ok: false, error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects cached document without planner access"
+          ],
+          "assertion": "expect(h.fetcher).not.toHaveBeenCalled();",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects non-HTTP page without planner access"
+          ],
+          "assertion": "expect(reply).toEqual({ ok: false, error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects non-HTTP page without planner access"
+          ],
+          "assertion": "expect(h.fetcher).not.toHaveBeenCalled();",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects cross origin without planner access"
+          ],
+          "assertion": "expect(reply).toEqual({ ok: false, error: 'AUTH_REQUIRED' });",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "rejects cross origin without planner access"
+          ],
+          "assertion": "expect(h.fetcher).not.toHaveBeenCalled();",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "checks actual current frame document rather than trusting sender.tab"
+          ],
+          "assertion": "expect(await h.broker.handle(prepare(), old)).toEqual({ ok: false, error: 'STALE_DOCUMENT' });",
+          "instances": 1
+        },
+        {
+          "requirement": "위조 sender의 tab·frame·document 요청 거부",
+          "run": "unit-final",
+          "file": "tests/unit/background.test.ts",
+          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "titlePath": [
+            "background authorization and storage boundary",
+            "checks actual current frame document rather than trusting sender.tab"
+          ],
+          "assertion": "expect(h.fetcher).not.toHaveBeenCalled();",
+          "instances": 1
+        }
+      ]
+    },
+    "T32": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "FLECTO 렌더·설정·광고·타이머 mutation이 재추론 루프를 만들지 않음"
+      ],
+      "assertions": [
+        {
+          "requirement": "FLECTO 렌더·설정·광고·타이머 mutation이 재추론 루프를 만들지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T32: preparation timer, sponsor, and local settings mutations do not request another plan"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(1);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "FLECTO 렌더·설정·광고·타이머 mutation이 재추론 루프를 만들지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T32: preparation timer, sponsor, and local settings mutations do not request another plan"
+          ],
+          "assertion": "expect(JSON.parse(qa.exchanges[0].request).snapshot.requestId).toBe(firstRequest);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "FLECTO 렌더·설정·광고·타이머 mutation이 재추론 루프를 만들지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T32: preparation timer, sponsor, and local settings mutations do not request another plan"
+          ],
+          "assertion": "expect(qa.exchanges[0].request).not.toContain('QA_ONLY_EXTENSION_MUTATION');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "FLECTO 렌더·설정·광고·타이머 mutation이 재추론 루프를 만들지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T32: preparation timer, sponsor, and local settings mutations do not request another plan"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'READY');",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T33": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "같은 요청의 singleflight 및 중복 provider 호출 방지",
+        "새 epoch의 요청에 예전 결과 적용 안 됨",
+        "실제 서로 다른 목표를 선택하는 경합에서도 새 목표 유지"
+      ],
+      "assertions": [
+        {
+          "requirement": "같은 요청의 singleflight 및 중복 provider 호출 방지",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "shares exact requests once; rejects changed payload/epoch and a different request as BUSY"
+          ],
+          "assertion": "expect(results.map(r => r.statusCode)).toEqual([200, 200]); expect(results[0].json()).toEqual(results[1].json());",
+          "instances": 1
+        },
+        {
+          "requirement": "같은 요청의 singleflight 및 중복 provider 호출 방지",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "shares exact requests once; rejects changed payload/epoch and a different request as BUSY"
+          ],
+          "assertion": "expect(h.plan).toHaveBeenCalledTimes(1); expect(h.rows()).toHaveLength(1);",
+          "instances": 1
+        },
+        {
+          "requirement": "새 epoch의 요청에 예전 결과 적용 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result"
+          ],
+          "assertion": "expect(next.sessionEpoch).toBeGreaterThan(first.sessionEpoch);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "새 epoch의 요청에 예전 결과 적용 안 됨",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('주문번호', { exact: false })).toHaveValue('FLECTO-2026-009');",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T34": {
+      "kind": "FIXTURE",
+      "coverage": "partial",
+      "requirements": [
+        "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
+        "탭·document·가림 실패 시 이미지 전송 안 함",
+        "시각 보완이 원래 요청 기한을 초기화하지 않음",
+        "실제 Chrome 허용 합성 document의 capture→remote model positive 경로"
+      ],
+      "assertions": [
+        {
+          "requirement": "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/vision-capture.spec.ts",
+          "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
+          "titlePath": [
+            "T34 fixture: masked crop hides private red, unknown green and the host; keeps public text"
+          ],
+          "assertion": "expect(out.count!.red, 'private sentinel pixels').toBe(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/vision-capture.spec.ts",
+          "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
+          "titlePath": [
+            "T34 fixture: masked crop hides private red, unknown green and the host; keeps public text"
+          ],
+          "assertion": "expect(out.count!.green, 'unknown non-region pixels').toBe(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/vision-capture.spec.ts",
+          "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
+          "titlePath": [
+            "T34 fixture: masked crop hides private red, unknown green and the host; keeps public text"
+          ],
+          "assertion": "expect(out.count!.magenta, 'FLECTO host pixels').toBe(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/vision-capture.spec.ts",
+          "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
+          "titlePath": [
+            "T34 fixture: masked crop hides private red, unknown green and the host; keeps public text"
+          ],
+          "assertion": "expect(out.count!.blue, 'approved public text').toBeGreaterThan(20);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/vision-capture.spec.ts",
+          "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
+          "titlePath": [
+            "T34 fixture: masked crop hides private red, unknown green and the host; keeps public text"
+          ],
+          "assertion": "expect(out.restored).toEqual(RESTORED);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "탭·document·가림 실패 시 이미지 전송 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/vision-capture.spec.ts",
+          "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
+          "titlePath": [
+            "T34 fixture: active-tab, navigation, document and scroll guards return no image and restore the page"
+          ],
+          "assertion": "expect(out.count, mode).toBeUndefined();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "탭·document·가림 실패 시 이미지 전송 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/vision-capture.spec.ts",
+          "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
+          "titlePath": [
+            "T34 fixture: active-tab, navigation, document and scroll guards return no image and restore the page"
+          ],
+          "assertion": "expect(out.captureError, mode).toBe(error);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "탭·document·가림 실패 시 이미지 전송 안 함",
+          "run": "unit-final",
+          "file": "tests/unit/vision-transport.test.ts",
+          "sourceSha256": "a2ff78bde1f6824a2c4ed139c5d7dff64e7c34231f6d1c58e1d44d324bf27403",
+          "titlePath": [
+            "VISION authenticated separate transport",
+            "rejects an inactive or changed document after capture"
+          ],
+          "assertion": "expect((await h.run()).ok).toBe(false); expect(h.planWithImage).not.toHaveBeenCalled();",
+          "instances": 1
+        },
+        {
+          "requirement": "탭·document·가림 실패 시 이미지 전송 안 함",
+          "run": "unit-final",
+          "file": "tests/integration/vision-controller.test.ts",
+          "sourceSha256": "bd46b25606c7e33a12b156d3d084de7bbc1329270cd6dc5b0dffd6660bc98794",
+          "titlePath": [
+            "a real focus change during capture fails restoration and blocks image upload"
+          ],
+          "assertion": "expect(h.planWithImage).not.toHaveBeenCalled(); expect(h.uploads).toEqual([]);",
+          "instances": 1
+        },
+        {
+          "requirement": "시각 보완이 원래 요청 기한을 초기화하지 않음",
+          "run": "unit-final",
+          "file": "tests/unit/vision-transport.test.ts",
+          "sourceSha256": "a2ff78bde1f6824a2c4ed139c5d7dff64e7c34231f6d1c58e1d44d324bf27403",
+          "titlePath": [
+            "VISION authenticated separate transport",
+            "does not restart the budget after capture"
+          ],
+          "assertion": "expect(await pending).toEqual({ ok: false, error: 'DEADLINE_EXCEEDED' }); expect(h.planWithImage).not.toHaveBeenCalled();",
+          "instances": 1
+        }
+      ]
+    },
+    "T35": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "LIVE provider 실패를 fixture 성공으로 조용히 바꾸지 않음"
+      ],
+      "assertions": [
+        {
+          "requirement": "LIVE provider 실패를 fixture 성공으로 조용히 바꾸지 않음",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "does not fall back to fixture on LIVE provider failure or leak its error"
+          ],
+          "assertion": "expect(result.statusCode).toBe(422); expect(result.json().error).toBe('PROVIDER_ERROR');",
+          "instances": 1
+        },
+        {
+          "requirement": "LIVE provider 실패를 fixture 성공으로 조용히 바꾸지 않음",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "does not fall back to fixture on LIVE provider failure or leak its error"
+          ],
+          "assertion": "expect(result.body).not.toContain(privateSentinels.password); expect(h.rows()).toHaveLength(0); expect(h.plan).toHaveBeenCalledTimes(1);",
+          "instances": 1
+        }
+      ]
+    },
+    "T36": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "READY 시 광고 제거 및 즉시 primary click 차단",
+        "종료된 광고의 실제 좌표에 입력해도 오클릭·제출 없음"
+      ],
+      "assertions": [
+        {
+          "requirement": "READY 시 광고 제거 및 즉시 primary click 차단",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
+          ],
+          "assertion": "expect(samples.filter(x => x.ad).every(x => x.phase === 'PREPARING')).toBe(true);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "READY 시 광고 제거 및 즉시 primary click 차단",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/performance.spec.ts",
+          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "titlePath": [
+            "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
+          ],
+          "assertion": "expect((await benefitsRecords(system)).count).toBe(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "READY 시 광고 제거 및 즉시 primary click 차단",
+          "run": "unit-final",
+          "file": "tests/unit/ui-templates.test.ts",
+          "sourceSha256": "e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276",
+          "titlePath": [
+            "final review",
+            "ignores a primary click that lands right after preparation ends"
+          ],
+          "assertion": "expect(actions).toHaveLength(0);",
+          "instances": 1
+        }
+      ]
+    },
+    "T37": {
+      "kind": "CACHE",
+      "coverage": "partial",
+      "requirements": [
+        "새 로그인 세션의 warm cache에 타인 입력 복원 없음",
+        "현재 선택지·정원 반영",
+        "reset 대상이 합성 namespace에 제한",
+        "실제 DEMO reset과 여러 동시 세션·cache 경합의 종합 확인"
+      ],
+      "assertions": [
+        {
+          "requirement": "새 로그인 세션의 warm cache에 타인 입력 복원 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T21 T37 partial: warm plan plus synthetic reset does not restore a previous login session input"
+          ],
+          "assertion": "await expect(dialog(page).getByLabel('주문번호', { exact: false })).toHaveValue('');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "새 로그인 세션의 warm cache에 타인 입력 복원 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T21 T37 partial: warm plan plus synthetic reset does not restore a previous login session input"
+          ],
+          "assertion": "expect(JSON.parse(qa.exchanges.at(-1)!.response!).mode).toBe('CACHE');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "새 로그인 세션의 warm cache에 타인 입력 복원 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T21 T37 partial: warm plan plus synthetic reset does not restore a previous login session input"
+          ],
+          "assertion": "expect(saved.records[0]).toMatchObject({ orderNumber: 'FLECTO-2026-004' });",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "현재 선택지·정원 반영",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T21 T37 partial: live source capacity refresh removes a closed option from a prepared plan"
+          ],
+          "assertion": "await expect(page.locator('main select[name=\"timeId\"] option[value=\"yoga-tue-thu-1000\"]')).toBeDisabled({ timeout: 25000 });",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "현재 선택지·정원 반영",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/variants.spec.ts",
+          "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
+          "titlePath": [
+            "T21 T37 partial: live source capacity refresh removes a closed option from a prepared plan"
+          ],
+          "assertion": "await expect(dialog(page).getByRole('radio', { name: /10:00/ }).first()).toBeDisabled();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "현재 선택지·정원 반영",
+          "run": "unit-final",
+          "file": "tests/integration/planner-cache-performance.test.ts",
+          "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
+          "titlePath": [
+            "CACHE-PERF-01 real extracted DOM and file SQLite; FIXTURE only",
+            "compatible reuse refreshes option labels/availability/refs while core still rejects mismatch"
+          ],
+          "assertion": "expect(choice.options[1]).toMatchObject({ label: '요가 잔여 0석', disabled: true });",
+          "instances": 1
+        },
+        {
+          "requirement": "현재 선택지·정원 반영",
+          "run": "unit-final",
+          "file": "tests/integration/planner-cache-performance.test.ts",
+          "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
+          "titlePath": [
+            "CACHE-PERF-01 real extracted DOM and file SQLite; FIXTURE only",
+            "compatible reuse refreshes option labels/availability/refs while core still rejects mismatch"
+          ],
+          "assertion": "expect(await h.stats()).toMatchObject({ exactHits: 0, compatibleHits: 1, misses: 1, providerCalls: 1 });",
+          "instances": 1
+        },
+        {
+          "requirement": "reset 대상이 합성 namespace에 제한",
+          "run": "unit-final",
+          "file": "tests/unit/ops-reset.test.ts",
+          "sourceSha256": "221ccf8c5f8fcc51d61aa8a94611ed36c49f2c65fa1c62396e3505d26494b392",
+          "titlePath": [
+            "demo:reset (DEMO01, T37 source side)",
+            "keeps DEMO fixed and confines QA overrides to temp or .flecto/qa paths"
+          ],
+          "assertion": "expect(demo).toMatchObject({ namespace: 'DEMO', ports: { benefits: 4173, culture: 4174 } });",
+          "instances": 1
+        },
+        {
+          "requirement": "reset 대상이 합성 namespace에 제한",
+          "run": "unit-final",
+          "file": "tests/unit/ops-reset.test.ts",
+          "sourceSha256": "221ccf8c5f8fcc51d61aa8a94611ed36c49f2c65fa1c62396e3505d26494b392",
+          "titlePath": [
+            "demo:reset (DEMO01, T37 source side)",
+            "keeps DEMO fixed and confines QA overrides to temp or .flecto/qa paths"
+          ],
+          "assertion": "await expect(resolveResetTarget(REPO_ROOT, { namespace: 'QA', dataDir: temp(), benefitsPort: 4173, culturePort: 5000 })).rejects.toThrow('DEMO ports');",
+          "instances": 1
+        },
+        {
+          "requirement": "reset 대상이 합성 namespace에 제한",
+          "run": "unit-final",
+          "file": "tests/unit/ops-reset.test.ts",
+          "sourceSha256": "221ccf8c5f8fcc51d61aa8a94611ed36c49f2c65fa1c62396e3505d26494b392",
+          "titlePath": [
+            "demo:reset (DEMO01, T37 source side)",
+            "keeps DEMO fixed and confines QA overrides to temp or .flecto/qa paths"
+          ],
+          "assertion": "await expect(resolveResetTarget(REPO_ROOT, { namespace: 'PROD', dataDir: temp(), benefitsPort: 5001, culturePort: 5002 })).rejects.toThrow('DEMO or QA');",
+          "instances": 1
+        }
+      ]
+    },
+    "T38": {
+      "kind": "FIXTURE",
+      "coverage": "partial",
+      "requirements": [
+        "서로 다른 탭·document에 요청·연결이 섞이지 않음",
+        "다른 origin 이동 및 복귀 후 명시적 재활성화",
+        "여러 실제 브라우저 창 사이에서도 같은 격리 유지"
+      ],
+      "assertions": [
+        {
+          "requirement": "서로 다른 탭·document에 요청·연결이 섞이지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T18 T38 partial: changing tabs cancels the old preparation and confines new bindings to the new tab"
+          ],
+          "assertion": "expect(documents[0].documentInstanceId).not.toBe(documents[1].documentInstanceId);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "서로 다른 탭·document에 요청·연결이 섞이지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T18 T38 partial: changing tabs cancels the old preparation and confines new bindings to the new tab"
+          ],
+          "assertion": "expect(documents[0].requestId).not.toBe(documents[1].requestId);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "서로 다른 탭·document에 요청·연결이 섞이지 않음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T18 T38 partial: changing tabs cancels the old preparation and confines new bindings to the new tab"
+          ],
+          "assertion": "await expect(page.locator('body > main input[name=\"orderNumber\"]')).toHaveValue('');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "다른 origin 이동 및 복귀 후 명시적 재활성화",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T38 partial: another local origin revokes activation and returning requires explicit reactivation"
+          ],
+          "assertion": "await expect.poll(() => activeSession(worker, page)).toEqual({ tabFound: true, active: false, origin: null });",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "다른 origin 이동 및 복귀 후 명시적 재활성화",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T38 partial: another local origin revokes activation and returning requires explicit reactivation"
+          ],
+          "assertion": "await expect.poll(() => activeSession(worker, page)).toEqual({ tabFound: true, active: true, origin: cultureOrigin });",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "다른 origin 이동 및 복귀 후 명시적 재활성화",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/regressions.spec.ts",
+          "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
+          "titlePath": [
+            "T38 partial: another local origin revokes activation and returning requires explicit reactivation"
+          ],
+          "assertion": "expect(lastSnapshot.origin).toBe(benefitsOrigin);",
+          "project": "",
+          "instances": 1
+        }
+      ]
+    },
+    "T39": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "complete",
+      "requirements": [
+        "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
+        "이전 모델·prompt artifact의 LIVE 근거 합산 금지"
+      ],
+      "assertions": [
+        {
+          "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "candidate ACK and semantic cache (T21/T37/T39)",
+            "quarantines mismatched payload model even if index metadata is current"
+          ],
+          "assertion": "expect(h.plan).toHaveBeenCalledTimes(2); expect(h.rows().find(r => r.id === cold.blueprintId)?.status).toBe('QUARANTINED');",
+          "instances": 1
+        },
+        {
+          "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "candidate ACK and semantic cache (T21/T37/T39)",
+            "quarantines mismatched payload promptVersion even if index metadata is current"
+          ],
+          "assertion": "expect(h.plan).toHaveBeenCalledTimes(2); expect(h.rows().find(r => r.id === cold.blueprintId)?.status).toBe('QUARANTINED');",
+          "instances": 1
+        },
+        {
+          "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "candidate ACK and semantic cache (T21/T37/T39)",
+            "quarantines mismatched payload cacheVersion even if index metadata is current"
+          ],
+          "assertion": "expect(h.plan).toHaveBeenCalledTimes(2); expect(h.rows().find(r => r.id === cold.blueprintId)?.status).toBe('QUARANTINED');",
+          "instances": 1
+        },
+        {
+          "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "candidate ACK and semantic cache (T21/T37/T39)",
+            "does not mix different indexed model namespaces"
+          ],
+          "assertion": "expect((await h.post(snapshot('next'))).json().mode).toBe('FIXTURE'); expect(h.plan).toHaveBeenCalledTimes(2);",
+          "instances": 1
+        },
+        {
+          "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "titlePath": [
+            "candidate ACK and semantic cache (T21/T37/T39)",
+            "does not mix different indexed version namespaces"
+          ],
+          "assertion": "expect((await h.post(snapshot('next'))).json().mode).toBe('FIXTURE'); expect(h.plan).toHaveBeenCalledTimes(2);",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 모델·prompt artifact의 LIVE 근거 합산 금지",
+          "run": "unit-final",
+          "file": "tests/unit/ops-qa-report.test.ts",
+          "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
+          "titlePath": [
+            "QA report evidence emitter",
+            "does not claim cold LIVE from wrong-model attachments"
+          ],
+          "assertion": "expect(result.report.live.benefits.cold).toBe(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 모델·prompt artifact의 LIVE 근거 합산 금지",
+          "run": "unit-final",
+          "file": "tests/unit/ops-qa-report.test.ts",
+          "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
+          "titlePath": [
+            "QA report evidence emitter",
+            "does not claim cold LIVE from wrong-model attachments"
+          ],
+          "assertion": "expect(result.report.results.T01?.status).toBe(mutation === 'warm-cache' ? 'PASS' : 'NOT_RUN');",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 모델·prompt artifact의 LIVE 근거 합산 금지",
+          "run": "unit-final",
+          "file": "tests/unit/ops-qa-report.test.ts",
+          "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
+          "titlePath": [
+            "QA report evidence emitter",
+            "does not claim cold LIVE from wrong-runtime attachments"
+          ],
+          "assertion": "expect(result.report.live.benefits.cold).toBe(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 모델·prompt artifact의 LIVE 근거 합산 금지",
+          "run": "unit-final",
+          "file": "tests/unit/ops-qa-report.test.ts",
+          "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
+          "titlePath": [
+            "QA report evidence emitter",
+            "does not claim cold LIVE from wrong-runtime attachments"
+          ],
+          "assertion": "expect(result.report.results.T01?.status).toBe(mutation === 'warm-cache' ? 'PASS' : 'NOT_RUN');",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 모델·prompt artifact의 LIVE 근거 합산 금지",
+          "run": "unit-final",
+          "file": "tests/unit/ops-qa-report.test.ts",
+          "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
+          "titlePath": [
+            "QA report evidence emitter",
+            "refuses old receipts after a runtime rebuild instead of relabeling old reports"
+          ],
+          "assertion": "await expect(emitEvidence(root, [path], mapping())).rejects.toThrow('cannot be rebound');",
+          "instances": 1
+        },
+        {
+          "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
+          "run": "unit-final",
+          "file": "tests/integration/planner-cache-performance.test.ts",
+          "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
+          "titlePath": [
+            "CACHE-PERF-01 real extracted DOM and file SQLite; FIXTURE only",
+            "refuses changed model on the compatible path"
+          ],
+          "assertion": "expect((await h.post(page(true).snapshot)).json().mode).toBe('FIXTURE'); expect(h.plan).toHaveBeenCalledTimes(2);",
+          "instances": 1
+        },
+        {
+          "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
+          "run": "unit-final",
+          "file": "tests/integration/planner-cache-performance.test.ts",
+          "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
+          "titlePath": [
+            "CACHE-PERF-01 real extracted DOM and file SQLite; FIXTURE only",
+            "refuses changed promptVersion on the compatible path"
+          ],
+          "assertion": "expect((await h.post(page(true).snapshot)).json().mode).toBe('FIXTURE'); expect(h.plan).toHaveBeenCalledTimes(2);",
+          "instances": 1
+        },
+        {
+          "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
+          "run": "unit-final",
+          "file": "tests/integration/planner-cache-performance.test.ts",
+          "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
+          "titlePath": [
+            "CACHE-PERF-01 real extracted DOM and file SQLite; FIXTURE only",
+            "refuses changed cacheVersion on the compatible path"
+          ],
+          "assertion": "expect((await h.post(page(true).snapshot)).json().mode).toBe('FIXTURE'); expect(h.plan).toHaveBeenCalledTimes(2);",
+          "instances": 1
+        },
+        {
+          "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
+          "run": "unit-final",
+          "file": "tests/integration/planner-cache-performance.test.ts",
+          "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
+          "titlePath": [
+            "CACHE-PERF-01 real extracted DOM and file SQLite; FIXTURE only",
+            "refuses changed compatibleVersion on the compatible path"
+          ],
+          "assertion": "expect((await h.post(page(true).snapshot)).json().mode).toBe('FIXTURE'); expect(h.plan).toHaveBeenCalledTimes(2);",
+          "instances": 1
+        }
+      ]
+    },
+    "T40": {
+      "kind": "FIXTURE",
+      "coverage": "partial",
+      "requirements": [
+        "로그인/password·OTP 등장 시 분석 중단·추가 계획 없음",
+        "비밀번호 getter를 읽지 않음",
+        "실제 인증 만료 전후 모델·로그·표시 중 광고·capture의 종합 비유출"
+      ],
+      "assertions": [
+        {
+          "requirement": "로그인/password·OTP 등장 시 분석 중단·추가 계획 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T40 partial: visible login/password and later OTP pause extraction without planning"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'AUTH_REQUIRED');",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "로그인/password·OTP 등장 시 분석 중단·추가 계획 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T40 partial: visible login/password and later OTP pause extraction without planning"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "로그인/password·OTP 등장 시 분석 중단·추가 계획 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "titlePath": [
+            "T40 partial: visible login/password and later OTP pause extraction without planning"
+          ],
+          "assertion": "expect(qa.exchanges.length).toBe(requestsAtReady);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "비밀번호 getter를 읽지 않음",
+          "run": "unit-final",
+          "file": "tests/integration/controller-observation.test.ts",
+          "sourceSha256": "3a4c1523f40312b8808c16de0e1a01e4b9a19ec7f188f1a61925ed052ed21bc8",
+          "titlePath": [
+            "source input event catches AUTH_REQUIRED and halts polling without touching the password"
+          ],
+          "assertion": "expect(read).not.toHaveBeenCalled();",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER01": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "실제 demo launcher 중복 run lock 획득 거부",
+        "SESSION_LOOP 작업 소유권도 두 번째 실행에 부여하지 않음"
+      ],
+      "assertions": [
+        {
+          "requirement": "실제 demo launcher 중복 run lock 획득 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "demo launcher run lock (OPER01 against the real launcher)",
+            "refuses a second system process on the same data dir while the first keeps serving"
+          ],
+          "assertion": "expect(second.code).toBe(3);",
+          "instances": 1
+        },
+        {
+          "requirement": "실제 demo launcher 중복 run lock 획득 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "demo launcher run lock (OPER01 against the real launcher)",
+            "refuses a second system process on the same data dir while the first keeps serving"
+          ],
+          "assertion": "expect(second.err).toContain('already running');",
+          "instances": 1
+        },
+        {
+          "requirement": "실제 demo launcher 중복 run lock 획득 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "demo launcher run lock (OPER01 against the real launcher)",
+            "refuses a second system process on the same data dir while the first keeps serving"
+          ],
+          "assertion": "expect(records.status).toBe(200);",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER02": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "기한 도달 시 자기 child·grandchild만 종료",
+        "codeStop에서 신규 코딩 차단 및 작업 보존 후 종료"
+      ],
+      "assertions": [
+        {
+          "requirement": "기한 도달 시 자기 child·grandchild만 종료",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "bounded runner (OPER02/OPER06/OPER08 process behaviour)",
+            "stops its own child and grandchild at the deadline and leaves unrelated processes alone"
+          ],
+          "assertion": "expect(result.timedOut).toBe(true);",
+          "instances": 1
+        },
+        {
+          "requirement": "기한 도달 시 자기 child·grandchild만 종료",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "bounded runner (OPER02/OPER06/OPER08 process behaviour)",
+            "stops its own child and grandchild at the deadline and leaves unrelated processes alone"
+          ],
+          "assertion": "expect(await waitDead(grandchild)).toBe(true);",
+          "instances": 1
+        },
+        {
+          "requirement": "기한 도달 시 자기 child·grandchild만 종료",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "bounded runner (OPER02/OPER06/OPER08 process behaviour)",
+            "stops its own child and grandchild at the deadline and leaves unrelated processes alone"
+          ],
+          "assertion": "expect(alive(bystander.pid!)).toBe(true);",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER03": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "보조 검증: 변경된 입력으로 기존 manifest 덮어쓰기 거부",
+        "실제 supervisor crash 후 ledger·파일 대조 및 정상본 보존"
+      ],
+      "assertions": [
+        {
+          "requirement": "보조 검증: 변경된 입력으로 기존 manifest 덮어쓰기 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-runtime-hash.test.ts",
+          "sourceSha256": "0f26148f624c21ea32294e9c800dd7106cc8b430ad85969cc2d9e71bdd588690",
+          "titlePath": [
+            "runtime content identity",
+            "will not stamp changed build inputs or silently refresh an existing manifest"
+          ],
+          "assertion": "await expect(writeRuntimeManifest(root, before)).rejects.toThrow('changed during build');",
+          "instances": 1
+        },
+        {
+          "requirement": "보조 검증: 변경된 입력으로 기존 manifest 덮어쓰기 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-runtime-hash.test.ts",
+          "sourceSha256": "0f26148f624c21ea32294e9c800dd7106cc8b430ad85969cc2d9e71bdd588690",
+          "titlePath": [
+            "runtime content identity",
+            "will not stamp changed build inputs or silently refresh an existing manifest"
+          ],
+          "assertion": "expect(await readFile(join(root, 'dist/runtime-hashes.json'), 'utf8')).toBe(saved);",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER04": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "lease 검증 함수가 이전 generation handoff 거부",
+        "실제 worker late handoff 격리 및 통합 차단"
+      ],
+      "assertions": [
+        {
+          "requirement": "lease 검증 함수가 이전 generation handoff 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-guards.test.ts",
+          "sourceSha256": "3355accfd9a75150872f5be2a8f28696502789c813892857122f52e389f2ac45",
+          "titlePath": [
+            "lease generations (OPER04 input)",
+            "quarantines late handoffs from an older generation, another owner or an expired lease"
+          ],
+          "assertion": "expect([g1.generation, g2.generation]).toEqual([1, 2]);",
+          "instances": 1
+        },
+        {
+          "requirement": "lease 검증 함수가 이전 generation handoff 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-guards.test.ts",
+          "sourceSha256": "3355accfd9a75150872f5be2a8f28696502789c813892857122f52e389f2ac45",
+          "titlePath": [
+            "lease generations (OPER04 input)",
+            "quarantines late handoffs from an older generation, another owner or an expired lease"
+          ],
+          "assertion": "expect(await checkHandoff(dir, { task: 'OPS-01', generation: 1, owner: 'worker-a' }, now)).toEqual({ ok: false, reason: 'stale generation 1 (current 2)' });",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER05": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "같은 patch-id의 중복 ledger 기록 방지",
+        "실제 통합 실행에서 재도착 patch 두 번 적용 안 함"
+      ],
+      "assertions": [
+        {
+          "requirement": "같은 patch-id의 중복 ledger 기록 방지",
+          "run": "unit-final",
+          "file": "tests/unit/ops-guards.test.ts",
+          "sourceSha256": "3355accfd9a75150872f5be2a8f28696502789c813892857122f52e389f2ac45",
+          "titlePath": [
+            "patch guards (OPER09/OPER10/OPER05 inputs)",
+            "identifies the same patch re-delivered on another base and records it only once, even concurrently"
+          ],
+          "assertion": "expect(id1).toMatch(/^[0-9a-f]{40}$/); expect(id2).toBe(id1);",
+          "instances": 1
+        },
+        {
+          "requirement": "같은 patch-id의 중복 ledger 기록 방지",
+          "run": "unit-final",
+          "file": "tests/unit/ops-guards.test.ts",
+          "sourceSha256": "3355accfd9a75150872f5be2a8f28696502789c813892857122f52e389f2ac45",
+          "titlePath": [
+            "patch guards (OPER09/OPER10/OPER05 inputs)",
+            "identifies the same patch re-delivered on another base and records it only once, even concurrently"
+          ],
+          "assertion": "expect(results.sort()).toEqual(['duplicate', 'recorded']);",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER06": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "bounded runner가 무한 대기 없이 자기 작업 종료",
+        "진전 없는 실제 worker 감지·제한 진단·종료"
+      ],
+      "assertions": [
+        {
+          "requirement": "bounded runner가 무한 대기 없이 자기 작업 종료",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "bounded runner (OPER02/OPER06/OPER08 process behaviour)",
+            "stops its own child and grandchild at the deadline and leaves unrelated processes alone"
+          ],
+          "assertion": "expect(result.timedOut).toBe(true);",
+          "instances": 1
+        },
+        {
+          "requirement": "bounded runner가 무한 대기 없이 자기 작업 종료",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "bounded runner (OPER02/OPER06/OPER08 process behaviour)",
+            "stops its own child and grandchild at the deadline and leaves unrelated processes alone"
+          ],
+          "assertion": "expect(await waitDead(grandchild)).toBe(true);",
+          "instances": 1
+        },
+        {
+          "requirement": "bounded runner가 무한 대기 없이 자기 작업 종료",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "bounded runner (OPER02/OPER06/OPER08 process behaviour)",
+            "stops its own child and grandchild at the deadline and leaves unrelated processes alone"
+          ],
+          "assertion": "expect(result.durationMs).toBeLessThan(6000);",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER07": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "보조 검증: 연결 UI auth·server 실패 구분",
+        "실제 rate/auth/quota 주입에서 backoff·승인차단 구분 및 자동결제 없음"
+      ],
+      "assertions": [
+        {
+          "requirement": "보조 검증: 연결 UI auth·server 실패 구분",
+          "run": "unit-final",
+          "file": "tests/unit/options.test.ts",
+          "sourceSha256": "36ebc38bf97d33860ed1304815c6d4c1eb1e5c4a1e291d7168a733cf66d6bec6",
+          "titlePath": [
+            "options connect request",
+            "maps auth, server, offline, malformed and timeout failures"
+          ],
+          "assertion": "expect(await requestConnect('http://127.0.0.1:4317', TOKEN, reply(401))).toEqual({ ok: false, error: 'auth' });",
+          "instances": 1
+        },
+        {
+          "requirement": "보조 검증: 연결 UI auth·server 실패 구분",
+          "run": "unit-final",
+          "file": "tests/unit/options.test.ts",
+          "sourceSha256": "36ebc38bf97d33860ed1304815c6d4c1eb1e5c4a1e291d7168a733cf66d6bec6",
+          "titlePath": [
+            "options connect request",
+            "maps auth, server, offline, malformed and timeout failures"
+          ],
+          "assertion": "expect(await requestConnect('http://127.0.0.1:4317', TOKEN, reply(500))).toEqual({ ok: false, error: 'server' });",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER08": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "기한 종료 시 타인 프로세스 생존",
+        "PID 재사용·타인 포트 소유확인 실패 시 비종료"
+      ],
+      "assertions": [
+        {
+          "requirement": "기한 종료 시 타인 프로세스 생존",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "bounded runner (OPER02/OPER06/OPER08 process behaviour)",
+            "stops its own child and grandchild at the deadline and leaves unrelated processes alone"
+          ],
+          "assertion": "expect(alive(bystander.pid!)).toBe(true);",
+          "instances": 1
+        },
+        {
+          "requirement": "기한 종료 시 타인 프로세스 생존",
+          "run": "unit-final",
+          "file": "tests/unit/ops-doctor.test.ts",
+          "sourceSha256": "31fc529f9f73c2a05f97f8e334290bc507f1a4f061fcbcfb1b6af2f71ddd745a",
+          "titlePath": [
+            "doctor (read-only environment check)",
+            "reports missing deps/build, broad secret-file permissions and foreign port owners as FAIL"
+          ],
+          "assertion": "expect(level('port.planner')).toBe('FAIL');",
+          "instances": 1
+        },
+        {
+          "requirement": "기한 종료 시 타인 프로세스 생존",
+          "run": "unit-final",
+          "file": "tests/unit/ops-doctor.test.ts",
+          "sourceSha256": "31fc529f9f73c2a05f97f8e334290bc507f1a4f061fcbcfb1b6af2f71ddd745a",
+          "titlePath": [
+            "doctor (read-only environment check)",
+            "reports missing deps/build, broad secret-file permissions and foreign port owners as FAIL"
+          ],
+          "assertion": "expect(await portInUse(foreign)).toBe(true);",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER09": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "보호·scope·삭제된 테스트 위반 검출",
+        "실제 handoff 거부 후 요구사항·gate 바이트 보존"
+      ],
+      "assertions": [
+        {
+          "requirement": "보호·scope·삭제된 테스트 위반 검출",
+          "run": "unit-final",
+          "file": "tests/unit/ops-guards.test.ts",
+          "sourceSha256": "3355accfd9a75150872f5be2a8f28696502789c813892857122f52e389f2ac45",
+          "titlePath": [
+            "patch guards (OPER09/OPER10/OPER05 inputs)",
+            "rejects protected paths, out-of-scope paths and removed tests from a real diff"
+          ],
+          "assertion": "expect(violations).toEqual(expect.arrayContaining([\n      { path: 'package.json', reason: 'protected path' }, { path: 'spec/00.md', reason: 'protected path' },\n      { path: 'apps/x.ts', reason: 'outside lease scope' }, { path: 'tests/unit/core.test.ts', reason: 'test file removed' },\n    ]));",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER10": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
+        "실제 운영 run의 고장 보고서 주입에서 전체 PASS 차단"
+      ],
+      "assertions": [
+        {
+          "requirement": "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-qa-report.test.ts",
+          "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
+          "titlePath": [
+            "QA report evidence emitter",
+            "emits every acceptance ID as NOT_RUN without a reviewed mapping despite passing T01 titles"
+          ],
+          "assertion": "expect(result.grade.counts.NOT_RUN).toBe(55); expect(result.grade.grade).toBe('UNVERIFIED');",
+          "instances": 1
+        },
+        {
+          "requirement": "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-evidence.test.ts",
+          "sourceSha256": "90977a769f588e11d20b9d48ecc3d84cb3d2f6efb5288aa57695f53bf8eb2a0d",
+          "titlePath": [
+            "evidence grading (OPER10/OPER11/OPER14 input rules)",
+            "rejects a report with a missing required ID instead of counting it"
+          ],
+          "assertion": "expect(g.valid).toBe(false); expect(g.grade).toBe('UNVERIFIED');",
+          "instances": 1
+        },
+        {
+          "requirement": "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-evidence.test.ts",
+          "sourceSha256": "90977a769f588e11d20b9d48ecc3d84cb3d2f6efb5288aa57695f53bf8eb2a0d",
+          "titlePath": [
+            "evidence grading (OPER10/OPER11/OPER14 input rules)",
+            "does not aggregate SKIP, FLAKY or retried PASS as PASS"
+          ],
+          "assertion": "expect(g.grade).toBe('UNVERIFIED');",
+          "instances": 1
+        },
+        {
+          "requirement": "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-evidence.test.ts",
+          "sourceSha256": "90977a769f588e11d20b9d48ecc3d84cb3d2f6efb5288aa57695f53bf8eb2a0d",
+          "titlePath": [
+            "evidence grading (OPER10/OPER11/OPER14 input rules)",
+            "does not aggregate SKIP, FLAKY or retried PASS as PASS"
+          ],
+          "assertion": "expect(g.reasons.join(' ')).toContain('SKIP/FLAKY');",
+          "instances": 1
+        },
+        {
+          "requirement": "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-qa-report.test.ts",
+          "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
+          "titlePath": [
+            "QA report evidence emitter",
+            "refuses stale source/gate reviews and tampered report bytes"
+          ],
+          "assertion": "await expect(emitEvidence(root, [path])).rejects.toThrow('report bytes changed');",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER11": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "다른 artifact·runtime 근거를 release/emitter가 거부",
+        "실제 릴리스 후보에 다른 artifact LIVE 근거 주입 차단"
+      ],
+      "assertions": [
+        {
+          "requirement": "다른 artifact·runtime 근거를 release/emitter가 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-release.test.ts",
+          "sourceSha256": "63573b51cc05d2465f340df057fa70bd936298d4af0bfadb86fc192777b1bf76",
+          "titlePath": [
+            "release:pack (REL01)",
+            "grades from bound evidence, lowers over-claims, and rejects evidence from another artifact (OPER11)"
+          ],
+          "assertion": "expect((other.manifest.grade as { product: string }).product).toBe('UNVERIFIED');",
+          "instances": 1
+        },
+        {
+          "requirement": "다른 artifact·runtime 근거를 release/emitter가 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-qa-report.test.ts",
+          "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
+          "titlePath": [
+            "QA report evidence emitter",
+            "refuses old receipts after a runtime rebuild instead of relabeling old reports"
+          ],
+          "assertion": "await expect(emitEvidence(root, [path], mapping())).rejects.toThrow('cannot be rebound');",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER12": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "근거 부족·실패에서 정직한 제한등급 산출",
+        "실제 마감 시 gate 실패를 주입하고 안전 정상본/제한등급으로 종료"
+      ],
+      "assertions": [
+        {
+          "requirement": "근거 부족·실패에서 정직한 제한등급 산출",
+          "run": "unit-final",
+          "file": "tests/unit/ops-qa-report.test.ts",
+          "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
+          "titlePath": [
+            "QA report evidence emitter",
+            "keeps nonzero process exits even when an individual assertion passes"
+          ],
+          "assertion": "expect(result.report.run.exitCode).toBe(1); expect(result.grade.grade).toBe('UNVERIFIED');",
+          "instances": 1
+        },
+        {
+          "requirement": "근거 부족·실패에서 정직한 제한등급 산출",
+          "run": "unit-final",
+          "file": "tests/unit/ops-release.test.ts",
+          "sourceSha256": "63573b51cc05d2465f340df057fa70bd936298d4af0bfadb86fc192777b1bf76",
+          "titlePath": [
+            "release:pack (REL01)",
+            "grades from bound evidence, lowers over-claims, and rejects evidence from another artifact (OPER11)"
+          ],
+          "assertion": "expect(grade.product).toBe('FIXTURE_ONLY'); expect(grade.claimed).toBe('FULL_LIVE');",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER13": {
+      "kind": "FIXTURE",
+      "coverage": "partial",
+      "requirements": [
+        "보조 검증: optional vision 없이 기본 task 사용 가능",
+        "생성 이미지 실패가 핵심 개발을 막지 않고 asset cutoff 이후 late asset 미반영"
+      ],
+      "assertions": [
+        {
+          "requirement": "보조 검증: optional vision 없이 기본 task 사용 가능",
+          "run": "unit-final",
+          "file": "tests/integration/vision-controller.test.ts",
+          "sourceSha256": "bd46b25606c7e33a12b156d3d084de7bbc1329270cd6dc5b0dffd6660bc98794",
+          "titlePath": [
+            "a fixture provider without image capability hides layout assistance and keeps normal tasks usable"
+          ],
+          "assertion": "await vi.waitFor(() => expect(h.plan).toHaveBeenCalledOnce());",
+          "instances": 1
+        },
+        {
+          "requirement": "보조 검증: optional vision 없이 기본 task 사용 가능",
+          "run": "unit-final",
+          "file": "tests/integration/vision-controller.test.ts",
+          "sourceSha256": "bd46b25606c7e33a12b156d3d084de7bbc1329270cd6dc5b0dffd6660bc98794",
+          "titlePath": [
+            "a fixture provider without image capability hides layout assistance and keeps normal tasks usable"
+          ],
+          "assertion": "expect(h.planWithImage).not.toHaveBeenCalled(); expect(h.api.tabs.captureVisibleTab).not.toHaveBeenCalled();",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER14": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "REVOKED build를 release packer가 거부",
+        "실제 과거 정상본 안전 결함 발견→철회→후보 제외 전체 과정"
+      ],
+      "assertions": [
+        {
+          "requirement": "REVOKED build를 release packer가 거부",
+          "run": "unit-final",
+          "file": "tests/unit/ops-release.test.ts",
+          "sourceSha256": "63573b51cc05d2465f340df057fa70bd936298d4af0bfadb86fc192777b1bf76",
+          "titlePath": [
+            "release:pack (REL01)",
+            "refuses a REVOKED build (OPER14)"
+          ],
+          "assertion": "expect(error.message).toContain('REVOKED');",
+          "instances": 1
+        }
+      ]
+    },
+    "OPER15": {
+      "kind": "FAULT_INJECTION",
+      "coverage": "partial",
+      "requirements": [
+        "보조 검증: 실제 종료 코드 보존·남은 child 회수",
+        "STOP·정상 종료는 재시작 안 함; crash만 제한 재개"
+      ],
+      "assertions": [
+        {
+          "requirement": "보조 검증: 실제 종료 코드 보존·남은 child 회수",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "bounded runner (OPER02/OPER06/OPER08 process behaviour)",
+            "returns the real exit code and reaps descendants left behind by a finished command"
+          ],
+          "assertion": "expect(result.timedOut).toBe(false);",
+          "instances": 1
+        },
+        {
+          "requirement": "보조 검증: 실제 종료 코드 보존·남은 child 회수",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "bounded runner (OPER02/OPER06/OPER08 process behaviour)",
+            "returns the real exit code and reaps descendants left behind by a finished command"
+          ],
+          "assertion": "expect(result.code).toBe(7);",
+          "instances": 1
+        },
+        {
+          "requirement": "보조 검증: 실제 종료 코드 보존·남은 child 회수",
+          "run": "unit-final",
+          "file": "tests/unit/ops-process.test.ts",
+          "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
+          "titlePath": [
+            "bounded runner (OPER02/OPER06/OPER08 process behaviour)",
+            "returns the real exit code and reaps descendants left behind by a finished command"
+          ],
+          "assertion": "expect(await waitDead(Number(/GRANDCHILD (\\d+)/.exec(result.stdoutTail)?.[1]))).toBe(true);",
+          "instances": 1
+        }
+      ]
+    }
+  }
+}
