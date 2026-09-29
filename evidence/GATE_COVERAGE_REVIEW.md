@@ -168,3 +168,9 @@ Mapping byte SHA-256 at static validation: `ad01177471d536095fadd370d97cee39edec
 | `tests/unit/options.test.ts` | `36ebc38bf97d33860ed1304815c6d4c1eb1e5c4a1e291d7168a733cf66d6bec6` |
 | `tests/unit/ui-templates.test.ts` | `e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276` |
 | `tests/unit/vision-transport.test.ts` | `a2ff78bde1f6824a2c4ed139c5d7dff64e7c34231f6d1c58e1d44d324bf27403` |
+
+## Lead supplemental review — 2026-09-29 14:58 KST
+
+Commit `1586195` adds direct source submit-button click and form-submit counters across local next/back, and two explicit external-URL malicious-output cases requiring SCHEMA_INVALID, no cache and no fetch. Existing assertions remain unchanged. These close the specific T27/T30 assertion gaps above: the current mapping is **25 complete / 30 partial**, still not execution PASS. The additive focused-Korean-draft regression changed the UI test file hash; existing mapped snippets were rechecked unchanged before refreshing hashes. Final receipts determine execution results.
+
+Native Korean composition after the focused-draft fix and Chrome's actual 200% zoom, focus wrap and source return were observed in `run-FamJXD`, with unchanged build and zero original saved records. The earlier split-syllable failure is retained in `run-OjY2Fj`. These remain separate manual evidence rather than automatic FULL promotion.

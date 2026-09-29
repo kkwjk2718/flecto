@@ -119,7 +119,7 @@
           "requirement": "필수 항목을 비우면 제출 안 됨",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -131,7 +131,7 @@
           "requirement": "필수 항목을 비우면 제출 안 됨",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -143,7 +143,7 @@
           "requirement": "해당 필드의 원본 검증 오류 안내",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -155,7 +155,7 @@
           "requirement": "해당 필드의 원본 검증 오류 안내",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -167,7 +167,7 @@
           "requirement": "해당 필드의 원본 검증 오류 안내",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -179,7 +179,7 @@
           "requirement": "해당 필드의 원본 검증 오류 안내",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -317,7 +317,7 @@
           "requirement": "사용자 선택 전 동의 체크박스 변경 안 됨",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -329,7 +329,7 @@
           "requirement": "사용자 선택 전 동의 체크박스 변경 안 됨",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -341,7 +341,7 @@
           "requirement": "사용자 선택 전 동의 체크박스 변경 안 됨",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -353,7 +353,7 @@
           "requirement": "명시적 사용자 클릭만 원본 동의에 반영",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -432,7 +432,7 @@
           "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T08: source rejection never becomes success or an automatic resubmission"
           ],
@@ -444,7 +444,7 @@
           "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T08: source rejection never becomes success or an automatic resubmission"
           ],
@@ -456,7 +456,7 @@
           "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T08: source rejection never becomes success or an automatic resubmission"
           ],
@@ -468,7 +468,7 @@
           "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T08: source rejection never becomes success or an automatic resubmission"
           ],
@@ -480,7 +480,7 @@
           "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T08 partial: response lost after commit creates one record and never auto-replays"
           ],
@@ -492,7 +492,7 @@
           "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T08 partial: response lost after commit creates one record and never auto-replays"
           ],
@@ -504,7 +504,7 @@
           "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T08 partial: response lost after commit creates one record and never auto-replays"
           ],
@@ -516,7 +516,7 @@
           "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T08 partial: response lost after commit creates one record and never auto-replays"
           ],
@@ -947,7 +947,7 @@
           "requirement": "동의·중요 원문 변경으로 기존 계획·notice cache 무효화",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "candidate ACK and semantic cache (T21/T37/T39)",
             "does not reuse a changed notice structure"
@@ -1332,7 +1332,7 @@
           "requirement": "입력·쿠키·숨김 sentinel의 extension 저장소 유출 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T20 T29 partial: private values and QA tokens never enter planner transport, cache, or service logs"
           ],
@@ -1413,7 +1413,7 @@
           "requirement": "현재 화면의 plan endpoint 차단 후 입력·수정·제출에 추가 계획 요청 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T22: blocking only the plan endpoint after READY still permits input, correction, and source save"
           ],
@@ -1425,7 +1425,7 @@
           "requirement": "원본 handler를 통한 저장 성공",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T22: blocking only the plan endpoint after READY still permits input, correction, and source save"
           ],
@@ -1437,7 +1437,7 @@
           "requirement": "원본 handler를 통한 저장 성공",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T22: blocking only the plan endpoint after READY still permits input, correction, and source save"
           ],
@@ -1753,7 +1753,7 @@
     },
     "T27": {
       "kind": "FIXTURE",
-      "coverage": "partial",
+      "coverage": "complete",
       "requirements": [
         "LOCAL_NEXT/LOCAL_BACK가 로컬 UI action만 발행",
         "로컬 단계 이동 중 원본 저장 POST 없음",
@@ -1764,7 +1764,7 @@
           "requirement": "LOCAL_NEXT/LOCAL_BACK가 로컬 UI action만 발행",
           "run": "unit-final",
           "file": "tests/unit/ui-templates.test.ts",
-          "sourceSha256": "e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276",
+          "sourceSha256": "68e6ce7a9d498d5fc28ba9eea310257a10423d575d611a4e72f3cf491dc5a17d",
           "titlePath": [
             "grouped form",
             "next and back send local step actions; next respects canGoNext"
@@ -1776,7 +1776,7 @@
           "requirement": "로컬 단계 이동 중 원본 저장 POST 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
@@ -1788,11 +1788,23 @@
           "requirement": "로컬 단계 이동 중 원본 저장 POST 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
           ],
           "assertion": "expect((await benefitsRecords(system)).count).toBe(0);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "controller에서 원본 click/submit 호출 자체가 없음을 직접 검증",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/safety.spec.ts",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
+          "titlePath": [
+            "T03 T06 T27: required errors, explicit consent, and local-next never submit the source"
+          ],
+          "assertion": "expect(await sourceEvents.jsonValue()).toEqual({ buttonClicks: 0, formSubmits: 0 });",
           "project": "",
           "instances": 1
         }
@@ -1928,7 +1940,7 @@
           "requirement": "provider/prompt/cache에 QA oracle sentinel 없음",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "validates coverage and sends only public snapshot to provider/prompt/cache"
@@ -1940,7 +1952,7 @@
           "requirement": "provider/prompt/cache에 QA oracle sentinel 없음",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "validates coverage and sends only public snapshot to provider/prompt/cache"
@@ -1952,7 +1964,7 @@
     },
     "T30": {
       "kind": "FAULT_INJECTION",
-      "coverage": "partial",
+      "coverage": "complete",
       "requirements": [
         "unknown refs·필수/notice 누락·잘못된 schema를 거부",
         "HTML/JS 실행 금지 및 plain text 렌더",
@@ -1963,7 +1975,7 @@
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "rejects malformed model plan unknownRef before SQLite writes"
@@ -1975,7 +1987,7 @@
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "rejects malformed model plan missingRequired before SQLite writes"
@@ -1987,7 +1999,7 @@
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "rejects malformed model plan missingNotice before SQLite writes"
@@ -1999,7 +2011,7 @@
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "rejects malformed model plan wrongSnapshot before SQLite writes"
@@ -2011,7 +2023,7 @@
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "rejects malformed model plan extraCode before SQLite writes"
@@ -2023,7 +2035,7 @@
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "rejects malformed model plan wrongForm before SQLite writes"
@@ -2035,7 +2047,7 @@
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "rejects malformed model plan duplicate before SQLite writes"
@@ -2047,7 +2059,7 @@
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "rejects malformed model plan wrongConsent before SQLite writes"
@@ -2083,7 +2095,7 @@
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
           "run": "unit-final",
           "file": "tests/unit/ui-templates.test.ts",
-          "sourceSha256": "e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276",
+          "sourceSha256": "68e6ce7a9d498d5fc28ba9eea310257a10423d575d611a4e72f3cf491dc5a17d",
           "titlePath": [
             "FLECTO shell",
             "renders model text as plain text, never as HTML"
@@ -2095,7 +2107,7 @@
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
           "run": "unit-final",
           "file": "tests/unit/ui-templates.test.ts",
-          "sourceSha256": "e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276",
+          "sourceSha256": "68e6ce7a9d498d5fc28ba9eea310257a10423d575d611a4e72f3cf491dc5a17d",
           "titlePath": [
             "FLECTO shell",
             "renders model text as plain text, never as HTML"
@@ -2107,12 +2119,84 @@
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
           "run": "unit-final",
           "file": "tests/unit/ui-templates.test.ts",
-          "sourceSha256": "e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276",
+          "sourceSha256": "68e6ce7a9d498d5fc28ba9eea310257a10423d575d611a4e72f3cf491dc5a17d",
           "titlePath": [
             "FLECTO shell",
             "renders model text as plain text, never as HTML"
           ],
           "assertion": "expect(shadow.textContent).toContain(evil);",
+          "instances": 1
+        },
+        {
+          "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "T30 rejects an arbitrary external URL action (unknownActionField) without caching or fetching it"
+          ],
+          "assertion": "expect(response.json().error).toBe('SCHEMA_INVALID');",
+          "instances": 1
+        },
+        {
+          "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "T30 rejects an arbitrary external URL action (unknownActionField) without caching or fetching it"
+          ],
+          "assertion": "expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "T30 rejects an arbitrary external URL action (unknownActionField) without caching or fetching it"
+          ],
+          "assertion": "expect(outbound).not.toHaveBeenCalled();",
+          "instances": 1
+        },
+        {
+          "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "T30 rejects an arbitrary external URL action (externalUrlAsActionRef) without caching or fetching it"
+          ],
+          "assertion": "expect(response.json().error).toBe('SCHEMA_INVALID');",
+          "instances": 1
+        },
+        {
+          "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "T30 rejects an arbitrary external URL action (externalUrlAsActionRef) without caching or fetching it"
+          ],
+          "assertion": "expect(h.rows()).toHaveLength(0);",
+          "instances": 1
+        },
+        {
+          "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
+          "run": "unit-final",
+          "file": "tests/integration/planner-security.test.ts",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
+          "titlePath": [
+            "singleflight, cancellation and provider integrity (T33/T35)",
+            "T30 rejects an arbitrary external URL action (externalUrlAsActionRef) without caching or fetching it"
+          ],
+          "assertion": "expect(outbound).not.toHaveBeenCalled();",
           "instances": 1
         }
       ]
@@ -2129,7 +2213,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {\"host\":\"evil.example\"} before provider or DB"
@@ -2141,7 +2225,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {\"host\":\"evil.example\"} before provider or DB"
@@ -2153,7 +2237,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {\"host\":\"localhost:4317\"} before provider or DB"
@@ -2165,7 +2249,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {\"host\":\"localhost:4317\"} before provider or DB"
@@ -2177,7 +2261,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {\"origin\":\"https://evil.example\"} before provider or DB"
@@ -2189,7 +2273,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {\"origin\":\"https://evil.example\"} before provider or DB"
@@ -2201,7 +2285,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {\"origin\":\"null\"} before provider or DB"
@@ -2213,7 +2297,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {\"origin\":\"null\"} before provider or DB"
@@ -2225,7 +2309,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {\"authorization\":\"Bearer wrong-token\"} before provider or DB"
@@ -2237,7 +2321,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {\"authorization\":\"Bearer wrong-token\"} before provider or DB"
@@ -2249,7 +2333,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {} before provider or DB"
@@ -2261,7 +2345,7 @@
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "PLANNER-QA-01 HTTP boundary and real SQLite (T20/T29/T31)",
             "rejects unauthenticated/forged access {} before provider or DB"
@@ -2557,7 +2641,7 @@
           "requirement": "같은 요청의 singleflight 및 중복 provider 호출 방지",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "shares exact requests once; rejects changed payload/epoch and a different request as BUSY"
@@ -2569,7 +2653,7 @@
           "requirement": "같은 요청의 singleflight 및 중복 provider 호출 방지",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "shares exact requests once; rejects changed payload/epoch and a different request as BUSY"
@@ -2745,7 +2829,7 @@
           "requirement": "LIVE provider 실패를 fixture 성공으로 조용히 바꾸지 않음",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "does not fall back to fixture on LIVE provider failure or leak its error"
@@ -2757,7 +2841,7 @@
           "requirement": "LIVE provider 실패를 fixture 성공으로 조용히 바꾸지 않음",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "singleflight, cancellation and provider integrity (T33/T35)",
             "does not fall back to fixture on LIVE provider failure or leak its error"
@@ -2803,7 +2887,7 @@
           "requirement": "READY 시 광고 제거 및 즉시 primary click 차단",
           "run": "unit-final",
           "file": "tests/unit/ui-templates.test.ts",
-          "sourceSha256": "e93366d0f239403fc6c4c083838f3fdd0f93218be9b514e15bde5e647677f276",
+          "sourceSha256": "68e6ce7a9d498d5fc28ba9eea310257a10423d575d611a4e72f3cf491dc5a17d",
           "titlePath": [
             "final review",
             "ignores a primary click that lands right after preparation ends"
@@ -3040,7 +3124,7 @@
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "candidate ACK and semantic cache (T21/T37/T39)",
             "quarantines mismatched payload model even if index metadata is current"
@@ -3052,7 +3136,7 @@
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "candidate ACK and semantic cache (T21/T37/T39)",
             "quarantines mismatched payload promptVersion even if index metadata is current"
@@ -3064,7 +3148,7 @@
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "candidate ACK and semantic cache (T21/T37/T39)",
             "quarantines mismatched payload cacheVersion even if index metadata is current"
@@ -3076,7 +3160,7 @@
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "candidate ACK and semantic cache (T21/T37/T39)",
             "does not mix different indexed model namespaces"
@@ -3088,7 +3172,7 @@
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
           "run": "unit-final",
           "file": "tests/integration/planner-security.test.ts",
-          "sourceSha256": "d986f503365d1a172ec1e60cd0158bb3a7d26323ee0659fb9b03079d4e037909",
+          "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
             "candidate ACK and semantic cache (T21/T37/T39)",
             "does not mix different indexed version namespaces"
@@ -3219,7 +3303,7 @@
           "requirement": "로그인/password·OTP 등장 시 분석 중단·추가 계획 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T40 partial: visible login/password and later OTP pause extraction without planning"
           ],
@@ -3231,7 +3315,7 @@
           "requirement": "로그인/password·OTP 등장 시 분석 중단·추가 계획 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T40 partial: visible login/password and later OTP pause extraction without planning"
           ],
@@ -3243,7 +3327,7 @@
           "requirement": "로그인/password·OTP 등장 시 분석 중단·추가 계획 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
-          "sourceSha256": "130d5f95d36b5796f88f59986a50202ea394712bfb27de3dbcdb1e9401d34b69",
+          "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
             "T40 partial: visible login/password and later OTP pause extraction without planning"
           ],
