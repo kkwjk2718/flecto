@@ -13,12 +13,16 @@ import {
   CodexProvider, DISABLED_FEATURES, KNOWN_HOST_SKILLS, MAX_PLAN_IMAGE_BYTES, buildExecArgs, decodePngDataUrl, discoverSkillNames, type SpawnFn,
 } from '../../apps/planner/src/provider/codex';
 import {
-  NOTICE_TEXT_LIMIT, PAGE_PLAN_OUTPUT_SCHEMA, PLANNER_INSTRUCTIONS, buildOutputSchema, buildPlanPrompt, decodePlan, encodePlanPrompt,
+  PAGE_PLAN_OUTPUT_SCHEMA, PLANNER_INSTRUCTIONS, buildOutputSchema, buildPlanPrompt, decodePlan, encodePlanPrompt,
 } from '../../apps/planner/src/provider/prompt';
 
 // UNIT ONLY: these tests stub child_process.spawn. They are not a LIVE_CODEX check.
 
 const BINARY = '/opt/fake/codex';
+
+/** > 160 chars with the critical condition at the very end: the model must see it, so no truncation is allowed. */
+const CRITICAL_TAIL = '단, 만 65세 이상 신청자는 보호자 연락처를 반드시 함께 제출해야 하며 미제출 시 신청이 취소됩니다.';
+const LONG_TERMS_TEXT = '개인정보 수집·이용 안내: 수집 항목은 성명, 생년월일, 연락처, 주소이며 보유 기간은 신청 처리 완료 후 1년입니다. 동의를 거부할 수 있으나 거부 시 혜택 신청이 제한됩니다. 자세한 내용은 개인정보 처리방침을 확인해 주세요. ' + CRITICAL_TAIL;
 
 /** Minimal valid 2x2 grayscale PNG (signature + IHDR + IDAT + IEND) built in-test; no capture involved. */
 function tinyPng(): Buffer {
@@ -90,7 +94,7 @@ function largeSnapshot(): PublicPageSnapshot {
       { ...base, formRef: null, required: false, ref: r('e', 17), kind: 'link', label: '고객센터', semanticKey: '|link|고객센터', actionKind: 'navigate' },
     ],
     notices: [
-      { ref: r('n', 1), kind: 'terms', formRef: form, semanticKey: form + '|notice|privacy', text: '개인정보 수집·이용 안내. '.repeat(30) },
+      { ref: r('n', 1), kind: 'terms', formRef: form, semanticKey: form + '|notice|privacy', text: LONG_TERMS_TEXT },
       { ref: r('n', 2), kind: 'terms', formRef: form, semanticKey: form + '|notice|third', text: '제3자 제공 안내' },
       { ref: r('n', 3), kind: 'info', formRef: form, semanticKey: form + '|notice|period', text: '신청 기간 안내' },
       { ref: r('n', 4), kind: 'warning', formRef: null, semanticKey: '|notice|global', text: '전역 안내' },
@@ -410,7 +414,7 @@ describe('encodePlanPrompt / buildOutputSchema / decodePlan', () => {
     expect([...encoding.controlRefs.keys()]).toEqual(Array.from({ length: 15 }, (_, i) => 'c' + (i + 1)));
     expect([...encoding.noticeRefs.values()]).toEqual(large.notices.slice(0, 4).map((n) => n.ref));
     const { prompt } = encoding;
-    expect(prompt.length).toBeLessThan(1000);
+    expect(prompt.length).toBeLessThan(1300);
     expect(prompt).not.toContain('a7f3c9e1');
     expect(prompt).not.toContain('|');
     expect(prompt).not.toContain('선택지 1');
@@ -421,10 +425,28 @@ describe('encodePlanPrompt / buildOutputSchema / decodePlan', () => {
     expect(prompt).toContain('c12 checkbox* 개인정보 수집·이용에 동의합니다 -> n1');
     expect(prompt).toContain('c4 email 이메일 주소');
     expect(prompt).toContain('n4 warning 전역 안내');
+    // Regression (spec 04): a >160-char terms notice is forwarded whole, including its critical tail condition.
+    expect(LONG_TERMS_TEXT.length).toBeGreaterThan(160);
     const noticeLine = prompt.split('\n').find((l) => l.startsWith('n1 '))!;
-    expect(noticeLine.length).toBeLessThanOrEqual(NOTICE_TEXT_LIMIT + 12);
-    expect(noticeLine.endsWith('…')).toBe(true);
+    expect(noticeLine).toBe('n1 terms ' + LONG_TERMS_TEXT);
+    expect(noticeLine.endsWith(CRITICAL_TAIL)).toBe(true);
+    expect(prompt).not.toContain('…');
     expect(JSON.stringify(large)).not.toContain('"c1"');
+  });
+
+  it('never truncates notice text: the model prompt carries every required/terms notice in full', () => {
+    const tail = '마감 이후 접수분은 무효 처리됩니다.';
+    const long = '안내 문구 '.repeat(120).trim() + ' ' + tail; // ~600 chars, well past any budget-style cut
+    const notices = [
+      { ref: 'n1', kind: 'terms' as const, formRef: 'f1', semanticKey: 'terms', text: long },
+      { ref: 'n2', kind: 'info' as const, formRef: null, semanticKey: 'global', text: 'x'.repeat(2999) + '!' },
+    ];
+    const { prompt } = encodePlanPrompt({ ...snapshot, notices });
+    const lines = prompt.split('\n');
+    expect(lines.find((l) => l.startsWith('n1 '))).toBe('n1 terms ' + long);
+    expect(lines.find((l) => l.startsWith('n2 '))).toBe('n2 info ' + 'x'.repeat(2999) + '!');
+    expect(prompt.endsWith('!')).toBe(true);
+    expect(prompt).toContain(tail);
   });
 
   it('forwards the whole page when no single submit target exists, and lists action candidates', () => {

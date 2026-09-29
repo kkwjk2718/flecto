@@ -5,9 +5,6 @@ import {
 
 export const PLAN_PROMPT_VERSION = PROMPT_VERSION;
 
-/** Longest notice text forwarded to the model; the rest is cut. Grouping never needs the full legal text. */
-export const NOTICE_TEXT_LIMIT = 160;
-
 /**
  * Minimal base instructions written to the file passed as `model_instructions_file`.
  * It replaces the ~21 KB coding-agent base prompt with the planner's purpose, legend and rules.
@@ -66,13 +63,14 @@ function controlLine(alias: string, control: PublicControl, noticeAlias: Readonl
 }
 
 function noticeLine(alias: string, notice: PublicNotice): string {
-  const text = notice.text.replace(/\s+/g, ' ').trim();
-  return alias + ' ' + notice.kind + ' ' + (text.length > NOTICE_TEXT_LIMIT ? text.slice(0, NOTICE_TEXT_LIMIT) + '…' : text);
+  // Full public notice text (spec 04: required information is never cut to fit a token budget); only whitespace is normalised.
+  return alias + ' ' + notice.kind + ' ' + notice.text.replace(/\s+/g, ' ').trim();
 }
 
 /**
  * Compacts the snapshot for the model: only the goal form's controls plus its own and global notices,
- * with actual refs rebased to short aliases (c1.., n1..). semanticKey/constraints/option refs are never sent.
+ * with actual refs rebased to short aliases (c1.., n1..). semanticKey/constraints/option refs are never sent;
+ * notice text is forwarded in full.
  * The snapshot is not mutated; the mapping stays in the returned encoding for decodePlan.
  */
 export function encodePlanPrompt(snapshot: PublicPageSnapshot): PromptEncoding {
