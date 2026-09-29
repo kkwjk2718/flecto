@@ -5,5 +5,7 @@ Config.setJpegQuality(95);
 Config.setConcurrency(1);
 Config.setCodec('h264');
 Config.setCrf(18);
-Config.setPixelFormat('yuv420p'); // limited-range 4:2:0 for broad player compatibility (default gave yuvj420p)
+Config.setPixelFormat('yuv420p');
+// Without an explicit color space, JPEG frames were tagged yuvj420p (full range). bt709 gives tv range + bt709 tags.
+Config.setColorSpace('bt709');
 Config.setAudioBitrate('256k');

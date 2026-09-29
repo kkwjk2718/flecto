@@ -35,10 +35,18 @@ export const T = {
   b1L2: 72,
   b1ScrollFrom: 60,
   b1ScrollTo: 140,
+  // B1 push-in on the original site's small field (replaces the scroll)
+  b1ZoomFrom: 84,
+  b1ZoomTo: 146,
+  // Insurance story: consent (14) then review (15), side-by-side original vs FLECTO replaces the second site
+  i4ReviewSlideFrom: 500,
+  iUnderlines: [522, 532, 542, 552],
+  iSideFrom: 650,
+  iSideIn: 654,
   // B2 morph: source field -> FLECTO field
   b2Start: 140,
   b2HeadOut: 140,
-  b2RestOutEnd: 164,
+  b2RestOutEnd: 156,
   b2MoveFrom: 146,
   b2MoveTo: 182,
   b2XfadeFrom: 158,

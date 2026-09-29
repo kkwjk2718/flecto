@@ -1,35 +1,47 @@
 import React from 'react';
 import {Img, staticFile} from 'remotion';
+import type {CropSpec} from './regions';
 import {C, SHEET_SHADOW} from './theme';
 
 // Captures are 1440x1100 logical CSS px (files may be 2x DPR; they are always drawn at 1440 CSS width).
 export const ASSET_W = 1440;
 export const ASSET_H = 1100;
-export const CROP_X = 120;
-export const CROP_W = 1200;
 
-export type Geom = {x: number; y: number; s: number; scroll?: number};
-export const A: Geom = {x: 720, y: 330, s: 0.9};
-export const B: Geom = {x: 720, y: 90, s: 0.9};
-export const CL: Geom = {x: 192, y: 330, s: 0.62};
-export const CR: Geom = {x: 984, y: 330, s: 0.62};
+export type Geom = {x: number; y: number; s: number; scroll?: number; cropX: number; cropW: number};
+type Slot = {x: number; y: number; w: number; maxH: number};
+export const SLOT: Record<'A' | 'B' | 'CL' | 'CR', Slot> = {
+  A: {x: 720, y: 330, w: 1080, maxH: Infinity}, // bleeds off the bottom
+  B: {x: 720, y: 90, w: 1080, maxH: 990}, // footer visible
+  CL: {x: 192, y: 330, w: 744, maxH: 682},
+  CR: {x: 984, y: 330, w: 744, maxH: 682},
+};
+
+/** Fit a capture crop into a layout slot without stretching; narrower results are centred in the slot. */
+export const fit = (slot: Slot, crop: CropSpec): Geom => {
+  const s = Math.min(slot.w / crop.w, slot.maxH / ASSET_H);
+  const w = crop.w * s;
+  return {x: slot.x + (slot.w - w) / 2, y: slot.y, s, cropX: crop.x, cropW: crop.w};
+};
 
 export const lerpGeom = (a: Geom, b: Geom, p: number): Geom => ({
   x: a.x + (b.x - a.x) * p,
   y: a.y + (b.y - a.y) * p,
   s: a.s + (b.s - a.s) * p,
   scroll: (a.scroll ?? 0) + ((b.scroll ?? 0) - (a.scroll ?? 0)) * p,
+  cropX: a.cropX + (b.cropX - a.cropX) * p,
+  cropW: a.cropW + (b.cropW - a.cropW) * p,
 });
 
 /** Asset coordinate -> canvas coordinate. Overlays must use this, never hardcoded canvas numbers. */
-export const toCanvas = (g: Geom, ax: number, ay: number): [number, number] => [g.x + (ax - CROP_X) * g.s, g.y + (g.scroll ?? 0) + ay * g.s];
+export const toCanvas = (g: Geom, ax: number, ay: number): [number, number] => [g.x + (ax - g.cropX) * g.s, g.y + (g.scroll ?? 0) + ay * g.s];
 
 export type Layer = {asset: string; opacity: number; dy?: number};
+export type Zoom = {k: number; tx: number; ty: number}; // sheet-local: p' = p * k + t
 
 const src = (asset: string) => staticFile('assets/' + asset + '.png');
 
-export const Sheet: React.FC<{geom: Geom; layers: Layer[]; opacity?: number; dx?: number; dy?: number; scale?: number}> = ({geom, layers, opacity = 1, dx = 0, dy = 0, scale = 1}) => {
-  const w = CROP_W * geom.s;
+export const Sheet: React.FC<{geom: Geom; layers: Layer[]; opacity?: number; dx?: number; dy?: number; scale?: number; zoom?: Zoom}> = ({geom, layers, opacity = 1, dx = 0, dy = 0, scale = 1, zoom}) => {
+  const w = geom.cropW * geom.s;
   const h = ASSET_H * geom.s;
   return (
     <div
@@ -50,22 +62,31 @@ export const Sheet: React.FC<{geom: Geom; layers: Layer[]; opacity?: number; dx?
         boxSizing: 'border-box',
       }}
     >
-      {layers.map((l, i) =>
-        l.opacity <= 0 ? null : (
-          <Img
-            key={l.asset + i}
-            src={src(l.asset)}
-            style={{
-              position: 'absolute',
-              left: -CROP_X * geom.s - 1,
-              top: (geom.scroll ?? 0) + (l.dy ?? 0) - 1,
-              width: ASSET_W * geom.s,
-              height: ASSET_H * geom.s,
-              opacity: l.opacity,
-            }}
-          />
-        ),
-      )}
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          transform: zoom ? 'translate(' + zoom.tx + 'px,' + zoom.ty + 'px) scale(' + zoom.k + ')' : undefined,
+          transformOrigin: '0 0',
+        }}
+      >
+        {layers.map((l, i) =>
+          l.opacity <= 0 ? null : (
+            <Img
+              key={l.asset + i}
+              src={src(l.asset)}
+              style={{
+                position: 'absolute',
+                left: -geom.cropX * geom.s - 1,
+                top: (geom.scroll ?? 0) + (l.dy ?? 0) - 1,
+                width: ASSET_W * geom.s,
+                height: ASSET_H * geom.s,
+                opacity: l.opacity,
+              }}
+            />
+          ),
+        )}
+      </div>
     </div>
   );
 };
@@ -76,7 +97,7 @@ export const Crop: React.FC<{asset: string; crop: {x: number; y: number; w: numb
   const k = rect.w / crop.w;
   const drawnH = crop.h * k;
   return (
-    <div style={{position: 'absolute', left: rect.x, top: rect.y + (rect.h - drawnH) / 2, width: rect.w, height: drawnH, overflow: 'hidden', opacity}}>
+    <div style={{position: 'absolute', left: rect.x, top: rect.y + (rect.h - drawnH) / 2, width: rect.w, height: drawnH, overflow: 'hidden', opacity, background: C.surface, borderRadius: 6}}>
       <Img src={src(asset)} style={{position: 'absolute', left: -crop.x * k, top: -crop.y * k, width: ASSET_W * k, height: ASSET_H * k}} />
     </div>
   );

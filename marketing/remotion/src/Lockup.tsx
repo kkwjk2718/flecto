@@ -32,13 +32,15 @@ export const BrandLockup: React.FC = () => {
   );
 };
 
-export const Footnote: React.FC = () => {
+export const Footnote: React.FC<{story: 'insurance' | 'benefits'}> = ({story}) => {
   const f = useCurrentFrame();
   if (f < T.b6Footnote) return null;
   const p = enter(f, T.b6Footnote, 14);
   return (
     <div style={{position: 'absolute', left: 0, width: '100%', top: 1004, textAlign: 'center', fontSize: 22, fontWeight: 400, color: C.muted, opacity: p}}>
-      화면은 시연용 사이트에서 설치된 확장 프로그램으로 캡처한 실제 화면이며, 접수 번호는 시연 데이터입니다.
+      {story === 'insurance'
+        ? '온담보험 시연센터는 가상의 기관입니다. 설치된 확장 프로그램으로 캡처한 실제 화면이며, 합성 시연 데이터로 실제 보험 접수가 아닙니다.'
+        : '화면은 시연용 사이트에서 설치된 확장 프로그램으로 캡처한 실제 화면이며, 접수 번호는 시연 데이터입니다.'}
     </div>
   );
 };
