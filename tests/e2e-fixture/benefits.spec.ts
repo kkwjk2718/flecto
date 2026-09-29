@@ -1,19 +1,8 @@
 import { test, expect, beginBenefits, fillBenefits, dialog, benefitsRecords } from './fixtures';
 
-test('T01 T09: FLECTO source handlers and full-navigation confirmation reach the original database', async ({ page, activate, system, consoleErrors, worker }) => {
+test('T01 T09: FLECTO source handlers and full-navigation confirmation reach the original database', async ({ page, activate, system, consoleErrors }) => {
   await beginBenefits(page, activate);
-  await worker.evaluate(`async () => {
-    const tab = (await chrome.tabs.query({active:true,currentWindow:true}))[0];
-    await chrome.scripting.executeScript({target:{tabId:tab.id},func:()=>{
-      const c=globalThis.__flectoController;const original=c.handle;c.diagnosticActions=[];
-      c.handle=async function(a){const item={kind:a.kind,from:a.fromStep,before:c.model.stepIndex,phase:c.model.phase,composing:c.composing.size};c.diagnosticActions.push(item);try{return await original.call(c,a)}finally{item.after=c.model.stepIndex;item.phaseAfter=c.model.phase;}};
-    }});
-  }`);
-  try { await fillBenefits(page); }
-  catch(error) {
-    console.log('ACTION_TRACE',await worker.evaluate(`async () => {const tab=(await chrome.tabs.query({active:true,currentWindow:true}))[0];return (await chrome.scripting.executeScript({target:{tabId:tab.id},func:()=>globalThis.__flectoController.diagnosticActions}))[0].result;}`));
-    throw error;
-  }
+  await fillBenefits(page);
   await expect(page.locator('body > main input[name="orderNumber"]')).toHaveValue('FLECTO-2026-001');
   await expect(page.locator('body > main input[name="consent"]')).toBeChecked();
   expect((await benefitsRecords(system)).count).toBe(0);

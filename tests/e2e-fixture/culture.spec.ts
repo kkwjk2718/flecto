@@ -1,0 +1,46 @@
+import { test, expect, dialog, QA_PORTS } from './fixtures';
+
+test('T02 T05 T10: React culture application preserves values across source SPA steps and saves once', async ({ page, activate, system, consoleErrors }) => {
+  await page.goto(`http://127.0.0.1:${QA_PORTS.culture}/login`);
+  await page.getByLabel('아이디', { exact: true }).fill('demo');
+  await page.getByLabel('비밀번호', { exact: true }).fill('flecto2026!');
+  await page.getByRole('button', { name: '로그인', exact: true }).click();
+  await expect(page).toHaveURL(`http://127.0.0.1:${QA_PORTS.culture}/courses`);
+  // A real source selection supplies the known public course to its application.
+  await page.getByRole('button', { name: /요가.*수강 신청/ }).click();
+  await expect(page).toHaveURL(/\/apply\/course/);
+  await activate(page);
+  await dialog(page).getByRole('button', { name: '다음', exact: true }).click();
+  await expect(dialog(page).getByRole('radiogroup', { name: /수업 시간/ })).toBeVisible();
+  const time = dialog(page).getByRole('radio', { name: /10:00/ }).first();
+  await time.click(); await expect(time).toBeChecked();
+  await expect(page.locator('main select[name="timeId"]')).toHaveValue('yoga-tue-thu-1000');
+  await dialog(page).getByRole('button', { name: '입력 내용 확인하기', exact: true }).click();
+  await dialog(page).getByRole('button', { name: '다음', exact: true }).click();
+  await expect(page).toHaveURL(/\/apply\/applicant/);
+  await expect(dialog(page).getByRole('button', { name: '다음', exact: true })).toBeVisible();
+  await dialog(page).getByRole('button', { name: '다음', exact: true }).click();
+  await dialog(page).getByLabel('신청자 이름', { exact: false }).fill('김하늘');
+  await dialog(page).getByLabel('휴대전화 번호', { exact: false }).fill('01012345678');
+  await expect(page.locator('main input[name="applicantName"]')).toHaveValue('김하늘');
+  await expect(page.locator('main input[name="phone"]')).toHaveValue('01012345678');
+  await dialog(page).getByRole('button', { name: '입력 내용 확인하기', exact: true }).click();
+  await dialog(page).getByRole('button', { name: '다음', exact: true }).click();
+  await expect(page).toHaveURL(/\/apply\/notice/);
+  await dialog(page).getByRole('button', { name: '다음', exact: true }).click();
+  const consent = dialog(page).getByRole('checkbox', { name: /개인정보 수집·이용에 동의/ });
+  await consent.click(); await expect(consent).toBeChecked();
+  await dialog(page).getByRole('button', { name: '입력 내용 확인하기', exact: true }).click();
+  await dialog(page).getByRole('button', { name: '다음', exact: true }).click();
+  await expect(page).toHaveURL(/\/apply\/review/);
+  await expect(dialog(page)).toContainText('김하늘');
+  await dialog(page).getByRole('button', { name: /신청하기/ }).click();
+  await expect(page).toHaveURL(/\/reservations\/HB-/);
+  await expect(dialog(page)).toContainText('접수 번호');
+  const response = await fetch(`http://127.0.0.1:${system.ports.culture}/__qa/records`, { headers: { 'x-flecto-qa-token': system.credentials.cultureToken } });
+  const oracle = await response.json() as { reservations: Array<Record<string, unknown>>; count: number };
+  expect(oracle.count).toBe(1);
+  expect(oracle.reservations[0]).toMatchObject({ courseId: 'yoga', timeId: 'yoga-tue-thu-1000', applicantName: '김하늘' });
+  expect(consoleErrors).toEqual([]);
+  await page.screenshot({ path: '/tmp/flecto-integration-shots/culture-complete.png' });
+});

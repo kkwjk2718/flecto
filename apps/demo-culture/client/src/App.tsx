@@ -542,6 +542,7 @@ function CourseStep({ courses, draft, updateDraft }: ApplyProps & { courses: Cou
               type="radio"
               name="courseId"
               value={item.id}
+              required
               checked={draft.courseId === item.id}
               onChange={() => updateDraft(draft.courseId === item.id ? {} : { courseId: item.id, timeId: '' })}
             />
@@ -558,6 +559,7 @@ function CourseStep({ courses, draft, updateDraft }: ApplyProps & { courses: Cou
         <select
           id="timeId"
           name="timeId"
+          required
           value={selectedTime ? draft.timeId : ''}
           onChange={(event) => updateDraft({ timeId: event.target.value })}
           aria-invalid={errors.timeId ? true : undefined}
@@ -854,4 +856,3 @@ function NotFoundPage() {
     </section>
   );
 }
-

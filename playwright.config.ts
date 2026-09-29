@@ -10,5 +10,5 @@ export default defineConfig({
   expect: { timeout: 10000 },
   outputDir: '.flecto/qa/test-results',
   reporter: [['list'], ['json', { outputFile: '.flecto/qa/fixture-results.json' }]],
-  use: { trace: 'off', screenshot: 'only-on-failure' },
+  use: { actionTimeout: 15000, trace: 'off', screenshot: 'only-on-failure' },
 });

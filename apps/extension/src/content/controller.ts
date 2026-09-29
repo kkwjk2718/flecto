@@ -72,6 +72,12 @@ export class FlectoController {
   }
   private patch(patch: Partial<FlectoViewModel>): void { this.model = { ...this.model, ...patch }; this.render(); }
   private enqueue = (action: UserAction): void => {
+    // Cancellation/settings must remain responsive while prepare awaits the model.
+    // Serialize source writes/submission, not the entire preparation request.
+    if (['START_GOAL', 'CANCEL', 'CLOSE', 'SHOW_ORIGINAL', 'RETRY', 'DISMISS_SPONSOR', 'UPDATE_SETTINGS'].includes(action.kind)) {
+      void this.handle(action).catch((error: unknown) => this.fail(error instanceof FlectoError ? error.code : 'SOURCE_REJECTED'));
+      return;
+    }
     this.actionQueue = this.actionQueue.then(() => this.handle(action)).catch((error: unknown) => {
       this.fail(error instanceof FlectoError ? error.code : 'SOURCE_REJECTED');
     });
@@ -152,7 +158,16 @@ export class FlectoController {
       }
       return { ...control, value, composing: this.composing.has(control.ref),
         error: this.model.controls.find((item) => item.ref === control.ref)?.error ?? null,
-        description: control.noticeRefs.map((id) => this.snapshot!.notices.find((notice) => notice.ref === id)?.text ?? '').filter(Boolean).join('\n') || null };
+        description: null };
+    });
+  }
+  private viewNotices(): FlectoViewModel['notices'] {
+    if (!this.snapshot || !this.registry) return [];
+    // The model/cache receive sanitized public text. The person sees the source
+    // notice itself locally, including any private details it legitimately contains.
+    return this.snapshot.notices.map((notice) => {
+      const element = this.registry!.notices.get(notice.ref);
+      return { ...notice, text: element?.innerText?.trim() || element?.textContent?.trim() || notice.text };
     });
   }
   private captureValues(): void {
@@ -187,7 +202,6 @@ export class FlectoController {
     } });
     if (this.epoch !== requestEpoch || this.model.phase !== 'PREPARING' || this.doc.visibilityState === 'hidden') return;
     if (performance.now() - this.prepareStart >= PREPARE_DEADLINE_MS) { this.cancelPrepare(true); return; }
-    this.clearDeadline();
     if (!response.ok || !('result' in response)) { this.fail(response.ok ? 'SCHEMA_INVALID' : response.error); return; }
     const parsed = PlannerResponseSchema.safeParse(response.result);
     if (!parsed.success || parsed.data.requestId !== requestId || parsed.data.snapshotId !== snapshot.snapshotId) { this.fail('STALE_DOCUMENT'); return; }
@@ -196,9 +210,12 @@ export class FlectoController {
     if (current.blocked || await structuralFingerprint(current.snapshot) !== key) { this.fail(current.blocked ?? 'STALE_DOCUMENT'); return; }
     try { this.plan = verifyPlan(parsed.data.plan, snapshot, this.registry); }
     catch (error) { this.fail(error instanceof FlectoError ? error.code : 'SCHEMA_INVALID'); return; }
+    if (this.epoch !== requestEpoch || this.model.phase !== 'PREPARING') return;
+    if (performance.now() - this.prepareStart >= PREPARE_DEADLINE_MS) { this.cancelPrepare(true); return; }
+    this.clearDeadline();
     this.structuralKey = key;
     this.model = { ...this.model, mode: parsed.data.mode, steps: this.plan.steps, stepIndex: 0, controls: this.viewControls(),
-      notices: snapshot.notices, sponsorVisible: false, elapsedMs: performance.now() - this.prepareStart, tasks: this.model.tasks };
+      notices: this.viewNotices(), sponsorVisible: false, elapsedMs: performance.now() - this.prepareStart, tasks: this.model.tasks };
     this.selectStep(0);
     if (parsed.data.blueprintId) void this.send({ type: 'FLECTO_VERIFY', requestId, snapshotId: snapshot.snapshotId, blueprintId: parsed.data.blueprintId });
   }
@@ -212,6 +229,7 @@ export class FlectoController {
     }
   }
   private fail(code: ErrorCode): void {
+    this.clearDeadline();
     this.review = null;
     const phase = code === 'AUTH_REQUIRED' ? 'AUTH_REQUIRED' : code === 'DEADLINE_EXCEEDED' ? 'TIMED_OUT' :
       code === 'CANCELLED' ? 'CANCELLED' : code === 'SOURCE_REJECTED' ? 'SOURCE_REJECTED' :
@@ -231,6 +249,14 @@ export class FlectoController {
       const element = binding.element;
       if (element instanceof HTMLInputElement || element instanceof HTMLSelectElement || element instanceof HTMLTextAreaElement) {
         if (!element.disabled && !element.checkValidity()) { valid = false; errors.set(ref, element.validationMessage || '이 항목을 확인해 주세요.'); }
+        if (element instanceof HTMLSelectElement && [...element.selectedOptions].some((option) => option.disabled || !!option.closest('optgroup[disabled]'))) {
+          valid = false; errors.set(ref, '지금 선택할 수 없는 항목이에요. 다른 항목을 골라 주세요.');
+        }
+        if (binding.kind === 'radio') {
+          const control = this.snapshot?.controls.find((item) => item.ref === ref);
+          const selected = control?.options.find((option) => (this.registry!.options.get(option.ref) as HTMLInputElement | undefined)?.checked);
+          if (selected?.disabled) { valid = false; errors.set(ref, '지금 선택할 수 없는 항목이에요. 다른 항목을 골라 주세요.'); }
+        }
       }
     }
     this.patch({ controls: this.viewControls().map((control) => ({ ...control, error: errors.get(control.ref) ?? null })),
@@ -261,6 +287,7 @@ export class FlectoController {
     if (!this.host) return;
     switch (action.kind) {
       case 'START_GOAL': {
+        if (this.model.phase === 'PREPARING' && action.ref === this.snapshot?.goalRef) return;
         const binding = action.ref ? this.registry?.bindings.get(action.ref) : null;
         const control = this.snapshot?.controls.find((item) => item.ref === action.ref);
         if (binding && control?.actionKind === 'navigate') {
@@ -317,6 +344,7 @@ export class FlectoController {
       case 'CANCEL': this.cancelPrepare(false); return;
       case 'RETRY': {
         if (this.pendingSubmit || this.model.phase === 'OUTCOME_UNKNOWN') return;
+        this.cancelPrepare(false); this.plan = null;
         this.refreshExtraction(); if (this.model.phase !== 'AUTH_REQUIRED') this.showTasks(); return;
       }
       case 'DISMISS_SPONSOR': this.sponsorDismissed = true; this.patch({ sponsorVisible: false }); return;
@@ -377,7 +405,7 @@ export class FlectoController {
       this.structuralKey = await structuralFingerprint(this.snapshot);
     } catch { return false; }
     this.plan = plan; this.pendingSubmit = false; this.localSourceReview = true; this.sourceReviewRows = definitions;
-    this.model.steps = plan.steps; this.model.notices = this.snapshot.notices; this.selectStep(0);
+    this.model.steps = plan.steps; this.model.notices = this.viewNotices(); this.selectStep(0);
     this.patch({ statusMessage: '아직 접수되지 않았어요. 원래 사이트가 표시한 내용을 확인한 뒤 직접 제출해 주세요.' });
     return true;
   }
@@ -388,7 +416,11 @@ export class FlectoController {
       .find((element) => !element.closest('#flecto-host') && element.getClientRects().length > 0 && /접수|예약|신청/.test(element.textContent ?? ''));
     if (receipt && status) {
       this.pendingSubmit = false; this.review = null;
-      this.patch({ phase: 'SUCCESS', title: '원래 사이트의 접수 결과예요', resultText: `${status.textContent?.trim().slice(0, 500)}\n접수 번호: ${receipt.textContent?.trim().slice(0, 120)}`,
+      const rows = [...status.querySelectorAll<HTMLElement>('dl dt')].map((term, index) => ({
+        ref: `result_${index}`, label: term.innerText.trim(), value: term.nextElementSibling?.textContent?.trim() ?? '',
+      })).filter((row) => row.label && row.value);
+      const heading = status.querySelector('h1,h2,h3')?.textContent?.trim() || '원래 사이트에서 접수 정보를 확인했어요.';
+      this.patch({ phase: 'SUCCESS', title: '원래 사이트의 접수 결과예요', resultText: `${heading}\n접수 번호: ${receipt.textContent?.trim().slice(0, 120)}`, reviewRows: rows,
         statusMessage: '원래 사이트에서 접수 정보를 확인했어요.', canSubmit: false, canGoNext: false, canGoBack: false, sponsorVisible: false, error: null });
       void this.sendState(); return true;
     }
@@ -456,9 +488,11 @@ export class FlectoController {
       this.cancelPrepare(performance.now() - this.prepareStart >= PREPARE_DEADLINE_MS);
     }
   };
-  private pageshow = (event: PageTransitionEvent): void => { if (event.persisted) this.sourceNavigation(); };
-  sourceNavigation(): void {
+  private pageshow = (event: PageTransitionEvent): void => { if (event.persisted) this.sourceNavigation(true); };
+  sourceNavigation(force = false): void {
     if (!this.host) return;
+    if (!force && location.href === this.lastUrl) return;
+    this.lastUrl = location.href;
     this.cancelPrepare(false); this.review = null;
     if (!this.probeOutcome()) {
       this.documentInstanceId = nonce('doc');
@@ -472,7 +506,6 @@ export class FlectoController {
         }
       }
     }
-    this.lastUrl = location.href;
   }
   private setupObservation(): void {
     this.doc.addEventListener('input', this.sourceEvent, true);
