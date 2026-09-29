@@ -2,7 +2,11 @@
 
 갱신: 2026-09-29 16:03 KST. 최신 사용자 지시로 실제 시연·녹화·발표·광고를 16:15까지 마무리한다. 자세한 다음 행동은 [NEXT_ACTION](NEXT_ACTION.md)을 따른다.
 
-## 최종 검증 완료
+## 16:12 대기 상한 변경
+
+사용자 요청으로 준비 상한30초 적용. 개인Chrome 확장·보험탭 갱신, 로그인 유지·CACHE/READY확인. 아래507/38/9는10초정책후보 전체검증이며,30초후보의새영향범위검사 진행중.
+
+## 16:03 최종 검증 완료
 
 **단위507 / Chrome FIXTURE38 / LIVE9회 모두 PASS.** 네이티브 보험 시연·녹화와 개인 Chrome 설치·캐시 준비 완료. 출고 SINGLE_SITE_LIVE / SESSION_CHECKPOINTED. 전체 게이트25 PASS/30 NOT_RUN(부분근거 포함). [최종 검증](../evidence/FINAL_VALIDATION.md)에 같은 빌드, 실패 이력, 속도와 미검증 범위를 기록했다.
 

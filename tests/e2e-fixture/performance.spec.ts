@@ -78,11 +78,13 @@ test('T19 partial: dismissing the sponsor preserves the same preparation request
   expect(consoleErrors).toEqual([]);
 });
 
-test('T17: 10s timeout offers original and rejects the 11s late planner response', async ({ page, activate, system, qa, consoleErrors }, info) => {
-  await openBenefits(page, activate, system); qa.delayMs = 11000;
+test('T17: 30s timeout offers original and rejects the 31s late planner response', async ({ page, activate, system, qa, consoleErrors }, info) => {
+  // The user explicitly extended preparation from 10s to 30s for rehearsal.
+  // Preserve the original timeout/late-result/no-submission safety assertions.
+  await openBenefits(page, activate, system); qa.delayMs = 31000;
   const stop = await observePreparation(page);
   await prepare(page);
-  await expect(dialog(page)).toHaveAttribute('data-phase', 'TIMED_OUT', { timeout: 11500 });
+  await expect(dialog(page)).toHaveAttribute('data-phase', 'TIMED_OUT', { timeout: 31500 });
   await expect(dialog(page).getByRole('button', { name: '원래 화면에서 계속하기', exact: true })).toBeEnabled();
   await expect(dialog(page).getByRole('complementary', { name: 'FLECTO 후원 광고' })).toHaveCount(0);
   await expect.poll(() => qa.exchanges[0]?.releasedAt).toBeTruthy();
@@ -91,9 +93,19 @@ test('T17: 10s timeout offers original and rejects the 11s late planner response
   await expect(dialog(page).getByLabel('주문번호', { exact: false })).toHaveCount(0);
   const samples = await stop();
   const elapsed = samples.find(x => x.phase === 'TIMED_OUT')!.ms - samples.find(x => x.phase === 'PREPARING')!.ms;
-  expect(elapsed).toBeGreaterThanOrEqual(9900); expect(elapsed).toBeLessThan(10500);
+  expect(elapsed).toBeGreaterThanOrEqual(29900); expect(elapsed).toBeLessThan(30500);
   expect(samples.some(x => x.phase === 'READY')).toBe(false);
   await info.attach('deadline-timeline', { body: JSON.stringify({ elapsed, samples }), contentType: 'application/json' });
+  expect((await benefitsRecords(system)).count).toBe(0);
+  expect(consoleErrors).toEqual([]);
+});
+
+test('D30: an 11s cold plan remains usable within the user-approved 30s preparation budget', async ({ page, activate, system, qa, consoleErrors }) => {
+  await openBenefits(page, activate, system); qa.delayMs = 11000;
+  await prepare(page);
+  await expect(dialog(page)).toHaveAttribute('data-phase', 'READY', { timeout: 15000 });
+  await expect(dialog(page).getByLabel('주문번호', { exact: false })).toBeEditable();
+  expect(qa.exchanges).toHaveLength(1);
   expect((await benefitsRecords(system)).count).toBe(0);
   expect(consoleErrors).toEqual([]);
 });

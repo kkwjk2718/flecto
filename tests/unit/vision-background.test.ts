@@ -171,8 +171,8 @@ describe('VIS01 background capture and masking', () => {
     expect(api.tabs.captureVisibleTab).not.toHaveBeenCalled();
   });
 
-  it('inherits the budget: never more than 10000 ms, never a fresh deadline, times out a hung capture', async () => {
-    expect(await run({ budget: { startedAt: 0, deadlineAt: 10_001 } }).promise).toMatchObject({ ok: false, error: 'BUDGET_INVALID' });
+  it('inherits the budget: never more than 30000 ms, never a fresh deadline, times out a hung capture', async () => {
+    expect(await run({ budget: { startedAt: 0, deadlineAt: 30_001 } }).promise).toMatchObject({ ok: false, error: 'BUDGET_INVALID' });
     expect(await run({ budget: { startedAt: 5000, deadlineAt: 6000 } }).promise).toMatchObject({ ok: false, error: 'BUDGET_INVALID' }); // starts in the future
     const spent = chromeApi();
     expect(await run({ chromeApi: spent, budget: { startedAt: 0, deadlineAt: 1000 } }).promise).toMatchObject({ ok: false, error: 'DEADLINE_EXCEEDED' });

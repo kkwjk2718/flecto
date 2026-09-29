@@ -5,7 +5,9 @@ export const SCHEMA_VERSION = 1 as const;
 export const CONTRACT_VERSION = '1.0.2';
 export const PROMPT_VERSION = 'flecto-plan-v3';
 export const CACHE_VERSION = 'flecto-blueprint-v2';
-export const PREPARE_DEADLINE_MS = 10_000;
+// User-approved rehearsal policy (2026-09-29): allow slower cold AI plans.
+// All layers inherit this single total budget; cancellation stays immediate.
+export const PREPARE_DEADLINE_MS = 30_000;
 export const SPONSOR_AFTER_MS = 3_000;
 export const DEFAULT_PORTS = { planner: 4317, benefits: 4173, culture: 4174 } as const;
 

@@ -13,7 +13,7 @@
       "assertions": [
         {
           "requirement": "구매 정상 흐름: 원본 저장값 일치",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/benefits.spec.ts",
           "sourceSha256": "9cf5481b6afda0ff235a0c0939ca1c853339735c5e8281ad6e87f786b6b1bab9",
           "titlePath": [
@@ -25,7 +25,7 @@
         },
         {
           "requirement": "구매 정상 흐름: 원본 저장값 일치",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/benefits.spec.ts",
           "sourceSha256": "9cf5481b6afda0ff235a0c0939ca1c853339735c5e8281ad6e87f786b6b1bab9",
           "titlePath": [
@@ -37,7 +37,7 @@
         },
         {
           "requirement": "완료 화면의 접수 번호와 원본 DB 일치",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -58,7 +58,7 @@
       "assertions": [
         {
           "requirement": "선택 강좌·시간과 원본 저장 결과 일치",
-          "run": "release-live-02",
+          "run": "timeout30-live-final",
           "file": "tests/e2e-live/product.spec.ts",
           "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
           "titlePath": [
@@ -70,7 +70,7 @@
         },
         {
           "requirement": "선택 강좌·시간과 원본 저장 결과 일치",
-          "run": "release-live-02",
+          "run": "timeout30-live-final",
           "file": "tests/e2e-live/product.spec.ts",
           "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
           "titlePath": [
@@ -82,7 +82,7 @@
         },
         {
           "requirement": "선택 강좌·시간과 원본 저장 결과 일치",
-          "run": "release-live-02",
+          "run": "timeout30-live-final",
           "file": "tests/e2e-live/product.spec.ts",
           "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
           "titlePath": [
@@ -94,7 +94,7 @@
         },
         {
           "requirement": "선택 강좌·시간과 원본 저장 결과 일치",
-          "run": "release-live-02",
+          "run": "timeout30-live-final",
           "file": "tests/e2e-live/product.spec.ts",
           "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
           "titlePath": [
@@ -117,7 +117,7 @@
       "assertions": [
         {
           "requirement": "필수 항목을 비우면 제출 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -129,7 +129,7 @@
         },
         {
           "requirement": "필수 항목을 비우면 제출 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -141,7 +141,7 @@
         },
         {
           "requirement": "해당 필드의 원본 검증 오류 안내",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -153,7 +153,7 @@
         },
         {
           "requirement": "해당 필드의 원본 검증 오류 안내",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -165,7 +165,7 @@
         },
         {
           "requirement": "해당 필드의 원본 검증 오류 안내",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -177,7 +177,7 @@
         },
         {
           "requirement": "해당 필드의 원본 검증 오류 안내",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -199,7 +199,7 @@
       "assertions": [
         {
           "requirement": "합성 한국어 조합·문자 삽입에서 값·커서 보존 및 Enter 제출 차단",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -211,7 +211,7 @@
         },
         {
           "requirement": "합성 한국어 조합·문자 삽입에서 값·커서 보존 및 Enter 제출 차단",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -223,7 +223,7 @@
         },
         {
           "requirement": "합성 한국어 조합·문자 삽입에서 값·커서 보존 및 Enter 제출 차단",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -235,7 +235,7 @@
         },
         {
           "requirement": "합성 한국어 조합·문자 삽입에서 값·커서 보존 및 Enter 제출 차단",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -257,7 +257,7 @@
       "assertions": [
         {
           "requirement": "React controlled field가 다음 렌더 후 값 유지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/core.test.ts",
           "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
           "titlePath": [
@@ -269,7 +269,7 @@
         },
         {
           "requirement": "원본 제출 handler와 원본 저장 결과에도 입력값 유지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/core.test.ts",
           "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
           "titlePath": [
@@ -281,7 +281,7 @@
         },
         {
           "requirement": "원본 제출 handler와 원본 저장 결과에도 입력값 유지",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/culture.spec.ts",
           "sourceSha256": "d3f99e4a63bc5fb4034ecb8c8b616f311dece6ae39af5485396caf08ebee4b92",
           "titlePath": [
@@ -293,7 +293,7 @@
         },
         {
           "requirement": "원본 제출 handler와 원본 저장 결과에도 입력값 유지",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/culture.spec.ts",
           "sourceSha256": "d3f99e4a63bc5fb4034ecb8c8b616f311dece6ae39af5485396caf08ebee4b92",
           "titlePath": [
@@ -315,7 +315,7 @@
       "assertions": [
         {
           "requirement": "사용자 선택 전 동의 체크박스 변경 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -327,7 +327,7 @@
         },
         {
           "requirement": "사용자 선택 전 동의 체크박스 변경 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -339,7 +339,7 @@
         },
         {
           "requirement": "사용자 선택 전 동의 체크박스 변경 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -351,7 +351,7 @@
         },
         {
           "requirement": "명시적 사용자 클릭만 원본 동의에 반영",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -372,7 +372,7 @@
       "assertions": [
         {
           "requirement": "중복 클릭·Enter 연타에도 원본 POST와 DB 삽입 한 건",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -384,7 +384,7 @@
         },
         {
           "requirement": "중복 클릭·Enter 연타에도 원본 POST와 DB 삽입 한 건",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -396,7 +396,7 @@
         },
         {
           "requirement": "중복 클릭·Enter 연타에도 원본 POST와 DB 삽입 한 건",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -408,7 +408,7 @@
         },
         {
           "requirement": "중복 클릭·Enter 연타에도 원본 POST와 DB 삽입 한 건",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -430,7 +430,7 @@
       "assertions": [
         {
           "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -442,7 +442,7 @@
         },
         {
           "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -454,7 +454,7 @@
         },
         {
           "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -466,7 +466,7 @@
         },
         {
           "requirement": "원본 오류에서 거짓 성공·자동 재제출 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -478,7 +478,7 @@
         },
         {
           "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -490,7 +490,7 @@
         },
         {
           "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -502,7 +502,7 @@
         },
         {
           "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -514,7 +514,7 @@
         },
         {
           "requirement": "커밋 후 응답 유실에서도 거짓 성공·자동 재제출 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -536,7 +536,7 @@
       "assertions": [
         {
           "requirement": "전체 페이지 이동 후 재주입·상태 복구",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/benefits.spec.ts",
           "sourceSha256": "9cf5481b6afda0ff235a0c0939ca1c853339735c5e8281ad6e87f786b6b1bab9",
           "titlePath": [
@@ -548,7 +548,7 @@
         },
         {
           "requirement": "전체 페이지 이동 후 재주입·상태 복구",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/benefits.spec.ts",
           "sourceSha256": "9cf5481b6afda0ff235a0c0939ca1c853339735c5e8281ad6e87f786b6b1bab9",
           "titlePath": [
@@ -560,7 +560,7 @@
         },
         {
           "requirement": "전체 페이지 이동 후 재주입·상태 복구",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/benefits.spec.ts",
           "sourceSha256": "9cf5481b6afda0ff235a0c0939ca1c853339735c5e8281ad6e87f786b6b1bab9",
           "titlePath": [
@@ -572,9 +572,9 @@
         },
         {
           "requirement": "이전 document/ref 폐기 및 새 instance 요구",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background N02 navigation and restart",
             "invalidates old references on full navigation and requires a new instance"
@@ -584,9 +584,9 @@
         },
         {
           "requirement": "이전 document/ref 폐기 및 새 instance 요구",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background N02 navigation and restart",
             "invalidates old references on full navigation and requires a new instance"
@@ -605,7 +605,7 @@
       "assertions": [
         {
           "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -617,7 +617,7 @@
         },
         {
           "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -629,7 +629,7 @@
         },
         {
           "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -641,7 +641,7 @@
         },
         {
           "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -653,7 +653,7 @@
         },
         {
           "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -665,7 +665,7 @@
         },
         {
           "requirement": "SPA 이동·뒤로가기·앞으로가기에서 올바른 문서·단계 연결",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -687,7 +687,7 @@
       "assertions": [
         {
           "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -699,7 +699,7 @@
         },
         {
           "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -711,7 +711,7 @@
         },
         {
           "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -723,7 +723,7 @@
         },
         {
           "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -735,7 +735,7 @@
         },
         {
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -747,7 +747,7 @@
         },
         {
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -759,7 +759,7 @@
         },
         {
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -771,7 +771,7 @@
         },
         {
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -783,7 +783,7 @@
         },
         {
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -795,7 +795,7 @@
         },
         {
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -817,7 +817,7 @@
       "assertions": [
         {
           "requirement": "필수 입력 추가 시 오래된 계획 거부",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -829,7 +829,7 @@
         },
         {
           "requirement": "필수 입력 추가 시 오래된 계획 거부",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -841,7 +841,7 @@
         },
         {
           "requirement": "필수 입력 추가 시 오래된 계획 거부",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -853,7 +853,7 @@
         },
         {
           "requirement": "재분석한 UI에 새 필수 입력·오류 반영",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -865,7 +865,7 @@
         },
         {
           "requirement": "재분석한 UI에 새 필수 입력·오류 반영",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -877,7 +877,7 @@
         },
         {
           "requirement": "재분석한 UI에 새 필수 입력·오류 반영",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -899,7 +899,7 @@
       "assertions": [
         {
           "requirement": "동일 라벨 복수 form에서 다른 form의 버튼·입력 선택 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/core.test.ts",
           "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
           "titlePath": [
@@ -911,7 +911,7 @@
         },
         {
           "requirement": "선택한 form의 원본 action으로만 저장",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -923,7 +923,7 @@
         },
         {
           "requirement": "선택한 form의 원본 action으로만 저장",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -945,7 +945,7 @@
       "assertions": [
         {
           "requirement": "동의·중요 원문 변경으로 기존 계획·notice cache 무효화",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -957,7 +957,7 @@
         },
         {
           "requirement": "동의·중요 원문 변경으로 기존 계획·notice cache 무효화",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -969,7 +969,7 @@
         },
         {
           "requirement": "동의·중요 원문 변경으로 기존 계획·notice cache 무효화",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -981,7 +981,7 @@
         },
         {
           "requirement": "새 원문을 재분석한 UI에 표시",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -993,7 +993,7 @@
         },
         {
           "requirement": "새 원문을 재분석한 UI에 표시",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -1015,9 +1015,9 @@
       "assertions": [
         {
           "requirement": "2.9초 준비 완료 시 광고 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T15 T21 partial: 2.9s cold transport and warm cache record real readiness with no ad"
           ],
@@ -1027,9 +1027,9 @@
         },
         {
           "requirement": "준비 완료 즉시 READY 및 입력 가능",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T15 T21 partial: 2.9s cold transport and warm cache record real readiness with no ad"
           ],
@@ -1039,9 +1039,9 @@
         },
         {
           "requirement": "준비 완료 즉시 READY 및 입력 가능",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T15 T21 partial: 2.9s cold transport and warm cache record real readiness with no ad"
           ],
@@ -1051,9 +1051,9 @@
         },
         {
           "requirement": "준비 완료 즉시 READY 및 입력 가능",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T15 T21 partial: 2.9s cold transport and warm cache record real readiness with no ad"
           ],
@@ -1073,9 +1073,9 @@
       "assertions": [
         {
           "requirement": "3.1초 이후 완료 시 준비 중에만 광고 표시",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
           ],
@@ -1085,9 +1085,9 @@
         },
         {
           "requirement": "3.1초 이후 완료 시 준비 중에만 광고 표시",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
           ],
@@ -1097,9 +1097,9 @@
         },
         {
           "requirement": "완료 즉시 광고 종료",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
           ],
@@ -1109,9 +1109,9 @@
         },
         {
           "requirement": "완료 즉시 광고 종료",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
           ],
@@ -1131,11 +1131,11 @@
       "assertions": [
         {
           "requirement": "10초 대기 상한 후 원본 선택 제공",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
-            "T17: 10s timeout offers original and rejects the 11s late planner response"
+            "T17: 30s timeout offers original and rejects the 31s late planner response"
           ],
           "assertion": "await expect(dialog(page).getByRole('button', { name: '원래 화면에서 계속하기', exact: true })).toBeEnabled();",
           "project": "",
@@ -1143,23 +1143,23 @@
         },
         {
           "requirement": "10초 대기 상한 후 원본 선택 제공",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
-            "T17: 10s timeout offers original and rejects the 11s late planner response"
+            "T17: 30s timeout offers original and rejects the 31s late planner response"
           ],
-          "assertion": "expect(elapsed).toBeGreaterThanOrEqual(9900); expect(elapsed).toBeLessThan(10500);",
+          "assertion": "expect(elapsed).toBeGreaterThanOrEqual(29900); expect(elapsed).toBeLessThan(30500);",
           "project": "",
           "instances": 1
         },
         {
           "requirement": "11초 늦은 결과를 READY/UI로 적용하지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
-            "T17: 10s timeout offers original and rejects the 11s late planner response"
+            "T17: 30s timeout offers original and rejects the 31s late planner response"
           ],
           "assertion": "await expect.poll(() => qa.exchanges[0]?.releasedAt).toBeTruthy();",
           "project": "",
@@ -1167,11 +1167,11 @@
         },
         {
           "requirement": "11초 늦은 결과를 READY/UI로 적용하지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
-            "T17: 10s timeout offers original and rejects the 11s late planner response"
+            "T17: 30s timeout offers original and rejects the 31s late planner response"
           ],
           "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'TIMED_OUT');",
           "project": "",
@@ -1179,11 +1179,11 @@
         },
         {
           "requirement": "11초 늦은 결과를 READY/UI로 적용하지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
-            "T17: 10s timeout offers original and rejects the 11s late planner response"
+            "T17: 30s timeout offers original and rejects the 31s late planner response"
           ],
           "assertion": "await expect(dialog(page).getByLabel('주문번호', { exact: false })).toHaveCount(0);",
           "project": "",
@@ -1191,11 +1191,11 @@
         },
         {
           "requirement": "11초 늦은 결과를 READY/UI로 적용하지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
-            "T17: 10s timeout offers original and rejects the 11s late planner response"
+            "T17: 30s timeout offers original and rejects the 31s late planner response"
           ],
           "assertion": "expect(samples.some(x => x.phase === 'READY')).toBe(false);",
           "project": "",
@@ -1213,9 +1213,9 @@
       "assertions": [
         {
           "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result"
           ],
@@ -1225,9 +1225,9 @@
         },
         {
           "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result"
           ],
@@ -1237,9 +1237,9 @@
         },
         {
           "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result"
           ],
@@ -1249,7 +1249,7 @@
         },
         {
           "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1261,7 +1261,7 @@
         },
         {
           "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1273,7 +1273,7 @@
         },
         {
           "requirement": "취소·새 epoch·탭 변경 후 이전 결과 적용 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1295,9 +1295,9 @@
       "assertions": [
         {
           "requirement": "광고 닫기가 준비 요청과 입력 가능 상태를 방해하지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T19 partial: dismissing the sponsor preserves the same preparation request"
           ],
@@ -1307,9 +1307,9 @@
         },
         {
           "requirement": "광고 닫기가 준비 요청과 입력 가능 상태를 방해하지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T19 partial: dismissing the sponsor preserves the same preparation request"
           ],
@@ -1319,9 +1319,9 @@
         },
         {
           "requirement": "광고 닫기가 준비 요청과 입력 가능 상태를 방해하지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T19 partial: dismissing the sponsor preserves the same preparation request"
           ],
@@ -1331,9 +1331,9 @@
         },
         {
           "requirement": "광고 닫기가 준비 요청과 입력 가능 상태를 방해하지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T19 partial: dismissing the sponsor preserves the same preparation request"
           ],
@@ -1354,7 +1354,7 @@
       "assertions": [
         {
           "requirement": "입력·쿠키·숨김 sentinel의 extension 저장소 유출 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -1376,7 +1376,7 @@
       "assertions": [
         {
           "requirement": "cold와 warm 측정·provider/cache 경로 구분",
-          "run": "release-live-02",
+          "run": "timeout30-live-final",
           "file": "tests/e2e-live/product.spec.ts",
           "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
           "titlePath": [
@@ -1388,7 +1388,7 @@
         },
         {
           "requirement": "cold와 warm 측정·provider/cache 경로 구분",
-          "run": "release-live-02",
+          "run": "timeout30-live-final",
           "file": "tests/e2e-live/product.spec.ts",
           "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
           "titlePath": [
@@ -1400,7 +1400,7 @@
         },
         {
           "requirement": "cold와 warm 측정·provider/cache 경로 구분",
-          "run": "release-live-02",
+          "run": "timeout30-live-final",
           "file": "tests/e2e-live/product.spec.ts",
           "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
           "titlePath": [
@@ -1412,7 +1412,7 @@
         },
         {
           "requirement": "cold와 warm 측정·provider/cache 경로 구분",
-          "run": "release-live-02",
+          "run": "timeout30-live-final",
           "file": "tests/e2e-live/product.spec.ts",
           "sourceSha256": "7275bd793668290999e6aaafef9ed752dfe11417986fe4fbdee0b3993f5399c2",
           "titlePath": [
@@ -1435,7 +1435,7 @@
       "assertions": [
         {
           "requirement": "현재 화면의 plan endpoint 차단 후 입력·수정·제출에 추가 계획 요청 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -1447,7 +1447,7 @@
         },
         {
           "requirement": "원본 handler를 통한 저장 성공",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -1459,7 +1459,7 @@
         },
         {
           "requirement": "원본 handler를 통한 저장 성공",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -1481,7 +1481,7 @@
       "assertions": [
         {
           "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1493,7 +1493,7 @@
         },
         {
           "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1505,7 +1505,7 @@
         },
         {
           "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1517,7 +1517,7 @@
         },
         {
           "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1529,7 +1529,7 @@
         },
         {
           "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1541,7 +1541,7 @@
         },
         {
           "requirement": "미지원 iframe/CAPTCHA에서 분석·우회·제출 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1553,7 +1553,7 @@
         },
         {
           "requirement": "원본 복귀 후 계속 입력 가능",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1565,7 +1565,7 @@
         },
         {
           "requirement": "원본 복귀 후 계속 입력 가능",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1577,7 +1577,7 @@
         },
         {
           "requirement": "원본 복귀 후 계속 입력 가능",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1589,7 +1589,7 @@
         },
         {
           "requirement": "원본 복귀 후 계속 입력 가능",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1611,7 +1611,7 @@
       "assertions": [
         {
           "requirement": "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1623,7 +1623,7 @@
         },
         {
           "requirement": "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1635,7 +1635,7 @@
         },
         {
           "requirement": "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1647,7 +1647,7 @@
         },
         {
           "requirement": "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1659,7 +1659,7 @@
         },
         {
           "requirement": "합성 200% 상당 viewport에서 키보드 포커스·입력·Escape 원본 복귀",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -1681,7 +1681,7 @@
       "assertions": [
         {
           "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -1693,7 +1693,7 @@
         },
         {
           "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -1705,7 +1705,7 @@
         },
         {
           "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -1717,7 +1717,7 @@
         },
         {
           "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -1729,7 +1729,7 @@
         },
         {
           "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
           "sourceSha256": "e1ef47fcea5fe5fa0e343b936b47a88748e9976097d55b6d028fff4fe3aa61b5",
           "titlePath": [
@@ -1751,7 +1751,7 @@
       "assertions": [
         {
           "requirement": "추가 필수 구조·오류에 안전하게 재분석 대응",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -1763,7 +1763,7 @@
         },
         {
           "requirement": "추가 필수 구조·오류에 안전하게 재분석 대응",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -1775,7 +1775,7 @@
         },
         {
           "requirement": "추가 필수 구조·오류에 안전하게 재분석 대응",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -1798,7 +1798,7 @@
       "assertions": [
         {
           "requirement": "LOCAL_NEXT/LOCAL_BACK가 로컬 UI action만 발행",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ui-templates.test.ts",
           "sourceSha256": "013f6128aed2cfc238268b81e6d3dfc2bb847d68613895347eb6fb1a563dba1e",
           "titlePath": [
@@ -1810,7 +1810,7 @@
         },
         {
           "requirement": "로컬 단계 이동 중 원본 저장 POST 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -1822,7 +1822,7 @@
         },
         {
           "requirement": "로컬 단계 이동 중 원본 저장 POST 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -1834,7 +1834,7 @@
         },
         {
           "requirement": "controller에서 원본 click/submit 호출 자체가 없음을 직접 검증",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -1856,7 +1856,7 @@
       "assertions": [
         {
           "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/core.test.ts",
           "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
           "titlePath": [
@@ -1868,7 +1868,7 @@
         },
         {
           "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/core.test.ts",
           "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
           "titlePath": [
@@ -1880,7 +1880,7 @@
         },
         {
           "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/core.test.ts",
           "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
           "titlePath": [
@@ -1892,7 +1892,7 @@
         },
         {
           "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/core.test.ts",
           "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
           "titlePath": [
@@ -1904,7 +1904,7 @@
         },
         {
           "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/core.test.ts",
           "sourceSha256": "c972590a1dbac89095ea25719430b27df8901463f7b718f7f399db3d5097f9db",
           "titlePath": [
@@ -1916,7 +1916,7 @@
         },
         {
           "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -1928,7 +1928,7 @@
         },
         {
           "requirement": "값·중요조건·대상·document 변경 시 기존 review token 무효",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -1940,7 +1940,7 @@
         },
         {
           "requirement": "최신 실제 값·조건으로 다시 확인",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -1952,7 +1952,7 @@
         },
         {
           "requirement": "최신 실제 값·조건으로 다시 확인",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -1974,7 +1974,7 @@
       "assertions": [
         {
           "requirement": "provider/prompt/cache에 QA oracle sentinel 없음",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -1986,7 +1986,7 @@
         },
         {
           "requirement": "provider/prompt/cache에 QA oracle sentinel 없음",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2009,7 +2009,7 @@
       "assertions": [
         {
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2021,7 +2021,7 @@
         },
         {
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2033,7 +2033,7 @@
         },
         {
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2045,7 +2045,7 @@
         },
         {
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2057,7 +2057,7 @@
         },
         {
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2069,7 +2069,7 @@
         },
         {
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2081,7 +2081,7 @@
         },
         {
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2093,7 +2093,7 @@
         },
         {
           "requirement": "unknown refs·필수/notice 누락·잘못된 schema를 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2105,9 +2105,9 @@
         },
         {
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/contracts.test.ts",
-          "sourceSha256": "6cf24bf99313657ecd203e01b10de0408479c22f36040994bf80e988486a10af",
+          "sourceSha256": "17d7f4cf931eca17aff66e9c003a76f4dbc2f833a5c422844cd01fec54dcd5fa",
           "titlePath": [
             "strict public contracts",
             "rejects executable output, unsupported templates and repeated references"
@@ -2117,9 +2117,9 @@
         },
         {
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/contracts.test.ts",
-          "sourceSha256": "6cf24bf99313657ecd203e01b10de0408479c22f36040994bf80e988486a10af",
+          "sourceSha256": "17d7f4cf931eca17aff66e9c003a76f4dbc2f833a5c422844cd01fec54dcd5fa",
           "titlePath": [
             "strict public contracts",
             "rejects executable output, unsupported templates and repeated references"
@@ -2129,7 +2129,7 @@
         },
         {
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ui-templates.test.ts",
           "sourceSha256": "013f6128aed2cfc238268b81e6d3dfc2bb847d68613895347eb6fb1a563dba1e",
           "titlePath": [
@@ -2141,7 +2141,7 @@
         },
         {
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ui-templates.test.ts",
           "sourceSha256": "013f6128aed2cfc238268b81e6d3dfc2bb847d68613895347eb6fb1a563dba1e",
           "titlePath": [
@@ -2153,7 +2153,7 @@
         },
         {
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ui-templates.test.ts",
           "sourceSha256": "013f6128aed2cfc238268b81e6d3dfc2bb847d68613895347eb6fb1a563dba1e",
           "titlePath": [
@@ -2165,7 +2165,7 @@
         },
         {
           "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2177,7 +2177,7 @@
         },
         {
           "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2189,7 +2189,7 @@
         },
         {
           "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2201,7 +2201,7 @@
         },
         {
           "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2213,7 +2213,7 @@
         },
         {
           "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2225,7 +2225,7 @@
         },
         {
           "requirement": "임의 URL을 포함한 모델 action 출력의 직접 거부 사례",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2247,7 +2247,7 @@
       "assertions": [
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2259,7 +2259,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2271,7 +2271,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2283,7 +2283,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2295,7 +2295,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2307,7 +2307,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2319,7 +2319,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2331,7 +2331,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2343,7 +2343,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2355,7 +2355,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2367,7 +2367,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2379,7 +2379,7 @@
         },
         {
           "requirement": "미승인 loopback Host·Origin·token 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2391,9 +2391,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects foreign extension without planner access"
@@ -2403,9 +2403,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects foreign extension without planner access"
@@ -2415,9 +2415,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects missing tab without planner access"
@@ -2427,9 +2427,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects missing tab without planner access"
@@ -2439,9 +2439,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects subframe without planner access"
@@ -2451,9 +2451,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects subframe without planner access"
@@ -2463,9 +2463,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects missing document without planner access"
@@ -2475,9 +2475,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects missing document without planner access"
@@ -2487,9 +2487,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects opaque origin without planner access"
@@ -2499,9 +2499,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects opaque origin without planner access"
@@ -2511,9 +2511,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects cached document without planner access"
@@ -2523,9 +2523,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects cached document without planner access"
@@ -2535,9 +2535,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects non-HTTP page without planner access"
@@ -2547,9 +2547,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects non-HTTP page without planner access"
@@ -2559,9 +2559,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects cross origin without planner access"
@@ -2571,9 +2571,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects cross origin without planner access"
@@ -2583,9 +2583,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "checks actual current frame document rather than trusting sender.tab"
@@ -2595,9 +2595,9 @@
         },
         {
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
+          "sourceSha256": "8919369e3a9a4ef335a55ef84283837fe8115996e0aabbe815cb050dd51b3602",
           "titlePath": [
             "background authorization and storage boundary",
             "checks actual current frame document rather than trusting sender.tab"
@@ -2616,7 +2616,7 @@
       "assertions": [
         {
           "requirement": "FLECTO 렌더·설정·광고·타이머 mutation이 재추론 루프를 만들지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -2628,7 +2628,7 @@
         },
         {
           "requirement": "FLECTO 렌더·설정·광고·타이머 mutation이 재추론 루프를 만들지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -2640,7 +2640,7 @@
         },
         {
           "requirement": "FLECTO 렌더·설정·광고·타이머 mutation이 재추론 루프를 만들지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -2652,7 +2652,7 @@
         },
         {
           "requirement": "FLECTO 렌더·설정·광고·타이머 mutation이 재추론 루프를 만들지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -2675,7 +2675,7 @@
       "assertions": [
         {
           "requirement": "같은 요청의 singleflight 및 중복 provider 호출 방지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2687,7 +2687,7 @@
         },
         {
           "requirement": "같은 요청의 singleflight 및 중복 provider 호출 방지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2699,9 +2699,9 @@
         },
         {
           "requirement": "새 epoch의 요청에 예전 결과 적용 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result"
           ],
@@ -2711,9 +2711,9 @@
         },
         {
           "requirement": "새 epoch의 요청에 예전 결과 적용 안 됨",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result"
           ],
@@ -2735,7 +2735,7 @@
       "assertions": [
         {
           "requirement": "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/vision-capture.spec.ts",
           "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
           "titlePath": [
@@ -2747,7 +2747,7 @@
         },
         {
           "requirement": "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/vision-capture.spec.ts",
           "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
           "titlePath": [
@@ -2759,7 +2759,7 @@
         },
         {
           "requirement": "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/vision-capture.spec.ts",
           "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
           "titlePath": [
@@ -2771,7 +2771,7 @@
         },
         {
           "requirement": "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/vision-capture.spec.ts",
           "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
           "titlePath": [
@@ -2783,7 +2783,7 @@
         },
         {
           "requirement": "합성 crop에서 private/unknown/host pixels 제거·public text 유지",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/vision-capture.spec.ts",
           "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
           "titlePath": [
@@ -2795,7 +2795,7 @@
         },
         {
           "requirement": "탭·document·가림 실패 시 이미지 전송 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/vision-capture.spec.ts",
           "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
           "titlePath": [
@@ -2807,7 +2807,7 @@
         },
         {
           "requirement": "탭·document·가림 실패 시 이미지 전송 안 함",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/vision-capture.spec.ts",
           "sourceSha256": "dc63b78b92f91717703435a426fb914f39130d2ca7ec95100fd7d7c1fb323563",
           "titlePath": [
@@ -2819,7 +2819,7 @@
         },
         {
           "requirement": "탭·document·가림 실패 시 이미지 전송 안 함",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/vision-transport.test.ts",
           "sourceSha256": "a2ff78bde1f6824a2c4ed139c5d7dff64e7c34231f6d1c58e1d44d324bf27403",
           "titlePath": [
@@ -2831,7 +2831,7 @@
         },
         {
           "requirement": "탭·document·가림 실패 시 이미지 전송 안 함",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/vision-controller.test.ts",
           "sourceSha256": "bd46b25606c7e33a12b156d3d084de7bbc1329270cd6dc5b0dffd6660bc98794",
           "titlePath": [
@@ -2842,7 +2842,7 @@
         },
         {
           "requirement": "시각 보완이 원래 요청 기한을 초기화하지 않음",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/vision-transport.test.ts",
           "sourceSha256": "a2ff78bde1f6824a2c4ed139c5d7dff64e7c34231f6d1c58e1d44d324bf27403",
           "titlePath": [
@@ -2863,7 +2863,7 @@
       "assertions": [
         {
           "requirement": "LIVE provider 실패를 fixture 성공으로 조용히 바꾸지 않음",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2875,7 +2875,7 @@
         },
         {
           "requirement": "LIVE provider 실패를 fixture 성공으로 조용히 바꾸지 않음",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -2897,9 +2897,9 @@
       "assertions": [
         {
           "requirement": "READY 시 광고 제거 및 즉시 primary click 차단",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
           ],
@@ -2909,9 +2909,9 @@
         },
         {
           "requirement": "READY 시 광고 제거 및 즉시 primary click 차단",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/performance.spec.ts",
-          "sourceSha256": "ffcedd734ee6d2eab797f910f79a8b5c75e28f1f5e74cc5da2ed9c40235233aa",
+          "sourceSha256": "9994ccce2c61313aeaf44a294ab9a31f1391c97733d30dca88b21da11833409c",
           "titlePath": [
             "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting"
           ],
@@ -2921,7 +2921,7 @@
         },
         {
           "requirement": "READY 시 광고 제거 및 즉시 primary click 차단",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ui-templates.test.ts",
           "sourceSha256": "013f6128aed2cfc238268b81e6d3dfc2bb847d68613895347eb6fb1a563dba1e",
           "titlePath": [
@@ -2945,7 +2945,7 @@
       "assertions": [
         {
           "requirement": "새 로그인 세션의 warm cache에 타인 입력 복원 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -2957,7 +2957,7 @@
         },
         {
           "requirement": "새 로그인 세션의 warm cache에 타인 입력 복원 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -2969,7 +2969,7 @@
         },
         {
           "requirement": "새 로그인 세션의 warm cache에 타인 입력 복원 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -2981,7 +2981,7 @@
         },
         {
           "requirement": "현재 선택지·정원 반영",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -2993,7 +2993,7 @@
         },
         {
           "requirement": "현재 선택지·정원 반영",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/variants.spec.ts",
           "sourceSha256": "9f6c802b01a818a72d233d345f9876ca1d98d35fa6689b7b82dd58e48d509a89",
           "titlePath": [
@@ -3005,7 +3005,7 @@
         },
         {
           "requirement": "현재 선택지·정원 반영",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-cache-performance.test.ts",
           "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
           "titlePath": [
@@ -3017,7 +3017,7 @@
         },
         {
           "requirement": "현재 선택지·정원 반영",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-cache-performance.test.ts",
           "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
           "titlePath": [
@@ -3029,7 +3029,7 @@
         },
         {
           "requirement": "reset 대상이 합성 namespace에 제한",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-reset.test.ts",
           "sourceSha256": "221ccf8c5f8fcc51d61aa8a94611ed36c49f2c65fa1c62396e3505d26494b392",
           "titlePath": [
@@ -3041,7 +3041,7 @@
         },
         {
           "requirement": "reset 대상이 합성 namespace에 제한",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-reset.test.ts",
           "sourceSha256": "221ccf8c5f8fcc51d61aa8a94611ed36c49f2c65fa1c62396e3505d26494b392",
           "titlePath": [
@@ -3053,7 +3053,7 @@
         },
         {
           "requirement": "reset 대상이 합성 namespace에 제한",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-reset.test.ts",
           "sourceSha256": "221ccf8c5f8fcc51d61aa8a94611ed36c49f2c65fa1c62396e3505d26494b392",
           "titlePath": [
@@ -3076,7 +3076,7 @@
       "assertions": [
         {
           "requirement": "서로 다른 탭·document에 요청·연결이 섞이지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -3088,7 +3088,7 @@
         },
         {
           "requirement": "서로 다른 탭·document에 요청·연결이 섞이지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -3100,7 +3100,7 @@
         },
         {
           "requirement": "서로 다른 탭·document에 요청·연결이 섞이지 않음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -3112,7 +3112,7 @@
         },
         {
           "requirement": "다른 origin 이동 및 복귀 후 명시적 재활성화",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -3124,7 +3124,7 @@
         },
         {
           "requirement": "다른 origin 이동 및 복귀 후 명시적 재활성화",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -3136,7 +3136,7 @@
         },
         {
           "requirement": "다른 origin 이동 및 복귀 후 명시적 재활성화",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/regressions.spec.ts",
           "sourceSha256": "56a307a6ad8d93be0661842e07dddb8ef5a63c54fce477a9fa8f786610860d54",
           "titlePath": [
@@ -3158,7 +3158,7 @@
       "assertions": [
         {
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -3170,7 +3170,7 @@
         },
         {
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -3182,7 +3182,7 @@
         },
         {
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -3194,7 +3194,7 @@
         },
         {
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -3206,7 +3206,7 @@
         },
         {
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-security.test.ts",
           "sourceSha256": "fedcf91754993ca22243d0ff7e44f0d969694152e9d4183470845a6a223c32d7",
           "titlePath": [
@@ -3218,7 +3218,7 @@
         },
         {
           "requirement": "이전 모델·prompt artifact의 LIVE 근거 합산 금지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-qa-report.test.ts",
           "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
           "titlePath": [
@@ -3230,7 +3230,7 @@
         },
         {
           "requirement": "이전 모델·prompt artifact의 LIVE 근거 합산 금지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-qa-report.test.ts",
           "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
           "titlePath": [
@@ -3242,7 +3242,7 @@
         },
         {
           "requirement": "이전 모델·prompt artifact의 LIVE 근거 합산 금지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-qa-report.test.ts",
           "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
           "titlePath": [
@@ -3254,7 +3254,7 @@
         },
         {
           "requirement": "이전 모델·prompt artifact의 LIVE 근거 합산 금지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-qa-report.test.ts",
           "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
           "titlePath": [
@@ -3266,7 +3266,7 @@
         },
         {
           "requirement": "이전 모델·prompt artifact의 LIVE 근거 합산 금지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-qa-report.test.ts",
           "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
           "titlePath": [
@@ -3278,7 +3278,7 @@
         },
         {
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-cache-performance.test.ts",
           "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
           "titlePath": [
@@ -3290,7 +3290,7 @@
         },
         {
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-cache-performance.test.ts",
           "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
           "titlePath": [
@@ -3302,7 +3302,7 @@
         },
         {
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-cache-performance.test.ts",
           "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
           "titlePath": [
@@ -3314,7 +3314,7 @@
         },
         {
           "requirement": "모델·prompt/cache version 변경 시 cache 분리·불일치 격리",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/planner-cache-performance.test.ts",
           "sourceSha256": "47e425aeed7b63b0405fdc33dcde6a7475c8e1719435c72c47e1d7c0a0145295",
           "titlePath": [
@@ -3337,7 +3337,7 @@
       "assertions": [
         {
           "requirement": "로그인/password·OTP 등장 시 분석 중단·추가 계획 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -3349,7 +3349,7 @@
         },
         {
           "requirement": "로그인/password·OTP 등장 시 분석 중단·추가 계획 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -3361,7 +3361,7 @@
         },
         {
           "requirement": "로그인/password·OTP 등장 시 분석 중단·추가 계획 없음",
-          "run": "release-fixture-02",
+          "run": "timeout30-fixture-final",
           "file": "tests/e2e-fixture/safety.spec.ts",
           "sourceSha256": "a5b362022c52030b1f6f295a7250b879cb7a8060fcffc6b6bb81942d73d63ec5",
           "titlePath": [
@@ -3373,7 +3373,7 @@
         },
         {
           "requirement": "비밀번호 getter를 읽지 않음",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/controller-observation.test.ts",
           "sourceSha256": "3a4c1523f40312b8808c16de0e1a01e4b9a19ec7f188f1a61925ed052ed21bc8",
           "titlePath": [
@@ -3394,7 +3394,7 @@
       "assertions": [
         {
           "requirement": "실제 demo launcher 중복 run lock 획득 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3406,7 +3406,7 @@
         },
         {
           "requirement": "실제 demo launcher 중복 run lock 획득 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3418,7 +3418,7 @@
         },
         {
           "requirement": "실제 demo launcher 중복 run lock 획득 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3440,7 +3440,7 @@
       "assertions": [
         {
           "requirement": "기한 도달 시 자기 child·grandchild만 종료",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3452,7 +3452,7 @@
         },
         {
           "requirement": "기한 도달 시 자기 child·grandchild만 종료",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3464,7 +3464,7 @@
         },
         {
           "requirement": "기한 도달 시 자기 child·grandchild만 종료",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3486,7 +3486,7 @@
       "assertions": [
         {
           "requirement": "보조 검증: 변경된 입력으로 기존 manifest 덮어쓰기 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-runtime-hash.test.ts",
           "sourceSha256": "0f26148f624c21ea32294e9c800dd7106cc8b430ad85969cc2d9e71bdd588690",
           "titlePath": [
@@ -3498,7 +3498,7 @@
         },
         {
           "requirement": "보조 검증: 변경된 입력으로 기존 manifest 덮어쓰기 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-runtime-hash.test.ts",
           "sourceSha256": "0f26148f624c21ea32294e9c800dd7106cc8b430ad85969cc2d9e71bdd588690",
           "titlePath": [
@@ -3520,7 +3520,7 @@
       "assertions": [
         {
           "requirement": "lease 검증 함수가 이전 generation handoff 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-guards.test.ts",
           "sourceSha256": "3355accfd9a75150872f5be2a8f28696502789c813892857122f52e389f2ac45",
           "titlePath": [
@@ -3532,7 +3532,7 @@
         },
         {
           "requirement": "lease 검증 함수가 이전 generation handoff 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-guards.test.ts",
           "sourceSha256": "3355accfd9a75150872f5be2a8f28696502789c813892857122f52e389f2ac45",
           "titlePath": [
@@ -3554,7 +3554,7 @@
       "assertions": [
         {
           "requirement": "같은 patch-id의 중복 ledger 기록 방지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-guards.test.ts",
           "sourceSha256": "3355accfd9a75150872f5be2a8f28696502789c813892857122f52e389f2ac45",
           "titlePath": [
@@ -3566,7 +3566,7 @@
         },
         {
           "requirement": "같은 patch-id의 중복 ledger 기록 방지",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-guards.test.ts",
           "sourceSha256": "3355accfd9a75150872f5be2a8f28696502789c813892857122f52e389f2ac45",
           "titlePath": [
@@ -3588,7 +3588,7 @@
       "assertions": [
         {
           "requirement": "bounded runner가 무한 대기 없이 자기 작업 종료",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3600,7 +3600,7 @@
         },
         {
           "requirement": "bounded runner가 무한 대기 없이 자기 작업 종료",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3612,7 +3612,7 @@
         },
         {
           "requirement": "bounded runner가 무한 대기 없이 자기 작업 종료",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3634,7 +3634,7 @@
       "assertions": [
         {
           "requirement": "보조 검증: 연결 UI auth·server 실패 구분",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/options.test.ts",
           "sourceSha256": "36ebc38bf97d33860ed1304815c6d4c1eb1e5c4a1e291d7168a733cf66d6bec6",
           "titlePath": [
@@ -3646,7 +3646,7 @@
         },
         {
           "requirement": "보조 검증: 연결 UI auth·server 실패 구분",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/options.test.ts",
           "sourceSha256": "36ebc38bf97d33860ed1304815c6d4c1eb1e5c4a1e291d7168a733cf66d6bec6",
           "titlePath": [
@@ -3668,7 +3668,7 @@
       "assertions": [
         {
           "requirement": "기한 종료 시 타인 프로세스 생존",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3680,7 +3680,7 @@
         },
         {
           "requirement": "기한 종료 시 타인 프로세스 생존",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-doctor.test.ts",
           "sourceSha256": "31fc529f9f73c2a05f97f8e334290bc507f1a4f061fcbcfb1b6af2f71ddd745a",
           "titlePath": [
@@ -3692,7 +3692,7 @@
         },
         {
           "requirement": "기한 종료 시 타인 프로세스 생존",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-doctor.test.ts",
           "sourceSha256": "31fc529f9f73c2a05f97f8e334290bc507f1a4f061fcbcfb1b6af2f71ddd745a",
           "titlePath": [
@@ -3714,7 +3714,7 @@
       "assertions": [
         {
           "requirement": "보호·scope·삭제된 테스트 위반 검출",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-guards.test.ts",
           "sourceSha256": "3355accfd9a75150872f5be2a8f28696502789c813892857122f52e389f2ac45",
           "titlePath": [
@@ -3736,7 +3736,7 @@
       "assertions": [
         {
           "requirement": "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-qa-report.test.ts",
           "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
           "titlePath": [
@@ -3748,7 +3748,7 @@
         },
         {
           "requirement": "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-evidence.test.ts",
           "sourceSha256": "90977a769f588e11d20b9d48ecc3d84cb3d2f6efb5288aa57695f53bf8eb2a0d",
           "titlePath": [
@@ -3760,7 +3760,7 @@
         },
         {
           "requirement": "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-evidence.test.ts",
           "sourceSha256": "90977a769f588e11d20b9d48ecc3d84cb3d2f6efb5288aa57695f53bf8eb2a0d",
           "titlePath": [
@@ -3772,7 +3772,7 @@
         },
         {
           "requirement": "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-evidence.test.ts",
           "sourceSha256": "90977a769f588e11d20b9d48ecc3d84cb3d2f6efb5288aa57695f53bf8eb2a0d",
           "titlePath": [
@@ -3784,7 +3784,7 @@
         },
         {
           "requirement": "집계기가 missing/skip/flaky/가짜·제목만 PASS 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-qa-report.test.ts",
           "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
           "titlePath": [
@@ -3806,7 +3806,7 @@
       "assertions": [
         {
           "requirement": "다른 artifact·runtime 근거를 release/emitter가 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-release.test.ts",
           "sourceSha256": "63573b51cc05d2465f340df057fa70bd936298d4af0bfadb86fc192777b1bf76",
           "titlePath": [
@@ -3818,7 +3818,7 @@
         },
         {
           "requirement": "다른 artifact·runtime 근거를 release/emitter가 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-qa-report.test.ts",
           "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
           "titlePath": [
@@ -3840,7 +3840,7 @@
       "assertions": [
         {
           "requirement": "근거 부족·실패에서 정직한 제한등급 산출",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-qa-report.test.ts",
           "sourceSha256": "102bbd7a1794341a98bfbb35828e0ec405a8936690ce31a76d5b6a5cb4298cef",
           "titlePath": [
@@ -3852,7 +3852,7 @@
         },
         {
           "requirement": "근거 부족·실패에서 정직한 제한등급 산출",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-release.test.ts",
           "sourceSha256": "63573b51cc05d2465f340df057fa70bd936298d4af0bfadb86fc192777b1bf76",
           "titlePath": [
@@ -3874,7 +3874,7 @@
       "assertions": [
         {
           "requirement": "보조 검증: optional vision 없이 기본 task 사용 가능",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/vision-controller.test.ts",
           "sourceSha256": "bd46b25606c7e33a12b156d3d084de7bbc1329270cd6dc5b0dffd6660bc98794",
           "titlePath": [
@@ -3885,7 +3885,7 @@
         },
         {
           "requirement": "보조 검증: optional vision 없이 기본 task 사용 가능",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/integration/vision-controller.test.ts",
           "sourceSha256": "bd46b25606c7e33a12b156d3d084de7bbc1329270cd6dc5b0dffd6660bc98794",
           "titlePath": [
@@ -3906,7 +3906,7 @@
       "assertions": [
         {
           "requirement": "REVOKED build를 release packer가 거부",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-release.test.ts",
           "sourceSha256": "63573b51cc05d2465f340df057fa70bd936298d4af0bfadb86fc192777b1bf76",
           "titlePath": [
@@ -3928,7 +3928,7 @@
       "assertions": [
         {
           "requirement": "보조 검증: 실제 종료 코드 보존·남은 child 회수",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3940,7 +3940,7 @@
         },
         {
           "requirement": "보조 검증: 실제 종료 코드 보존·남은 child 회수",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [
@@ -3952,7 +3952,7 @@
         },
         {
           "requirement": "보조 검증: 실제 종료 코드 보존·남은 child 회수",
-          "run": "release-unit-02",
+          "run": "timeout30-unit-final",
           "file": "tests/unit/ops-process.test.ts",
           "sourceSha256": "71a044c7580673659538469a5723169c3f6ce238934e99f40339ce0ac1b6db1a",
           "titlePath": [

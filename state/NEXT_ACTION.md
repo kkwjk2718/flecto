@@ -2,6 +2,10 @@
 
 2026-09-29 16:03 KST. 최신 사용자 지시: 16:15까지 실제 시연·영상·발표자료·출고 전달 완료. 자동 연장 없음.
 
+## 16:12 최신 지시
+
+사용자 요청으로 준비상한30초 변경, 개인Chrome반영·CACHE READY확인. timeout30-unit-final/timeout30-fixture-final/timeout30-live-final 병렬재검증중. fixture는benefits/culture/insurance/performance 영향범위만, 이전전체38과구분한다. 완료뒤새evidence/release로로컬delivery앱교체. 기존10초영상과검증은기록보존. USB outputs125개는로컬imports복사완료,USB쓰기금지.
+
 ## 완료 근거
 
 - 보험 원본 서비스, 30px 기본 글씨·72/80px 조작 영역, 옆 안내, 유일한 본문 폼 원클릭 준비 통합.

@@ -300,10 +300,10 @@ describe('CodexProvider (unit, spawn stubbed)', () => {
     expect(record.args).toContain('service_tier="fast"');
   });
 
-  it('clamps the budget to 10 s and rejects exhausted budgets before spawning', async () => {
+  it('clamps the budget to 30 s and rejects exhausted budgets before spawning', async () => {
     const { instance, record } = provider({ events: completedEvents(JSON.stringify(modelAnswer)) });
     const result = await instance.planDetailed(snapshot, 99_000, new AbortController().signal);
-    expect(result.budgetMs).toBe(10_000);
+    expect(result.budgetMs).toBe(30_000);
     const { instance: empty, record: emptyRecord } = provider({});
     await expect(empty.plan(snapshot, 0, new AbortController().signal)).rejects.toMatchObject({ code: 'DEADLINE_EXCEEDED' });
     expect(emptyRecord.command).toBe('');

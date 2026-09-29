@@ -36,7 +36,8 @@ it('one activation prepares the unique main form without touching input, consent
   const request = h.requests()[0][0].payload!;
   expect(request.snapshot.goalRef).toBeTruthy();
   expect(request.remainingBudgetMs).toBeGreaterThan(0);
-  expect(request.remainingBudgetMs).toBeLessThanOrEqual(10000);
+  expect(request.remainingBudgetMs).toBeGreaterThan(10000);
+  expect(request.remainingBudgetMs).toBeLessThanOrEqual(30000);
   expect(JSON.stringify(request)).not.toContain('PRIVATE_VALUE');
   expect((document.querySelector('#name') as HTMLInputElement).value).toBe('PRIVATE_VALUE');
   expect((document.querySelector('[type=checkbox]') as HTMLInputElement).checked).toBe(false);

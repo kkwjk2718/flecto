@@ -23,7 +23,8 @@ describe('strict public contracts', () => {
   });
   it('bounds waiting time and rejects arbitrary metric text', () => {
     expect(PlannerRequestSchema.safeParse({ snapshot, remainingBudgetMs: 10000, sessionEpoch: 1 }).success).toBe(true);
-    expect(PlannerRequestSchema.safeParse({ snapshot, remainingBudgetMs: 10001, sessionEpoch: 1 }).success).toBe(false);
+    expect(PlannerRequestSchema.safeParse({ snapshot, remainingBudgetMs: 30000, sessionEpoch: 1 }).success).toBe(true);
+    expect(PlannerRequestSchema.safeParse({ snapshot, remainingBudgetMs: 30001, sessionEpoch: 1 }).success).toBe(false);
     expect(RunMetricSchema.safeParse({ schemaVersion: 1, prompt: 'PRIVATE_SENTINEL' }).success).toBe(false);
   });
 });

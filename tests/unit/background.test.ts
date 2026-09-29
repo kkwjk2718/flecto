@@ -196,7 +196,7 @@ describe('background planner ownership and deadline', () => {
     const h = harness(); await h.activate();
     const request = payload() as unknown as Record<string, unknown>;
     if (kind === 'private input') (request.snapshot as Record<string, unknown>).value = 'PRIVATE';
-    if (kind === 'over budget') request.remainingBudgetMs = 10001;
+    if (kind === 'over budget') request.remainingBudgetMs = 30001;
     if (kind === 'extra request field') request.url = 'https://evil.example';
     expect(await h.broker.handle({ type: 'FLECTO_PREPARE', payload: request }, h.sender())).toEqual({ ok: false, error: 'SCHEMA_INVALID' });
     expect(h.fetcher).not.toHaveBeenCalled();
