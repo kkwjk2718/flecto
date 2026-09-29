@@ -46,4 +46,10 @@ describe('runtime content identity', () => {
     await symlink(join(root, 'apps/planner/src'), join(root, 'apps/linked'));
     await expect(captureRuntimeInputs(root)).rejects.toThrow('symlink');
   });
+  it('binds actual Node/platform identity and file-based prompts, including Markdown prompts', async () => {
+    const initial = await writeRuntimeManifest(root, await captureRuntimeInputs(root));
+    expect(initial.toolchain).toEqual({ node: process.version, platform: process.platform, arch: process.arch });
+    await put('apps/planner/src/provider/prompt.md', 'new model instruction');
+    expect((await inspectRuntimeManifest(root)).ok).toBe(false);
+  });
 });

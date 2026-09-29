@@ -46,7 +46,7 @@ function evidence(buildSha: string, extra: Record<string, unknown> = {}) {
   const results = Object.fromEntries(REQUIRED_IDS.map((id) => [id, { status: 'NOT_RUN' }]));
   results.T01 = { status: 'PASS', kind: 'FIXTURE' } as never;
   const path = join(root, '..', 'evidence-' + Math.random().toString(36).slice(2) + '.json');
-  writeFileSync(path, JSON.stringify({ schema: EVIDENCE_SCHEMA, artifact: { extensionBuildSha256: buildSha, runtimeBuildSha256: JSON.parse(readFileSync(join(root, 'dist/runtime-hashes.json'), 'utf8')).runtimeBuildSha256 }, run: { exitCode: 0, startedAt: 'a', finishedAt: 'b' }, results, claimedGrade: 'FULL_LIVE', ...extra }));
+  writeFileSync(path, JSON.stringify({ schema: EVIDENCE_SCHEMA, artifact: { extensionBuildSha256: buildSha, runtimeBuildSha256: JSON.parse(readFileSync(join(root, 'dist/runtime-hashes.json'), 'utf8')).runtimeBuildSha256, runtimeInputSha256: JSON.parse(readFileSync(join(root, 'dist/runtime-hashes.json'), 'utf8')).runtimeInputSha256 }, run: { exitCode: 0, startedAt: 'a', finishedAt: 'b' }, results, claimedGrade: 'FULL_LIVE', ...extra }));
   return path;
 }
 

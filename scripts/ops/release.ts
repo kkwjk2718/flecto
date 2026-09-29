@@ -97,7 +97,7 @@ export async function createRelease(options: ReleaseOptions): Promise<ReleaseRes
     if (leaks.length) throw new ReleaseError('evidence report contains secret-like content', ['evidence: ' + leaks.join(',')]);
     let parsed: unknown = null;
     try { parsed = JSON.parse(evidenceBody.toString('utf8')); } catch { parsed = null; }
-    grade = gradeEvidence(parsed, buildSha, build.runtime.manifest!.runtimeBuildSha256);
+    grade = gradeEvidence(parsed, buildSha, build.runtime.manifest!.runtimeBuildSha256, build.runtime.manifest!.runtimeInputSha256);
     if (grade.grade === 'REVOKED') throw new ReleaseError('evidence marks this build REVOKED; not packaged', grade.reasons);
   }
   const productGrade = grade.grade;
@@ -130,7 +130,7 @@ export async function createRelease(options: ReleaseOptions): Promise<ReleaseRes
     if (hashesBody) await stage('dist/extension-hashes.json', hashesBody);
     const runtimeBody = await readPackagedFile(rootReal, RUNTIME_MANIFEST, problems);
     if (runtimeBody) await stage(RUNTIME_MANIFEST, runtimeBody);
-    for (const [path, hash] of Object.entries(build.runtime.manifest!.inputs)) {
+    for (const [path, hash] of Object.entries({ ...build.runtime.manifest!.inputs, ...build.runtime.manifest!.artifacts })) {
       if (!entries.some((entry) => entry.path === path && entry.sha256 === hash)) problems.push(path + ': runtime input is missing or changed in package (track new inputs before release)');
     }
     const rechecked = await inspectRuntimeManifest(rootReal);

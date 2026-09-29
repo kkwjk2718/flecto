@@ -6,20 +6,27 @@ import { denyReason } from './policy';
 export const RUNTIME_MANIFEST = 'dist/runtime-hashes.json';
 export const RUNTIME_SCHEMA = 'flecto.runtime.v1';
 export type HashFiles = Record<string, string>;
-export type RuntimeManifest = { schema: typeof RUNTIME_SCHEMA; inputs: HashFiles; artifacts: HashFiles; runtimeInputSha256: string; runtimeBuildSha256: string };
+export type RuntimeManifest = { schema: typeof RUNTIME_SCHEMA; inputs: HashFiles; artifacts: HashFiles; toolchain: { node: string; platform: string; arch: string }; runtimeInputSha256: string; runtimeBuildSha256: string };
 const ROOT_INPUTS = ['package.json', 'package-lock.json', 'tsconfig.json', 'vitest.config.ts', 'playwright.config.ts', 'playwright.live.config.ts', '.nvmrc'];
 const INPUT_DIRS = ['apps', 'packages', 'scripts', 'tests', 'spec', 'ops'];
+
+async function rejectLinkedParents(root: string, rel: string): Promise<void> {
+  const parts = rel.split('/');
+  for (let i = 1; i < parts.length; i++) {
+    if ((await lstat(resolve(root, ...parts.slice(0, i)))).isSymbolicLink()) throw new Error(rel + ': symlinked parent is not a runtime input');
+  }
+}
 
 async function tree(root: string, rel: string, output: HashFiles, artifacts = false): Promise<void> {
   if (!artifacts && denyReason(rel + '/entry')) return;
   let info;
-  try { info = await lstat(resolve(root, rel)); }
+  try { await rejectLinkedParents(root, rel); info = await lstat(resolve(root, rel)); }
   catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return; throw error; }
   if (info.isSymbolicLink()) throw new Error(rel + ': symlink is not a runtime input');
   if (info.isDirectory()) {
     for (const name of (await readdir(resolve(root, rel))).sort()) await tree(root, rel + '/' + name, output, artifacts);
   } else if (info.isFile()) {
-    if (!artifacts && (denyReason(rel) || (/\.md$/i.test(rel) && !/^(spec|ops)\//.test(rel)))) return;
+    if (!artifacts && (denyReason(rel) || (/\/(README|NEXT_ACTION|STATUS|BG01_HANDOFF)\.md$/i.test(rel) && !/^(spec|ops)\//.test(rel)))) return;
     output[rel] = sha256(await readFile(resolve(root, rel)));
   } else throw new Error(rel + ': non-regular runtime input');
 }
@@ -37,8 +44,9 @@ async function currentManifest(root: string): Promise<RuntimeManifest> {
   const artifacts: HashFiles = {};
   for (const path of ['dist/extension', 'dist/extension-hashes.json', 'apps/demo-culture/dist']) await tree(root, path, artifacts, true);
   if (!artifacts['dist/extension/manifest.json'] || !artifacts['apps/demo-culture/dist/index.html'] || !artifacts['dist/extension-hashes.json']) throw new Error('runtime manifest requires completed extension and culture builds');
-  const runtimeInputSha256 = sha256(canonicalJson(inputs));
-  return { schema: RUNTIME_SCHEMA, inputs, artifacts, runtimeInputSha256, runtimeBuildSha256: sha256(canonicalJson({ schema: RUNTIME_SCHEMA, inputs, artifacts })) };
+  const toolchain = { node: process.version, platform: process.platform, arch: process.arch };
+  const runtimeInputSha256 = sha256(canonicalJson({ inputs, toolchain }));
+  return { schema: RUNTIME_SCHEMA, inputs, artifacts, toolchain, runtimeInputSha256, runtimeBuildSha256: sha256(canonicalJson({ schema: RUNTIME_SCHEMA, inputs, artifacts, toolchain })) };
 }
 
 /** Build integration: capture inputs BEFORE building; write only AFTER all builds succeed. */
@@ -53,6 +61,7 @@ export async function writeRuntimeManifest(root: string, before: HashFiles): Pro
 export async function inspectRuntimeManifest(root: string): Promise<{ ok: boolean; problems: string[]; manifest: RuntimeManifest | null }> {
   try {
     const path = resolve(root, RUNTIME_MANIFEST);
+    await rejectLinkedParents(root, RUNTIME_MANIFEST);
     if (!(await lstat(path)).isFile()) throw new Error('runtime manifest is not a regular file');
     const recorded: unknown = JSON.parse(await readFile(path, 'utf8'));
     const current = await currentManifest(root);

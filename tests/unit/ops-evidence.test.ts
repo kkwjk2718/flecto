@@ -53,6 +53,8 @@ describe('evidence grading (OPER10/OPER11/OPER14 input rules)', () => {
     const g = gradeEvidence(report({ artifact: { extensionBuildSha256: 'b'.repeat(64) }, claimedGrade: 'FULL_LIVE' }, allPass('LIVE_CODEX')), BUILD, RUNTIME);
     expect(g.valid).toBe(false); expect(g.grade).toBe('UNVERIFIED');
     expect(gradeEvidence(report(), null, RUNTIME).grade).toBe('UNVERIFIED');
+    expect(gradeEvidence(report(), BUILD, RUNTIME, 'f'.repeat(64)).valid).toBe(false);
+    expect(gradeEvidence(report({ artifact: { extensionBuildSha256: BUILD, runtimeBuildSha256: RUNTIME, runtimeInputSha256: 'f'.repeat(64) } }), BUILD, RUNTIME, 'f'.repeat(64)).valid).toBe(true);
   });
 
   it('never raises a claim and lowers FULL_LIVE when LIVE runs or vision are missing', () => {
