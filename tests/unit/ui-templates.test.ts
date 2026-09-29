@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { describe, expect, it, afterEach } from 'vitest';
+import { describe, expect, it, afterEach, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
@@ -448,5 +448,63 @@ describe('task selection', () => {
     expect(actions.at(-1)).toEqual({ kind: 'SHOW_ORIGINAL' });
     expect(JSON.stringify(actions)).not.toMatch(/김영희|010|택배/);
     expect(actions.some((a) => a.kind === 'START_GOAL' && a.ref === null)).toBe(false);
+  });
+});
+
+// Regression (UI-REPAIR-01): after PREPARING -> READY the primary "다음" button used to render
+// enabled while primary() silently dropped clicks for 500ms, so an automated (or quick) first
+// Next click on the first input step was lost with no state change and no error. Visible
+// disabled state and the runtime guard must agree, and the button must arm on its own.
+describe('primary arming after preparation', () => {
+  const findNext = (shadow: ShadowRoot) => qa<HTMLButtonElement>(shadow, '.fl-footer button').find((b) => b.textContent === '다음')!;
+
+  it('renders the first-step Next disabled while unarmed, then arms itself and emits LOCAL_NEXT', () => {
+    vi.useFakeTimers();
+    try {
+      const preparing = { ...formModel(), phase: 'PREPARING' as const, steps: [], canGoNext: false };
+      const { shadow, actions, rerender } = mount(preparing);
+      rerender(formModel());
+      const next = findNext(shadow);
+      expect(next).toBeDefined();
+      expect(next.disabled).toBe(true);
+      act(() => next.click());
+      expect(actions).toHaveLength(0);
+      act(() => { vi.advanceTimersByTime(499); });
+      expect(findNext(shadow).disabled).toBe(true);
+      act(() => { vi.advanceTimersByTime(1); });
+      const armed = findNext(shadow);
+      expect(armed.disabled).toBe(false);
+      act(() => armed.click());
+      expect(actions).toEqual([{ kind: 'LOCAL_NEXT', fromStep: 's1' }]);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it('never disables a primary button once armed, even across value re-renders', () => {
+    vi.useFakeTimers();
+    try {
+      const { shadow, actions, rerender } = mount({ ...formModel(), phase: 'PREPARING' as const, steps: [], canGoNext: false });
+      rerender(formModel());
+      act(() => { vi.advanceTimersByTime(500); });
+      // A controller patch (typed value echoed back) re-renders without a phase change.
+      rerender(formModel({ controls: formModel().controls.map((c) => c.ref === 'name' ? { ...c, value: '김영희' } : c) }));
+      const next = findNext(shadow);
+      expect(next.disabled).toBe(false);
+      act(() => next.click());
+      expect(actions).toEqual([{ kind: 'LOCAL_NEXT', fromStep: 's1' }]);
+    } finally { vi.useRealTimers(); }
+  });
+
+  it('keeps the status-phase primary and result close in step with the arm guard', () => {
+    vi.useFakeTimers();
+    try {
+      const timedOut = { ...emptyViewModel(), phase: 'TIMED_OUT' as const };
+      const { shadow, rerender } = mount({ ...timedOut, phase: 'PREPARING' as const });
+      rerender(timedOut);
+      const primaries = qa<HTMLButtonElement>(shadow, '.fl-footer .fl-btn-primary');
+      expect(primaries.length).toBeGreaterThan(0);
+      for (const b of primaries) expect(b.disabled).toBe(true);
+      act(() => { vi.advanceTimersByTime(500); });
+      for (const b of qa<HTMLButtonElement>(shadow, '.fl-footer .fl-btn-primary')) expect(b.disabled).toBe(false);
+    } finally { vi.useRealTimers(); }
   });
 });

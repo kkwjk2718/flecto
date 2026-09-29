@@ -222,7 +222,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
   const armedAt = useRef(0);
   const prevPhase = useRef(model.phase);
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [, refreshArmedState] = useState(0);
+  const [armTick, refreshArmedState] = useState(0);
 
   const emit = useCallback<Emit>((action) => onActionRef.current(action), [onActionRef]);
   const setComposing = useCallback((ref: string, composing: boolean) => {
@@ -238,6 +238,9 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
     if (prevPhase.current === 'PREPARING') armedAt.current = Date.now() + ARM_DELAY_MS;
     prevPhase.current = model.phase;
   }
+  // Every button routed through primary() must also render disabled while unarmed. A button that
+  // looks enabled but silently drops its click makes automation (and people) believe the step is
+  // stuck; `actionsArmed` and the runtime guard below must always agree.
   const primary = (action: UserAction) => () => {
     if (Date.now() < armedAt.current) return;
     emit(action);
@@ -246,9 +249,11 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
   useEffect(() => {
     const remaining = armedAt.current - Date.now();
     if (remaining <= 0) return;
+    // Re-render once the window closes; the effect re-runs on the tick so a timer that fires a
+    // millisecond early simply schedules one more check instead of leaving buttons disabled.
     const timer = setTimeout(() => refreshArmedState((value) => value + 1), remaining);
     return () => clearTimeout(timer);
-  }, [model.phase]);
+  }, [model.phase, armTick]);
 
   const view = resolveView(model);
   const step = model.steps[model.stepIndex] ?? null;
@@ -371,7 +376,12 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
         {actions.map(([a, act], i) => (
           <Fragment key={a.label}>
             {a.primary && i > 0 ? <span className="fl-spacer" /> : null}
-            <button type="button" className={'fl-btn' + (a.primary ? ' fl-btn-primary' : '')} onClick={a.primary ? primary(act!) : () => emit(act!)}>
+            <button
+              type="button"
+              className={'fl-btn' + (a.primary ? ' fl-btn-primary' : '')}
+              disabled={a.primary && !actionsArmed}
+              onClick={a.primary ? primary(act!) : () => emit(act!)}
+            >
               {a.label}
             </button>
           </Fragment>
@@ -481,7 +491,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
         <>
           <button type="button" className="fl-btn" onClick={() => emit({ kind: 'SHOW_ORIGINAL' })}>원래 화면에서 내역 보기</button>
           <span className="fl-spacer" />
-          <button type="button" className="fl-btn fl-btn-primary" onClick={primary({ kind: 'CLOSE' })}>쉬운 화면 닫기</button>
+          <button type="button" className="fl-btn fl-btn-primary" disabled={!actionsArmed} onClick={primary({ kind: 'CLOSE' })}>쉬운 화면 닫기</button>
         </>
       );
     } else {
@@ -497,7 +507,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
           {back ?? <span />}
           <span className="fl-spacer" />
           {step ? (
-            <button type="button" className="fl-btn fl-btn-primary" disabled={!model.canGoNext} onClick={primary({ kind: 'LOCAL_NEXT', fromStep: step.id })}>
+            <button type="button" className="fl-btn fl-btn-primary" disabled={!model.canGoNext || !actionsArmed} onClick={primary({ kind: 'LOCAL_NEXT', fromStep: step.id })}>
               {nextLabel}
             </button>
           ) : null}
