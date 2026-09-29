@@ -271,4 +271,23 @@ describe('singleflight, cancellation and provider integrity (T33/T35)', () => {
     }, 'LIVE_CODEX');
     const response = await h.post(); expect(response.statusCode).toBe(422); expect(h.rows()).toHaveLength(0);
   });
+  it.each(['unknownActionField', 'externalUrlAsActionRef'] as const)('T30 rejects an arbitrary external URL action (%s) without caching or fetching it', async defect => {
+    const externalUrl = 'https://model-action.invalid/collect-and-submit';
+    // Observe the real server's fetch boundary while preventing any accidental
+    // outbound request. Fastify.inject still runs the actual route and SQLite.
+    const outbound = vi.spyOn(globalThis, 'fetch').mockRejectedValue(new Error('External model actions must never be fetched'));
+    const h = harness(async s => {
+      const plan = publicPlan(s);
+      if (defect === 'unknownActionField') Object.assign(plan, { action: { kind: 'submit', method: 'POST', url: externalUrl } });
+      else plan.sourceActionRef = externalUrl;
+      return plan;
+    }, 'LIVE_CODEX'); // Fault-injected provider output; no real LIVE inference.
+    const response = await h.post();
+    expect(h.plan).toHaveBeenCalledTimes(1);
+    expect(response.statusCode).toBe(422);
+    expect(response.json().error).toBe('SCHEMA_INVALID');
+    expect(h.rows()).toHaveLength(0);
+    expect(response.json()).not.toHaveProperty('plan');
+    expect(outbound).not.toHaveBeenCalled();
+  });
 });

@@ -5,6 +5,17 @@ test('T03 T06 T27: required errors, explicit consent, and local-next never submi
   await beginBenefits(page, activate, system);
   const posts = countSourcePosts(page);
   const ui = dialog(page);
+  const sourceEvents = await page.locator('body > main form[action="/apply"]').evaluateHandle((form: HTMLFormElement) => {
+    const submit = form.querySelector<HTMLButtonElement>('button[type="submit"]');
+    if (!submit) throw new Error('The original submit button is missing');
+    const counts = { buttonClicks: 0, formSubmits: 0 };
+    submit.addEventListener('click', () => { counts.buttonClicks++; }, true);
+    form.addEventListener('submit', () => { counts.formSubmits++; }, true);
+    return counts;
+  });
+  const expectLocalOnly = async () => {
+    expect(await sourceEvents.jsonValue()).toEqual({ buttonClicks: 0, formSubmits: 0 });
+  };
   await expect(page.locator('main input[name="consent"]')).not.toBeChecked();
   await ui.getByRole('button', { name: '다음', exact: true }).click();
   await expect(ui.getByLabel('주문번호', { exact: false })).toHaveAttribute('aria-invalid', 'true');
@@ -12,24 +23,37 @@ test('T03 T06 T27: required errors, explicit consent, and local-next never submi
   const nativeError = await page.locator('main input[name="orderNumber"]').evaluate((input: HTMLInputElement) => input.validationMessage);
   expect(nativeError).not.toBe('');
   await expect(ui.locator('.fl-error').first()).toContainText(nativeError);
+  await expectLocalOnly();
   expect(posts).toEqual([]);
   await ui.getByLabel('주문번호', { exact: false }).fill('FLECTO-2026-001');
   await ui.getByLabel('구매일', { exact: false }).fill('2026-09-01');
   await ui.getByRole('button', { name: '다음', exact: true }).click();
+  await expect(ui.getByRole('radio', { name: '가전', exact: true })).toBeVisible();
+  await expectLocalOnly();
+  await ui.locator('footer [data-action="LOCAL_BACK"]').click();
+  await expect(ui.getByLabel('주문번호', { exact: false })).toHaveValue('FLECTO-2026-001');
+  await expectLocalOnly();
+  await ui.getByRole('button', { name: '다음', exact: true }).click();
+  await expect(ui.getByRole('radio', { name: '가전', exact: true })).toBeVisible();
+  await expectLocalOnly();
   await ui.getByRole('radio', { name: '가전', exact: true }).click();
   await ui.getByRole('button', { name: '다음', exact: true }).click();
   const consent = ui.getByRole('checkbox', { name: /위 신청 조건과 주문 정보 저장/ });
   await expect(consent).not.toBeChecked();
+  await expectLocalOnly();
   await ui.getByRole('button', { name: '입력 내용 확인하기', exact: true }).click();
   await expect(consent).toHaveAttribute('aria-invalid', 'true');
   await expect(page.locator('main input[name="consent"]')).not.toBeChecked();
+  await expectLocalOnly();
   await consent.click();
   await expect(page.locator('main input[name="consent"]')).toBeChecked();
   await ui.getByRole('button', { name: '입력 내용 확인하기', exact: true }).click();
   await expect(ui).toHaveAttribute('data-phase', 'REVIEW');
+  await expectLocalOnly();
   expect(posts).toEqual([]);
   expect((await benefitsRecords(system)).count).toBe(0);
   expect(consoleErrors).toEqual([]);
+  await sourceEvents.dispose();
 });
 
 test('T08: source rejection never becomes success or an automatic resubmission', async ({ page, activate, system, consoleErrors }) => {
