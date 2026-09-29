@@ -118,7 +118,9 @@ export const browserVisionCanvas: VisionCanvasAdapter = {
     const canvas = new OffscreenCanvas(width, height);
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) throw new Error('no 2d context');
-    ctx.imageSmoothingEnabled = true;
+    // Nearest-neighbour only: a smoothing filter may sample pixels just outside the
+    // allowed source rectangle (drawImage does not clamp to it) and blend them in.
+    ctx.imageSmoothingEnabled = false;
     return {
       fill(x, y, w, h, color) { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); },
       copy(bitmap, sx, sy, sw, sh, dx, dy, dw, dh) { ctx.drawImage(bitmap as unknown as ImageBitmap, sx, sy, sw, sh, dx, dy, dw, dh); },

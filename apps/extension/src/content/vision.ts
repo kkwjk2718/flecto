@@ -59,6 +59,10 @@ export type VisionPlanInput = {
 const PRIVATE_SELECTOR = 'input:not([type="hidden"]),textarea,select,[data-private],[data-flecto-private],[contenteditable]:not([contenteditable="false"]),output,[role="status"],[role="log"],[aria-live]:not([aria-live="off"]),[data-flecto-result]';
 const IMAGE_SELECTOR = 'img,svg,canvas,video,picture,object,embed,iframe,image,input[type="image"]';
 const HOST_ID = 'flecto-host';
+/** Unknown text boxes are grown by this much before the region test (glyph overhang). */
+const TEXT_PAD = 1;
+/** Mask overlays created by withVisionIsolation. Identity only: a page attribute can never opt out of masking. */
+const OWN_OVERLAYS = new WeakSet<Element>();
 
 class Reject extends Error { constructor(readonly code: VisionRejectCode, readonly registryError?: string) { super(code); } }
 const fail = (code: VisionRejectCode): never => { throw new Reject(code); };
@@ -79,6 +83,12 @@ export function normalizeVisionAllowlist(entries: readonly string[]): string[] {
 }
 
 function inPrivate(e: Element): boolean { return !!e.closest('#' + HOST_ID + ',[data-private],[data-flecto-private]'); }
+/** FLECTO's own host (hidden during capture) or one of its capture-time mask overlays. */
+function ours(e: Element): boolean {
+  if (e.closest('#' + HOST_ID)) return true;
+  for (let n: Element | null = e; n; n = n.parentElement) if (OWN_OVERLAYS.has(n)) return true;
+  return false;
+}
 function visible(e: Element): boolean {
   if (inPrivate(e)) return false;
   for (let n: Element | null = e; n; n = n.parentElement) {
@@ -87,6 +97,48 @@ function visible(e: Element): boolean {
     if (st && (st.display === 'none' || st.visibility === 'hidden' || st.visibility === 'collapse' || st.opacity === '0')) return false;
   }
   return true;
+}
+/**
+ * Conservative paint test for UNKNOWN content. True unless Chrome certainly paints
+ * nothing: display:none or opacity:0 on the element or an ancestor. hidden/aria-hidden/
+ * inert are ignored on purpose (CSS can still paint them); visibility is checked by the
+ * caller on the element that owns the pixels because descendants may override it.
+ */
+function suppressed(e: Element | null, win: Window, cache: Map<Element, boolean>): boolean {
+  if (!e) return false;
+  const known = cache.get(e);
+  if (known !== undefined) return known;
+  const st = win.getComputedStyle(e);
+  const out = st.display === 'none' || Number.parseFloat(st.opacity) === 0 || suppressed(e.parentElement, win, cache);
+  cache.set(e, out);
+  return out;
+}
+const hiddenVisibility = (st: CSSStyleDeclaration) => st.visibility === 'hidden' || st.visibility === 'collapse';
+const noneValue = (v: string | null | undefined) => !v || v === 'none' || v === 'initial';
+function hasImage(st: CSSStyleDeclaration): boolean {
+  return !noneValue(st.backgroundImage) || !noneValue(st.borderImageSource) || (!!st.display?.includes('list-item') && !noneValue(st.listStyleImage));
+}
+/** Computed style of a generated ::before/::after/::marker box, or null when none is generated. */
+function pseudoBox(win: Window, e: Element, pseudo: string): CSSStyleDeclaration | null {
+  let st: CSSStyleDeclaration | null = null;
+  try { st = win.getComputedStyle(e, pseudo); } catch { return null; }
+  const content = st?.content ?? '';
+  return !content || content === 'none' || content === 'normal' ? null : st;
+}
+const hasGeneratedText = (st: CSSStyleDeclaration) => st.content !== '""' && st.content !== "''";
+/** Text nodes counted by rawText(): the only text allowed to paint inside a public region. */
+function approvedText(e: Element, out: Set<Node>): void {
+  for (const n of Array.from(e.childNodes)) {
+    if (n.nodeType === 3) out.add(n);
+    else if (n.nodeType === 1 && !(n as Element).matches('input,textarea,select,script,style,template')) approvedText(n as Element, out);
+  }
+}
+/** Painted line boxes of a text node (viewport CSS px). Missing Range geometry fails closed. */
+function textRects(doc: Document, node: Node): VisionRect[] {
+  const range = doc.createRange();
+  if (typeof range.getClientRects !== 'function') fail('BAD_GEOMETRY');
+  range.selectNodeContents(node);
+  return Array.from(range.getClientRects(), (r) => ({ x: r.left, y: r.top, width: r.width, height: r.height }));
 }
 /** Same text rule as core extraction: text nodes, skipping form controls. */
 function rawText(e: Element): string {
@@ -108,7 +160,7 @@ const round = (r: VisionRect): VisionRect => ({ x: +r.x.toFixed(2), y: +r.y.toFi
 function privateValues(doc: Document): string[] {
   const values = new Set<string>();
   for (const e of Array.from(doc.querySelectorAll<HTMLInputElement>('input,textarea'))) {
-    if (e.closest('#' + HOST_ID)) continue;
+    if (ours(e)) continue;
     if (e.matches('input[type="submit"],input[type="button"],input[type="radio"],input[type="checkbox"],input[type="hidden"]')) continue;
     if (e.value && norm(e.value).length >= 2) values.add(norm(e.value));
   }
@@ -117,16 +169,35 @@ function privateValues(doc: Document): string[] {
 
 function checkNoImage(e: Element): void {
   const win = e.ownerDocument.defaultView;
+  if (!win) fail('UNKNOWN_IMAGE');
   const all = [e, ...Array.from(e.querySelectorAll('*'))];
   for (const n of all) {
     if (n.matches(IMAGE_SELECTOR)) fail('UNKNOWN_IMAGE');
-    const st = win?.getComputedStyle(n);
-    const bg = st?.backgroundImage;
-    if (bg && bg !== 'none' && bg !== 'initial') fail('UNKNOWN_IMAGE');
+    if (hasImage(win!.getComputedStyle(n))) fail('UNKNOWN_IMAGE');
     for (const pseudo of ['::before', '::after']) {
-      let content = '';
-      try { content = win?.getComputedStyle(n, pseudo).content ?? ''; } catch { content = ''; }
-      if (content && content !== 'none' && content !== 'normal' && content !== '""' && content !== "''") fail('UNKNOWN_IMAGE');
+      const box = pseudoBox(win!, n, pseudo);
+      if (box && (hasGeneratedText(box) || hasImage(box))) fail('UNKNOWN_IMAGE');
+    }
+  }
+}
+
+/**
+ * Ancestors paint beneath and around an approved box, so only plain colors/borders are
+ * allowed there. Their own direct text is measured separately (unknown-text pass), so a
+ * normal <body> that merely CONTAINS the label is not rejected.
+ */
+function checkAncestors(e: Element): void {
+  const win = e.ownerDocument.defaultView;
+  if (!win) fail('UNSAFE_OVERLAP');
+  for (let n = e.parentElement; n; n = n.parentElement) {
+    const st = win!.getComputedStyle(n);
+    if (hasImage(st)) fail('UNKNOWN_IMAGE');
+    if (st.display?.includes('list-item') && st.listStyleType !== 'none' && st.listStylePosition === 'inside') fail('UNSAFE_OVERLAP');
+    for (const pseudo of ['::before', '::after', '::marker']) {
+      const box = pseudoBox(win!, n, pseudo);
+      if (!box) continue;
+      if (hasImage(box)) fail('UNKNOWN_IMAGE');
+      if (hasGeneratedText(box)) fail('UNSAFE_OVERLAP');
     }
   }
 }
@@ -245,30 +316,61 @@ function build({ doc, registry, snapshot, reason, refs, allowedOrigins }: Vision
   if (!crop) fail('BAD_GEOMETRY');
 
   // Masks: every private/control element that touches the crop, padded for focus rings.
-  const maskElements = Array.from(doc.querySelectorAll(PRIVATE_SELECTOR)).filter((e) => !e.closest('#' + HOST_ID));
+  const maskElements = Array.from(doc.querySelectorAll(PRIVATE_SELECTOR)).filter((e) => !ours(e));
   const masks: VisionRect[] = [];
-  const masked = new Set<Element>();
   for (const e of maskElements) {
     const r = rectOf(e);
     if (!finite(r)) fail('BAD_GEOMETRY');
-    masked.add(e);
     const padded = intersect({ x: r.x - MASK_PAD, y: r.y - MASK_PAD, width: r.width + 2 * MASK_PAD, height: r.height + 2 * MASK_PAD }, crop!);
     if (padded && r.width > 0 && r.height > 0) masks.push(round(padded));
   }
   if (masks.length > VISION_MAX_MASKS) fail('TOO_LARGE');
 
-  // Overlap: any other painted element intersecting an allowed region must be
-  // an ancestor, a descendant, or fully masked. Otherwise its pixels are unknown.
-  const isMasked = (e: Element) => { for (const m of masked) if (m === e || m.contains(e)) return true; return false; };
-  const others = Array.from(doc.body?.querySelectorAll('*') ?? []).filter((e) => !e.closest('#' + HOST_ID) && !['SCRIPT', 'STYLE', 'TEMPLATE', 'OPTION', 'OPTGROUP', 'BR'].includes(e.tagName));
-  for (const { region, element } of regions) {
-    for (const e of others) {
-      if (e === element || e.contains(element) || element.contains(e) || isMasked(e)) continue;
+  // Overlap. Inside an allowed region only the approved source subtree (text-checked,
+  // image-free), plain ancestor colors, and pixels fully under a private mask may paint.
+  // Everything else is unknown and fails closed.
+  const covered = (hit: VisionRect) => privateMasksCover(masks, hit);
+  const cache = new Map<Element, boolean>();
+  for (const { element } of regions) checkAncestors(element);
+  const others = Array.from(doc.documentElement.querySelectorAll('*')).filter((e) => !ours(e) && !['OPTION', 'OPTGROUP', 'BR'].includes(e.tagName));
+  for (const e of others) {
+    if (suppressed(e, win!, cache)) continue;
+    if (!hiddenVisibility(win!.getComputedStyle(e))) {
       const r = rectOf(e);
       if (!finite(r)) fail('BAD_GEOMETRY');
-      if (!intersect(r, region.rect)) continue;
-      if (!visible(e)) continue;
-      fail('UNSAFE_OVERLAP');
+      for (const { region, element } of regions) {
+        // Ancestors: own paint checked by checkAncestors + the text pass. Descendants: rawText + checkNoImage.
+        if (e === element || e.contains(element) || element.contains(e)) continue;
+        const hit = intersect(r, region.rect);
+        if (hit && !covered(hit)) fail('UNSAFE_OVERLAP');
+      }
+    }
+    // Generated boxes can leave their element's box; allow them only when they provably cannot.
+    for (const pseudo of ['::before', '::after']) {
+      const box = pseudoBox(win!, e, pseudo);
+      if (!box || hiddenVisibility(box) || (!hasGeneratedText(box) && !hasImage(box))) continue;
+      const st = win!.getComputedStyle(e);
+      const clipped = !!st.overflowX && !!st.overflowY && st.overflowX !== 'visible' && st.overflowY !== 'visible';
+      if ((box.position && box.position !== 'static') || !noneValue(box.transform) || !clipped) fail('UNSAFE_OVERLAP');
+    }
+  }
+  // Every painted text node that is not approved source text (ancestor direct text,
+  // overflowing sibling text, text inside private elements) is measured precisely.
+  const approved = new Set<Node>();
+  for (const { element } of regions) approvedText(element, approved);
+  const walker = doc.createTreeWalker(doc.documentElement, 4 /* NodeFilter.SHOW_TEXT */);
+  for (let t = walker.nextNode(); t; t = walker.nextNode()) {
+    const parent = t.parentElement;
+    if (approved.has(t) || !parent || ours(parent) || !norm(t.textContent ?? '')) continue;
+    if (suppressed(parent, win!, cache) || hiddenVisibility(win!.getComputedStyle(parent))) continue;
+    for (const r of textRects(doc, t)) {
+      if (!finite(r)) fail('BAD_GEOMETRY');
+      if (r.width <= 0 || r.height <= 0) continue;
+      const box = { x: r.x - TEXT_PAD, y: r.y - TEXT_PAD, width: r.width + 2 * TEXT_PAD, height: r.height + 2 * TEXT_PAD };
+      for (const { region } of regions) {
+        const hit = intersect(box, region.rect);
+        if (hit && !covered(hit)) fail('UNSAFE_OVERLAP');
+      }
     }
   }
 
@@ -283,11 +385,22 @@ function build({ doc, registry, snapshot, reason, refs, allowedOrigins }: Vision
   };
 }
 
+/** True when one private mask fully covers the given box (masks are painted last, opaque). */
+function privateMasksCover(masks: readonly VisionRect[], box: VisionRect): boolean {
+  return masks.some((m) => inside(box, m));
+}
+
 export type VisionIsolationOptions = {
   /** Also paint opaque DOM boxes (data-flecto-private, pointer-events:none) over masks during capture. */
   domMaskOverlay?: boolean;
   /** Waits for a paint; defaults to two requestAnimationFrame ticks (or a 32 ms timer). */
   nextPaint?: () => Promise<void>;
+  /**
+   * Upper bound (ms) for paint + capture. On expiry the page is restored at once and
+   * ISOLATION_FAILED is returned; a late capture result is dropped. Pass the remaining
+   * inherited budget so a dead worker can never leave the host transparent.
+   */
+  timeoutMs?: number;
 };
 export type VisionIsolationResult<T> = { ok: true; value: T } | { ok: false; code: 'STATE_CHANGED' | 'ISOLATION_FAILED' };
 
@@ -322,10 +435,12 @@ export async function withVisionIsolation<T>(doc: Document, plan: VisionCaptureP
   let overlay: HTMLElement | null = null;
   let value: T;
   let threw = false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
   try {
     host?.style.setProperty('opacity', '0', 'important');
     if (options.domMaskOverlay && plan.privateMasks.length) {
       overlay = doc.createElement('div');
+      OWN_OVERLAYS.add(overlay);
       overlay.setAttribute('data-flecto-private', 'vision-mask');
       overlay.setAttribute('aria-hidden', 'true');
       overlay.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:2147483647;';
@@ -336,11 +451,15 @@ export async function withVisionIsolation<T>(doc: Document, plan: VisionCaptureP
       }
       (doc.body ?? doc.documentElement).appendChild(overlay);
     }
-    await (options.nextPaint ?? (() => defaultPaint(doc.defaultView)))();
-    value = await capture();
+    const run = (async () => { await (options.nextPaint ?? (() => defaultPaint(doc.defaultView)))(); return capture(); })();
+    run.catch(() => undefined);
+    value = await (options.timeoutMs === undefined ? run : Promise.race([run, new Promise<never>((_, reject) => {
+      timer = setTimeout(() => reject(new Error('VISION_ISOLATION_TIMEOUT')), Math.max(0, options.timeoutMs!));
+    })]));
   } catch {
     threw = true;
   } finally {
+    clearTimeout(timer);
     overlay?.remove();
     if (host) {
       if (prevOpacity) host.style.setProperty('opacity', prevOpacity, prevPriority);

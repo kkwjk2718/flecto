@@ -6,14 +6,28 @@ import { validateVisionPlan } from '../../apps/extension/src/background/vision';
 
 // jsdom has no layout: rects are explicit stubs per element (CSS px, viewport-relative).
 const rects = new Map<Element, [number, number, number, number]>();
+// Text geometry (Range#getClientRects) defaults to the parent's stubbed box unless a test places it.
+const textBoxes = new Map<Node, [number, number, number, number][]>();
 const place = (sel: string, r: [number, number, number, number]) => rects.set(document.querySelector(sel)!, r);
+let rangeRects: PropertyDescriptor | undefined;
 beforeEach(() => {
   vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
-    const [x, y, w, h] = rects.get(this) ?? [0, 0, 0, 0];
+    // The capture-time mask overlay covers the whole viewport in a real browser.
+    const [x, y, w, h] = rects.get(this) ?? (this.parentElement?.getAttribute('data-flecto-private') === 'vision-mask' || this.getAttribute('data-flecto-private') === 'vision-mask' ? [0, 0, 1024, 768] : [0, 0, 0, 0]);
     return { x, y, left: x, top: y, width: w, height: h, right: x + w, bottom: y + h, toJSON() { return {}; } } as DOMRect;
   });
+  rangeRects = Object.getOwnPropertyDescriptor(Range.prototype, 'getClientRects');
+  Object.defineProperty(Range.prototype, 'getClientRects', { configurable: true, writable: true, value(this: Range) {
+    const n = this.startContainer;
+    const boxes = textBoxes.get(n) ?? (n.parentElement ? [rects.get(n.parentElement) ?? [0, 0, 0, 0]] : []);
+    return boxes.map(([x, y, w, h]) => ({ x, y, left: x, top: y, width: w, height: h, right: x + w, bottom: y + h }));
+  } });
 });
-afterEach(() => { vi.restoreAllMocks(); rects.clear(); document.body.innerHTML = ''; });
+afterEach(() => {
+  vi.restoreAllMocks(); rects.clear(); textBoxes.clear(); document.body.innerHTML = '';
+  if (rangeRects) Object.defineProperty(Range.prototype, 'getClientRects', rangeRects);
+  else delete (Range.prototype as { getClientRects?: unknown }).getClientRects;
+});
 
 const ORIGIN = location.origin; // jsdom default: http://localhost:3000
 const allow = [ORIGIN];
@@ -26,9 +40,28 @@ function page(extra = '', noticeExtra = '') {
   const noticeRef = snapshot.notices[0]?.ref;
   return { snapshot, registry, blocked, nameRef: nameRef!, noticeRef: noticeRef! };
 }
-const input = (p: ReturnType<typeof page>, over: Partial<Parameters<typeof buildVisionCapturePlan>[0]> = {}) => ({
+type Built = Pick<ReturnType<typeof page>, 'snapshot' | 'registry' | 'nameRef' | 'noticeRef'>;
+const input = (p: Built, over: Partial<Parameters<typeof buildVisionCapturePlan>[0]> = {}) => ({
   doc: document, registry: p.registry, snapshot: p.snapshot, reason: 'VISUAL_RELATION_AMBIGUOUS', refs: [p.nameRef, p.noticeRef], allowedOrigins: allow, ...over,
 });
+/** The label sits inside #anc, which (like <body>) also has its own direct text. */
+function wrapped(ancAttrs = '') {
+  document.body.innerHTML = '본문 안내<form id="f"><div id="anc"' + ancAttrs + '>비밀조상<label id="lab">성명<input id="name" name="name"></label></div><p id="notice">신청 기한은 오늘입니다.</p><button id="go">신청</button></form><div id="flecto-host"></div>';
+  place('#f', [0, 0, 600, 300]); place('#anc', [0, 0, 600, 56]); place('#lab', [10, 10, 300, 40]); place('#name', [100, 15, 200, 30]);
+  place('#notice', [10, 60, 400, 24]); place('#go', [10, 100, 80, 40]); place('#flecto-host', [0, 0, 1024, 768]);
+  const ancText = document.getElementById('anc')!.firstChild!;
+  textBoxes.set(document.body.firstChild!, [[700, 400, 80, 20]]); // body direct text, far from every region
+  textBoxes.set(ancText, [[320, 12, 60, 30]]); // ancestor direct text beside (not over) the label
+  const { snapshot, registry } = extractPage(document, { documentInstanceId: 'd_' + crypto.randomUUID() });
+  const nameRef = snapshot.controls.find((c) => c.kind === 'text')!.ref;
+  const noticeRef = snapshot.notices.find((n) => n.text.startsWith('신청 기한'))!.ref;
+  return { snapshot, registry, nameRef, noticeRef, ancText };
+}
+const fakeStyle = (over: Record<string, string>) => ({ content: 'none', display: 'block', position: 'static', transform: 'none', visibility: 'visible', backgroundImage: 'none', borderImageSource: 'none', ...over }) as unknown as CSSStyleDeclaration;
+function pseudoStub(id: string, pseudo: string, style: CSSStyleDeclaration) {
+  const real = window.getComputedStyle.bind(window);
+  return vi.spyOn(window, 'getComputedStyle').mockImplementation((el: Element, p?: string | null) => (el.id === id && p === pseudo ? style : real(el, p)));
+}
 
 describe('VIS01 content capture plan', () => {
   it('builds a deterministic plan: only exact public label/notice text, all controls masked, values untouched', () => {
@@ -135,6 +168,69 @@ describe('VIS01 content capture plan', () => {
   });
 });
 
+describe('VIS01 unknown paint over approved regions', () => {
+  it('keeps plain labels positive when <body> and an ancestor have direct text beside, not over, the region', () => {
+    const p = wrapped();
+    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
+    // Unknown text fully under a private mask is not visible in the output either.
+    textBoxes.set(p.ancText, [[110, 20, 50, 20]]);
+    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
+  });
+
+  it('rejects unknown ancestor direct text painted over the approved label', () => {
+    const p = wrapped();
+    textBoxes.set(p.ancText, [[40, 20, 60, 20]]);
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+  });
+
+  it('rejects an unknown ancestor background image and ancestor generated content', () => {
+    expect(buildVisionCapturePlan(input(wrapped(' style="background-image: url(bg.png)"')))).toEqual({ ok: false, code: 'UNKNOWN_IMAGE' });
+
+    const pseudo = wrapped();
+    const spy = pseudoStub('anc', '::before', fakeStyle({ content: '"비밀"', position: 'absolute' }));
+    expect(buildVisionCapturePlan(input(pseudo))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+
+    const image = wrapped();
+    pseudoStub('anc', '::after', fakeStyle({ content: '""', backgroundImage: 'url(secret.png)' }));
+    expect(buildVisionCapturePlan(input(image))).toEqual({ ok: false, code: 'UNKNOWN_IMAGE' });
+  });
+
+  it('still allows an empty clearfix pseudo box on an ancestor', () => {
+    const p = wrapped();
+    pseudoStub('anc', '::after', fakeStyle({ content: '""', display: 'table' }));
+    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
+  });
+
+  it('treats aria-hidden / inert elements as painted', () => {
+    const p = page('<div id="float" aria-hidden="true" inert>팝업</div>');
+    place('#float', [300, 65, 200, 10]);
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+  });
+
+  it('measures private text that overflows its own mask onto a public region', () => {
+    const p = page('<div data-private id="pv">비밀값</div>');
+    place('#pv', [10, 200, 50, 10]);
+    textBoxes.set(document.getElementById('pv')!.firstChild!, [[20, 62, 200, 20]]);
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+  });
+
+  it('rejects positioned generated content from an unrelated element', () => {
+    const p = page('<div id="far">x</div>');
+    place('#far', [700, 500, 10, 10]);
+    pseudoStub('far', '::after', fakeStyle({ content: '"비밀"', position: 'absolute' }));
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+  });
+
+  it('cannot be bypassed by a page element copying the overlay marker: it is masked', () => {
+    const p = page('<div data-flecto-private="vision-mask" id="spoof">가짜</div>');
+    place('#spoof', [320, 62, 60, 20]);
+    const result = buildVisionCapturePlan(input(p));
+    expect(result).toMatchObject({ ok: true });
+    expect((result as { plan: VisionCapturePlan }).plan.privateMasks).toContainEqual({ x: 318, y: 60, width: 64, height: 24 });
+  });
+});
+
 describe('VIS01 capture isolation', () => {
   it('hides only the FLECTO host during capture and restores style, focus and values', async () => {
     const p = page();
@@ -151,10 +247,12 @@ describe('VIS01 capture isolation', () => {
       // The overlay must not create a semantic change for the current registry.
       const rebuilt = buildVisionCapturePlan(input(p));
       seen.push(String(rebuilt.ok));
+      // ...nor a plan change: the guard compares plans structurally.
+      seen.push(String(JSON.stringify(rebuilt) === JSON.stringify({ ok: true, plan })));
       return 'captured';
     }, { domMaskOverlay: true, nextPaint: async () => undefined });
     expect(result).toEqual({ ok: true, value: 'captured' });
-    expect(seen).toEqual(['0', 'important', String(plan.privateMasks.length), 'true']);
+    expect(seen).toEqual(['0', 'important', String(plan.privateMasks.length), 'true', 'true']);
     expect(host.style.getPropertyValue('opacity')).toBe('0.9');
     expect(host.style.getPropertyPriority('opacity')).toBe('');
     expect(document.querySelector('[data-flecto-private]')).toBeNull();
@@ -171,5 +269,15 @@ describe('VIS01 capture isolation', () => {
     expect(host.getAttribute('style') ?? '').not.toContain('opacity');
     const changed = await withVisionIsolation(document, plan, async () => { (document.getElementById('name') as HTMLInputElement).value = 'typed'; return 1; }, { nextPaint: async () => undefined });
     expect(changed).toEqual({ ok: false, code: 'STATE_CHANGED' });
+  });
+
+  it('restores the host when capture never answers (timeoutMs)', async () => {
+    const p = page();
+    const host = document.getElementById('flecto-host')!;
+    const plan = (buildVisionCapturePlan(input(p)) as { plan: VisionCapturePlan }).plan;
+    const hung = await withVisionIsolation(document, plan, () => new Promise<string>(() => undefined), { nextPaint: async () => undefined, timeoutMs: 20, domMaskOverlay: true });
+    expect(hung).toEqual({ ok: false, code: 'ISOLATION_FAILED' });
+    expect(host.getAttribute('style') ?? '').not.toContain('opacity');
+    expect(document.querySelector('[data-flecto-private]')).toBeNull();
   });
 });
