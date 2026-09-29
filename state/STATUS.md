@@ -1,6 +1,20 @@
 # FLECTO 실행 상태
 
-갱신: 2026-09-29 13:55 KST. 사용자 목표는 제품·UI·검증·30초 광고 완성, 마감은 오늘16:00이다. 자세한 다음 행동은 [NEXT_ACTION](NEXT_ACTION.md)을 따른다.
+갱신: 2026-09-29 16:03 KST. 최신 사용자 지시로 실제 시연·녹화·발표·광고를 16:15까지 마무리한다. 자세한 다음 행동은 [NEXT_ACTION](NEXT_ACTION.md)을 따른다.
+
+## 최종 검증 완료
+
+**단위507 / Chrome FIXTURE38 / LIVE9회 모두 PASS.** 네이티브 보험 시연·녹화와 개인 Chrome 설치·캐시 준비 완료. 출고 SINGLE_SITE_LIVE / SESSION_CHECKPOINTED. 전체 게이트25 PASS/30 NOT_RUN(부분근거 포함). [최종 검증](../evidence/FINAL_VALIDATION.md)에 같은 빌드, 실패 이력, 속도와 미검증 범위를 기록했다.
+
+## 15:51 후보 체크포인트
+
+- `36a1bec`: 보험 원본 서비스, 30px 기본 글씨·72/80px 조작 영역, 옆 입력 안내, 하나로 확인된 본문 폼의 원클릭 준비를 통합했다. 공개 개발 브랜치에 push 완료.
+- 원클릭 보험 FIXTURE 전체 흐름 PASS. 직접 입력·선택·두 동의·검토·최종 제출 후 원본 DB 정확히 한 건. 근거 `.flecto/qa/insurance-oneclick.receipt.json`.
+- 원클릭 직전 후보의 실제 Codex 보험 3회 PASS, 조작 가능 시간 6.39–7.63초. 3초 목표 달성으로 주장하지 않는다. 최종 원클릭 후보의 LIVE 재검증 진행 중.
+- 최종 후보 단위·통합 **507개 PASS**, 0 FAIL. 근거 `.flecto/qa/release-unit.receipt.json`. 전체 Chrome FIXTURE 38개와 LIVE 9회 실행 중.
+- 실제 보험 화면 7개 PNG와 파일별 빌드 해시 sidecar 확보. 영상은 이 화면과 새 밝은 한국어 내레이션·음악으로 수정 중.
+- 이전 후보의 실제 Chrome 도구 막대, 두벌식 한글 IME, 200% 확대, 포커스 이동, 마스킹 이미지 LIVE 경로는 별도 수동 근거가 있다. 현재 후보의 설치·시연 녹화는 Astra 작업자가 진행한다.
+- 전체 T01–T40/OPER01–OPER15 PASS나 FULL_LIVE는 아직 주장하지 않는다. 아래 표는 13:55 체크포인트 기록이다.
 
 | 항목 | 실제 상태 |
 |---|---|

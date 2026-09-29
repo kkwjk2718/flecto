@@ -3,8 +3,8 @@
 **PATCH_READY. This worker ran only static mapping checks. No unit/fixture/LIVE test, browser, build, provider, QA emitter or release command was run.** `complete` means reviewed assertion coverage, never execution PASS.
 
 - Refreshed at 2026-09-29 15:49:33 KST. User deadlines: mapping commit by 15:55 KST; overall work by 16:15 KST. The historical template/state deadlines are not silently changed.
-- Owned checkout: `/Users/kkwjk2718/.codex/worktrees/flecto-runtime/kakao-ralphthon-main`, base HEAD `108e124a5ff0779d1a2ccb243329d674b000cd84`. Existing contracts/core/state changes belong to others and are excluded.
-- Source/mapping baseline: `/Users/kkwjk2718/Documents/kakao-ralphthon-main`, initial HEAD `15b24406a585da7391b84cfeac379255c0de4900`, refreshed after the one-click integration to HEAD `36a1becf3f285588e20c1cefe57e1df57706e25b` (clean when inspected). The UI settings-test correction is now committed on main. The two evidence files are absent at the owned checkout's base; review the evidence-only diff against main `15b2440`, not the unrelated runtime tree diff.
+- Owned checkout: `분리된 flecto-runtime 작업 공간`, base HEAD `108e124a5ff0779d1a2ccb243329d674b000cd84`. Existing contracts/core/state changes belong to others and are excluded.
+- Source/mapping baseline: `이 저장소`, initial HEAD `15b24406a585da7391b84cfeac379255c0de4900`, refreshed after the one-click integration to HEAD `36a1becf3f285588e20c1cefe57e1df57706e25b` (clean when inspected). The UI settings-test correction is now committed on main. The two evidence files are absent at the owned checkout's base; review the evidence-only diff against main `15b2440`, not the unrelated runtime tree diff.
 - Scope: only this file and `evidence/assertion-map.json`. No test source, grader, build-hash procedure, runtime, lockfile or shared state edits. The map targets main's bytes and is intentionally not usable against this older worktree's tests.
 - Authority: original `ops/02_GATES_AND_TESTS.md`, `01_DECISIONS.md`, `scripts/qa-report.ts`, `docs/OPERATIONS.md`. Historical reported/manual results below are preserved as provenance, not refreshed execution evidence.
 
@@ -43,7 +43,7 @@ Reviewed helper/additional-source hashes (context only; sourceSha256 mapping and
 ## Mapping and receipt contract
 
 - Schema `flecto.qa-map.v1`; gate SHA-256 `0b0c6d288257f1202c03588107a7ff6c0c16fe83cf70a7330637083c34394f44`, unchanged.
-- Run IDs remain `unit-final`, `fixture-final`, `live-final`. No prior report paths, receipt hashes, PASS totals or artifact hashes are embedded into JSON.
+- Run IDs remain `release-unit-02`, `release-fixture-02`, `release-live-02`. No prior report paths, receipt hashes, PASS totals or artifact hashes are embedded into JSON.
 - Each snippet was checked inside the selected callback body, including literal parameter expansion, exact describe ancestry and duplicate title cardinality. The restart helper is reviewed through its unconditional awaited call sites, not attributed as an unrelated test's assertion. Every sourceSha256 is the entire current main test file.
 - LIVE assertions retain three instances and requestedModel `gpt-6-luna`, matching `playwright.live.config.ts`. T31's duplicate `%j` `{}` title retains two instances. Other non-LIVE references retain one. All actual matching instances must pass.
 - The unmodified emitter requires current source hashes, final receipts, matching artifact/run-input evidence and complete requirements. Missing evidence/partial coverage remains NOT_RUN; FAIL/FLAKY/SKIP retain precedence. A mapping edit never relabels an old report with new hashes.
@@ -155,7 +155,7 @@ Current mapping SHA-256: `97d1e7eb864f1b294949c0520136e5de92ece0ffafad42e741bd67
 
 1. Integrate only these two files; the commit is based on the older runtime checkout, where both paths are additions. If cherry-picking onto main reports add/add conflicts, resolve only these evidence files to the reviewed commit versions. Review with `git diff 15b2440 <mapping-commit> -- evidence/assertion-map.json evidence/GATE_COVERAGE_REVIEW.md`.
 2. Preserve the reviewed UI settings-test correction now committed on main. Recheck all main test/helper/config bytes at final candidate freeze. Any new source change needs renewed source review and hash refresh, not fabricated receipt provenance.
-3. The lead owns the heavy slot. Run the existing wrapper/build-hash process unchanged for `unit-final`, `fixture-final`, `live-final` on the actual final candidate; retain failures, include both worker-stop cases, and keep all three LIVE repeats.
+3. The lead owns the heavy slot. Run the existing wrapper/build-hash process unchanged for `release-unit-02`, `release-fixture-02`, `release-live-02` on the actual final candidate; retain failures, include both worker-stop cases, and keep all three LIVE repeats.
 4. Emit only from fresh matching receipts. Keep browser/profile restart and other partial gaps, manual supplements and unsupported vision evidence explicit. No current product PASS follows from this static review.
 5. Shared `state/NEXT_ACTION.md` is outside this worker's ownership; this section is the handoff checkpoint to copy there if needed. No push or external submission was performed.
 

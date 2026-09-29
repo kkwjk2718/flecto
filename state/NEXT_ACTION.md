@@ -1,35 +1,32 @@
 # 다음 행동
 
-2026-09-29 14:14 KST 체크포인트. 마감 오늘16:00, 기능안정화15:15/최종검증15:45. [실행 설정](RUN_SETTINGS.md).
+2026-09-29 16:03 KST. 최신 사용자 지시: 16:15까지 실제 시연·영상·발표자료·출고 전달 완료. 자동 연장 없음.
 
-## 완료된 실제 연결
+## 완료 근거
 
-- 제품 코드 GitHub 공개 개발 브랜치에 push, draft PR #6 생성·연결. main은 아직 초기문서이며 제품ZIP 링크는 README의 feat/flecto-product 기준.
-- 두 FIXTURE 흐름 실제 확장→원본처리→DB1건 PASS. LIVE v3 후보에서 두 사이트 각3cold총6회+benefitswarm3회 PASS. 후보312e102 기반 기록이며 이후UI·vision·fast설정 변경 때문에 최종재검증 필요.
-- LIVE 첫시도는 ancillary navigation을 task_selection에 넣는 계획으로3FAIL,1PASS,1interrupted,1NOT_RUN. 원인을수정하고실패원본보존. PROMPTv3에서선택폼입력/동의/선택행동만전달, unusabletemplate거절.
-- 후보 controlsReady(주요버튼500ms보호포함): LIVEcold5.0–9.1초,benefitswarm0.836–0.840초. 3초cold목표 미달이며 최종실측전홍보수치로쓰지않음.
-- Opus UI2커밋 통합. source/localreviewedit구분, 실제결과영수증,Lucide헤더·단계표시,큰글씨버튼유지.
-- sourceobserver의STALE/AUTH 예외를 상태로처리, privatebatchreads,옵션동적갱신/원본review변경무효화 통합.
-- vision captureprivacy추가검토+guardedprotocol/providerwire 통합. authcapability있는합성허용origin만선택메뉴노출. 실제captureVisibleTab/LIVEimage positive는 아직검사전.
-- 최근 단위/통합441개PASS, typecheckPASS. 이후visionprivacy추가분/회귀검사최종확인중.
-- fullfixture첫회10PASS3FAIL(동일controlledcheckbox.check 즉시검사결함)로중단. 독립QA가.click+await overlay/source readback으로고침. fixture-v3 실제재실행중.
+- 보험 원본 서비스, 30px 기본 글씨·72/80px 조작 영역, 옆 안내, 유일한 본문 폼 원클릭 준비 통합.
+- 개인 Chrome에 확장 설치·활성화·고정·도우미 연결을 네이티브 UI로 확인. 개인 Chrome 단축키는 Bitwarden과 겹쳐 도구 막대 FLECTO 클릭 사용.
+- Astra가 별도 Chrome의 실제 네이티브 조작으로 보험 전체 흐름을 완료했다. 원본 POST /insurance/apply와 /insurance/submit 각각303, DB1건, 접수번호 확인. 연속 원본 녹화 .flecto/recordings/insurance-native-20260929/insurance-native-continuous.webm, recording-evidence.json에서 extension bytes 전후 동일 확인. 외부 보험 거래 없음.
+- 실제 보험 PNG7개와 갤러리·ZIP 완성. dist/delivery/usage-images에 전달본 복사.
+- GitHub 릴리스의 Deepgreen5장 PPT를 보험 실제 화면으로 채운 PPT/PDF 완성. 이후 사용자 USB outputs가 연결되어 팀원 최신 추천본을 추가 확인·반영 중.
+- ElevenLabs Jubal 밝은한국어VO, 122BPM음악, 전환POP SFX 생성. Opus 새30초보험광고 렌더 완료 후 Fable 독립 시각 검토 중.
+- 제품브랜치 feat/flecto-product 공개push. PR6. 71b0af7에 설정 저장 회귀 테스트 수정 포함.
 
-## 병렬 작성과 남은작업
+## 검사 진행과 실패 보존
 
-- QA Zeno: regression/helperfix(d137862/fc25daf) 통합, actualSWrestart검사추가중. flecto-core.
-- Vision Harvey: privacy두패치통합, realChromepixel3test미실행에서이번fullrun포함. flecto-culture.
-- Vision Avicenna: wire8a7f7f9/capability6256904통합,planTransport표시추가후마무리. flecto-runtime.
-- Manual Chandrasekhar: scripts/manual-qa.ts 작성, 실제Chrome툴바capture권한/OSIME/200% 점검에사용할harness. flecto-background.
-- Video Opus Erdos: Fable제작프롬프트기반 marketing/remotion/ 편집가능30초광고구현. flecto-benefits. 첫시각preview14:20목표. heavy렌더는mainQA와직렬.
+- 최초최종후보 단위507PASS. Chrome FIXTURE37PASS/1FAIL: 기본글씨30을 다시 선택해 저장이 발생하지 않는 검사 준비 결함. 독립QA가26저장→30선택으로 수정, 기존 assertion 전부 유지, 대상실제Chrome1PASS.
+- 최초최종후보 LIVE9회 중8PASS/1TIMEOUT. 보험cold1회가10초준비상한을 넘었고 안전하게 원본복귀/재시도를 제시했다. 실패기록 release-live 보존. 제품10초상한은 변경하지 않는다. AI cold를항상3초라고주장하지 않는다.
+- 테스트 준비 수정 이후 같은새artifact로 unit/fixture/LIVE 전부 재실행 중: release-unit-02, release-fixture-02, release-live-02. evidence/assertion-map.json의 runID도 이세개에 연결.
+- 이전 수동 IME/200%/focus/vision 기록은 별도후보 근거로 유지. T01–40/OPER01–15 모두PASS 또는 FULL_LIVE를 아직주장하지 않는다.
 
-## 오디오·영상
+## 16:03 갱신
 
-Fable프롬프트 marketing/FLECTO_30S_PRODUCTION_PROMPT.md +audio-script.json통합. ElevenLabsCreator실잔여131000크레딧확인후기존quota만사용. 4VO/4music/16SFX생성완료,실오디오 .flecto/creative/audio/production-manifest.json. VO기본Sara4 약27.77초,영상0.8초시작. music은30초요청이48초결과라최종믹스에서30초로편집. 원음 대안모두보존. 소비약2746크레딧(도구반환실비기준,transcription비용미표시). 추가결제/공개게시없음. 모델audioinput미지원으로실제청취검수확정하지않음; 길이·파형·자막근거만확인.
+최종 unit507/fixture38/LIVE9 전부PASS. 자동 등급 SINGLE_SITE_LIVE / SESSION_CHECKPOINTED, 완전 게이트25PASS/30NOT_RUN. 빌드해시·실패이력 [최종 검증](../evidence/FINAL_VALIDATION.md). 실제시연녹화와 개인Chrome캐시READY완료. 남은 일은 최종패키지·USB복사·팀전달 및 문서검사수정 GitHub push.
 
-## 즉시 다음
+## 즉시 마무리
 
-1. fixture-v3(runwrapper)결과확인→실제결함수정,테스트결함은독립QA검토의미유지.
-2. 최종happy2개만FLECTO_CAPTURE=1로재캡처해동일빌드6이미지확보→Opus영상asset교체. 전체fixture중간캡처는holdout이덮어쓸수있으므로영상에바로쓰지않음.
-3. actualChrome/IME/200%와실제maskedimageprovider경로확인. 실패범위기록.
-4. 모든code/test통합뒤build→qa-report unit/fixture/LIVE새receipt→검토된55IDassertionmap→제한등급/미실행범위포함releaseZIP.
-5. runtime/sourcehash가다르면과거LIVE증거출고에사용불가. README/teamhandoff/3분데모안내최종갱신,GitHub최신push. 실제행사제출/영상외부게시별도이며submitted=false.
+1. 최종세run 실제종료·JSON·receipt 검사. 실패있으면원인과제한등급공개. emitter→releasepack→ZIP검사. 검사없어진것처럼실패삭제금지.
+2. Opus광고최종commit과30.000초MP4·자막·무음·포스터 통합. FableactualMP4프레임검토 반영. 미청취를청취검증이라고말하지 않음.
+3. USB outputs의팀원최신추천본을실제보험화면으로채운PPT/PDF 통합. 기존원본보존.
+4. 녹화WebM과호환MP4, 최신앱ZIP, 발표자료, 이미지팩을 dist/delivery에모으고 사용자에게절대경로링크 전달. 개인Chrome설치스크린샷/프로필/토큰/DB는공유패키지제외.
+5. GitHub최종push 및 PR설명/CI확인. 코드공개승인은있으나행사제출·광고외부게시 미실행(submitted=false).
