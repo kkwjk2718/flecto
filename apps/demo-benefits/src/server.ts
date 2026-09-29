@@ -3,6 +3,7 @@ import cookie from '@fastify/cookie';
 import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
 import { applicationForm, categories, contactMethods, css, details, escape, hidden, layout, loginForm, notice, noticeFor, type Values, type Variant } from './views.js';
+import { initializeInsuranceDatabase, registerInsuranceRoutes, resetInsuranceDatabase } from './insurance.js';
 
 export interface BenefitsServerOptions {
   dbPath: string;
@@ -35,7 +36,7 @@ export function createBenefitsServer(options: BenefitsServerOptions): FastifyIns
     if (tables.length) {
       if (!tables.some(t => t.name === 'benefits_meta')) throw new Error('Refusing a database not owned by this synthetic service.');
       const marker = db.prepare("SELECT value FROM benefits_meta WHERE key='identity'").get() as { value: string } | undefined;
-      if (marker?.value !== `ondam-benefits-synthetic-v1:${options.namespace}` || tables.some(t => !['benefits_meta', 'sessions', 'orders', 'drafts', 'records'].includes(t.name))) throw new Error('Database namespace or ownership mismatch.');
+      if (marker?.value !== `ondam-benefits-synthetic-v1:${options.namespace}` || tables.some(t => !['benefits_meta', 'sessions', 'orders', 'drafts', 'records', 'insurance_meta', 'insurance_drafts', 'insurance_records'].includes(t.name))) throw new Error('Database namespace or ownership mismatch.');
     }
     db.exec(`PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL; PRAGMA busy_timeout=3000;
       CREATE TABLE IF NOT EXISTS benefits_meta(key TEXT PRIMARY KEY, value TEXT NOT NULL);
@@ -47,6 +48,7 @@ export function createBenefitsServer(options: BenefitsServerOptions): FastifyIns
     db.prepare('INSERT OR IGNORE INTO benefits_meta VALUES (?,?)').run('insertions', '0');
     const seed = db.prepare('INSERT OR IGNORE INTO orders VALUES (?,?)');
     for (let i = 1; i <= 99; i++) seed.run(`FLECTO-2026-${String(i).padStart(3, '0')}`, '2026-09-01');
+    initializeInsuranceDatabase(db);
   } catch (error) { db.close(); throw error; }
 
   const app = Fastify({ logger: false, bodyLimit: 16 * 1024 });
@@ -210,7 +212,12 @@ export function createBenefitsServer(options: BenefitsServerOptions): FastifyIns
     return reply.send({ records, count: records.length, insertionCount: Number(counter.value), namespace: options.namespace });
   });
   app.post('/__qa/reset', (_request, reply) => {
-    db.exec("BEGIN IMMEDIATE; DELETE FROM records; DELETE FROM drafts; UPDATE benefits_meta SET value='0' WHERE key='insertions'; COMMIT;");
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      db.exec("DELETE FROM records; DELETE FROM drafts; UPDATE benefits_meta SET value='0' WHERE key='insertions';");
+      resetInsuranceDatabase(db);
+      db.exec('COMMIT');
+    } catch (error) { db.exec('ROLLBACK'); throw error; }
     return reply.send({ count: 0, insertionCount: 0, namespace: options.namespace, sessionsPreserved: true });
   });
   app.post('/__qa/config', (request, reply) => {
@@ -221,5 +228,6 @@ export function createBenefitsServer(options: BenefitsServerOptions): FastifyIns
     if (body.delayMs !== undefined) delayMs = body.delayMs as number;
     return reply.send({ variant, fault, delayMs });
   });
+  registerInsuranceRoutes(app, { db, namespace: options.namespace, sessionSecret: options.sessionSecret, sessionOf, auth, bodyOf, field });
   return app;
 }
