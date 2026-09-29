@@ -4,14 +4,15 @@ import { resolve } from 'node:path';
 import { startSystem, type RunningSystem } from '../../scripts/system';
 import { EXTENSION_ID } from '@flecto/contracts';
 
-export const QA_PORTS = { planner: 4427, benefits: 4283, culture: 4284 };
+export const E2E_MODE = process.env.FLECTO_E2E_MODE === 'LIVE_CODEX' ? 'LIVE_CODEX' : 'FIXTURE';
+export const QA_PORTS = E2E_MODE === 'LIVE_CODEX' ? { planner: 4527, benefits: 4383, culture: 4384 } : { planner: 4427, benefits: 4283, culture: 4284 };
 type AppFixtures = { context: BrowserContext; worker: Worker; activate: (page: Page) => Promise<void>; consoleErrors: string[] };
 type WorkerFixtures = { system: RunningSystem };
 export const test = base.extend<AppFixtures, WorkerFixtures>({
   system: [async ({}, use) => {
     await mkdir('.flecto/qa', { recursive: true });
     const dataDir = await mkdtemp(resolve('.flecto/qa/e2e-'));
-    const system = await startSystem({ mode: 'FIXTURE', namespace: 'QA', dataDir, ports: QA_PORTS });
+    const system = await startSystem({ mode: E2E_MODE, namespace: 'QA', dataDir, ports: QA_PORTS });
     try { await use(system); } finally { await system.close(); }
   }, { scope: 'worker' }],
   context: async ({ system }, use, testInfo) => {
@@ -38,7 +39,7 @@ export const test = base.extend<AppFixtures, WorkerFixtures>({
       await expect(options.locator('.fl-status')).toContainText('도우미와 연결됐어요');
       await options.close();
       await use(context);
-      await testInfo.attach('artifact', { body: JSON.stringify({ extensionId: EXTENSION_ID, activation: 'production-broker-in-isolated-extension-worker', mode: 'FIXTURE' }), contentType: 'application/json' });
+      await testInfo.attach('artifact', { body: JSON.stringify({ extensionId: EXTENSION_ID, activation: 'production-broker-in-isolated-extension-worker', mode: E2E_MODE }), contentType: 'application/json' });
     } finally { await context.close(); }
   },
   worker: async ({ context }, use) => { await use(context.serviceWorkers()[0] ?? await context.waitForEvent('serviceworker')); },

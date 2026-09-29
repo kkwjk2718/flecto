@@ -4,11 +4,11 @@
 |---|---|
 | 문안·대본·차트 명세 | DOCUMENTS_READY |
 | 실제 PPT·PDF·차트 이미지 | NOT_CREATED |
-| 실제 제품 빌드 | NOT_STARTED / NOT_RUN |
+| 실제 제품 빌드 | 구현·FIXTURE 원본 저장 검증, 최종 빌드 고정 전 |
 | 제품 검증 등급 | UNVERIFIED |
 | 실제 LIVE 데모 | NOT_RUN |
-| 실제 화면 캡처 | NOT_CAPTURED |
-| 오프닝·예비 영상 | NOT_RENDERED |
+| 실제 화면 캡처 | 합성2흐름6개 확보, UI최종수정 후 재캡처 예정 |
+| 오프닝·예비 영상 | Fable5.1 제작 구성 중, Opus5.5로30초 광고 제작 예정 |
 | 기술·사용자 실측값 | NOT_MEASURED |
 | 광고·후원 계약·정산 | UNVERIFIED |
 | 대상 고령자 실험 | 이번 행사 검증 대상 아님 |
