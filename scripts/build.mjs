@@ -3,8 +3,11 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { mkdir, copyFile, readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { tsImport } from 'tsx/esm/api';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
+const { captureRuntimeInputs, writeRuntimeManifest } = await tsImport('./ops/runtime-hash.ts', import.meta.url);
+const runtimeInputs = await captureRuntimeInputs(root);
 const extension = resolve(root, 'dist/extension');
 const alias = Object.fromEntries([
   ['contracts', 'index.ts'], ['core', 'index.ts'], ['templates', 'index.tsx'], ['design-tokens', 'index.ts'],
@@ -32,4 +35,5 @@ const hashes = {};
 for (const name of files) hashes[name] = createHash('sha256').update(await readFile(resolve(extension, name))).digest('hex');
 await writeFile(resolve(root, 'dist/extension-hashes.json'), JSON.stringify(hashes, null, 2) + '\n');
 await build({ configFile: resolve(root, 'apps/demo-culture/vite.config.ts'), logLevel: 'warn' });
+await writeRuntimeManifest(root, runtimeInputs);
 console.log('Extension build complete: dist/extension (file hashes: dist/extension-hashes.json)');

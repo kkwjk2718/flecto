@@ -3,7 +3,7 @@ import { test, expect, dialog, QA_PORTS, loginBenefits, benefitsRecords } from '
 import { EXTENSION_ORIGIN } from '@flecto/contracts';
 import type { RunningSystem } from '../../scripts/system';
 
-type Timing = { source: string; mode: string; controlsReadyMs: number };
+type Timing = { source: 'benefits' | 'culture'; stage: string; mode: 'LIVE_CODEX' | 'CACHE'; controlsReadyMs: number };
 async function diagnostics(system: RunningSystem) {
   const response = await fetch(`http://127.0.0.1:${system.ports.planner}/v1/diagnostics/cache`, {
     headers: { authorization: `Bearer ${system.credentials.plannerToken}`, origin: EXTENSION_ORIGIN },
@@ -20,7 +20,8 @@ async function prepare(page: Page, label: string, source: string, timings: Timin
   const end = await page.evaluate(() => performance.now());
   const mode = await ui.locator('.fl-tech').textContent() ?? '';
   expect(mode).toContain(source.endsWith('-warm') ? '(CACHE)' : '(LIVE_CODEX)');
-  timings.push({ source, mode, controlsReadyMs: end - start });
+  timings.push({ source: source.startsWith('benefits') ? 'benefits' : 'culture', stage: source,
+    mode: source.endsWith('-warm') ? 'CACHE' : 'LIVE_CODEX', controlsReadyMs: end - start });
 }
 /** Drive the displayed controls, independent of the model's grouping/order. */
 async function finishLocalSteps(page: Page, values: Record<string, string>, choice: RegExp, consent: RegExp) {
@@ -42,13 +43,19 @@ async function finishLocalSteps(page: Page, values: Record<string, string>, choi
   }
   throw new Error('The displayed plan did not reach review within the schema step limit');
 }
-async function attachEvidence(info: TestInfo, timings: Timing[], system: RunningSystem, outcome: object) {
+function cacheDelta(before: Record<string, number>, after: Record<string, number>) {
+  return Object.fromEntries(['exactHits', 'compatibleHits', 'misses', 'providerCalls'].map(key => [key, after[key] - before[key]]));
+}
+async function attachEvidence(info: TestInfo, timings: Timing[], cache: Record<string, number>, outcome: object) {
   await info.attach('live-source-evidence', { body: JSON.stringify({ mode: 'LIVE_CODEX', requestedModel: 'gpt-6-luna',
-    coldNamespace: 'new QA system per repeat worker', timings, cache: await diagnostics(system), outcome }), contentType: 'application/json' });
+    coldNamespace: 'new QA system per repeat worker; site counters are the actual run delta', timings: timings.filter(t => t.mode === 'LIVE_CODEX'),
+    cache, outcome }), contentType: 'application/json' });
+  await info.attach('controls-ready-samples', { body: JSON.stringify(timings), contentType: 'application/json' });
 }
 
 test('LIVE benefits: cold original storage and separate warm controlsReady', async ({ page, activate, system, consoleErrors }, info) => {
   const timings: Timing[] = [];
+  const initial = await diagnostics(system);
   await loginBenefits(page); await page.goto(`http://127.0.0.1:${QA_PORTS.benefits}/apply`); await activate(page);
   await prepare(page, '신청 내용 확인', 'benefits-cold', timings);
   expect((await diagnostics(system)).misses).toBeGreaterThan(0);
@@ -72,11 +79,12 @@ test('LIVE benefits: cold original storage and separate warm controlsReady', asy
   expect(after.providerCalls).toBe(before.providerCalls);
   expect(after.exactHits + after.compatibleHits).toBeGreaterThan(before.exactHits + before.compatibleHits);
   expect(consoleErrors).toEqual([]);
-  await attachEvidence(info, timings, system, { sourceDatabaseCount: result.count, insertionCount: result.insertionCount });
+  await attachEvidence(info, timings, cacheDelta(initial, before), { sourceDatabaseCount: result.count, insertionCount: result.insertionCount });
 });
 
 test('LIVE culture: cold React-controlled application stores the selected course and time', async ({ page, activate, system, consoleErrors }, info) => {
   const timings: Timing[] = [];
+  const initial = await diagnostics(system);
   await page.goto(`http://127.0.0.1:${QA_PORTS.culture}/login`);
   await page.getByLabel('아이디', { exact: true }).fill('demo'); await page.getByLabel('비밀번호', { exact: true }).fill('flecto2026!');
   await page.getByRole('button', { name: '로그인', exact: true }).click();
@@ -102,5 +110,5 @@ test('LIVE culture: cold React-controlled application stores the selected course
   const outcome = await response.json(); expect(outcome.count).toBe(1);
   expect(outcome.reservations[0]).toMatchObject({ courseId: 'yoga', timeId: 'yoga-tue-thu-1000', applicantName: '김하늘' });
   expect(consoleErrors).toEqual([]);
-  await attachEvidence(info, timings, system, { sourceDatabaseCount: outcome.count });
+  await attachEvidence(info, timings, cacheDelta(initial, await diagnostics(system)), { sourceDatabaseCount: outcome.count });
 });

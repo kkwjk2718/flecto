@@ -75,6 +75,8 @@ describe('public extraction and source verification', () => {
     code(() => verifyPlan({ ...valid, steps: [valid.steps[0]] }, snapshot), 'REQUIRED_MISSING');
     code(() => verifyPlan({ ...valid, steps: [...valid.steps, { ...valid.steps[0], id: 'duplicate' }] }, snapshot), 'SCHEMA_INVALID');
     expect(verifyPlan(valid, snapshot, registry)).toEqual(valid);
+    code(() => verifyPlan({ ...valid, steps: [...valid.steps, { id: 'aux', template: 'task_selection', title: '다른 작업', controlRefs: [], noticeRefs: [] }] }, snapshot), 'SCHEMA_INVALID');
+    code(() => verifyPlan({ ...valid, steps: [...valid.steps, { id: 'fake_done', template: 'result', title: '완료', controlRefs: [], noticeRefs: [] }] }, snapshot), 'SCHEMA_INVALID');
   });
   it('does not mix identically named actions and inputs from different forms', () => {
     const { snapshot, registry } = page('<form><label>성명<input required></label><button>신청</button></form><form><label>성명<input required></label><button>신청</button></form>');

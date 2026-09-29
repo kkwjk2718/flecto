@@ -22,6 +22,7 @@ export const PLANNER_INSTRUCTIONS = [
   '',
   '## Rules',
   '- Use every listed control exactly once across all steps, in the order a person fills a form. Never invent, rename or omit an alias.',
+  '- With an action alias, this is an already chosen form: use only grouped_form, item_selection, consent, and final_review. Do not add task_selection or result steps. Auxiliary navigation is not part of completing the chosen form.',
   '- Templates: task_selection (choose a task link/button), grouped_form (text/tel/email/date/number/textarea inputs), item_selection (select/radio choices), consent (agreement checkboxes plus their terms notices), final_review (summary before the submit control), result (post-submit message).',
   '- Put all checkboxes of the form into one consent step together with their terms notices. Attach every other listed notice to the step where it is read; every listed notice must appear in at least one step.',
   '- Put 2-4 related inputs per grouped_form or item_selection step. Use the fewest steps that keep each step small (1-12 steps total).',
@@ -76,7 +77,7 @@ function noticeLine(alias: string, notice: PublicNotice): string {
 export function encodePlanPrompt(snapshot: PublicPageSnapshot): PromptEncoding {
   const { chosen, scope } = selectScope(snapshot);
   const controls = scope === null ? snapshot.controls
-    : snapshot.controls.filter((c) => c.formRef === scope && (c.actionKind !== 'submit' || c.ref === chosen!.ref));
+    : snapshot.controls.filter((c) => c.formRef === scope && (c.actionKind === 'none' || c.ref === chosen!.ref));
   const notices = scope === null ? snapshot.notices
     : snapshot.notices.filter((n) => n.formRef === null || n.formRef === scope);
 
@@ -130,7 +131,8 @@ export function buildOutputSchema(encoding: PromptEncoding): Record<string, unkn
           additionalProperties: false,
           required: ['template', 'title', 'controls', 'notices'],
           properties: {
-            template: { type: 'string', enum: [...TemplateSchema.options] },
+            template: { type: 'string', enum: encoding.fixedAction !== null
+              ? ['grouped_form', 'item_selection', 'consent', 'final_review'] : [...TemplateSchema.options] },
             title: { type: 'string' },
             controls: { type: 'array', items: aliasItems([...encoding.controlRefs.keys()]) },
             notices: { type: 'array', items: aliasItems([...encoding.noticeRefs.keys()]) },

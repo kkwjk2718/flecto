@@ -405,6 +405,17 @@ describe('CodexProvider (unit, spawn stubbed)', () => {
 });
 
 describe('encodePlanPrompt / buildOutputSchema / decodePlan', () => {
+  it('excludes auxiliary navigation from an already selected form and restricts its templates', () => {
+    const selected = { ...snapshot, goalRef: 'e3', controls: [...snapshot.controls,
+      { ...snapshot.controls[2], ref: 'help', kind: 'button' as const, label: '강좌 안내 보기', semanticKey: 'help', actionKind: 'navigate' as const },
+      { ...snapshot.controls[2], ref: 'later', kind: 'link' as const, label: '나중에 신청', semanticKey: 'later', actionKind: 'navigate' as const },
+    ] };
+    const encoded = encodePlanPrompt(selected);
+    expect([...encoded.controlRefs.values()]).toEqual(['e1', 'e2', 'e3']);
+    expect(encoded.prompt).not.toMatch(/강좌 안내 보기|나중에 신청/);
+    const schema = buildOutputSchema(encoded) as any;
+    expect(schema.properties.steps.items.properties.template.enum).toEqual(['grouped_form', 'item_selection', 'consent', 'final_review']);
+  });
   it('forwards only the goal form plus global notices, with short aliases and no semantic keys, refs or option refs', () => {
     const large = largeSnapshot();
     const encoding = encodePlanPrompt(large);

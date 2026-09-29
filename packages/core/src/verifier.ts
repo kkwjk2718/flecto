@@ -20,6 +20,7 @@ export function verifyPlan(input: unknown, snapshot: PublicPageSnapshot, registr
   if (snapshot.goal === 'complete_form' && (!action || action.actionKind !== 'submit' || !action.formRef)) throw new FlectoError('REQUIRED_MISSING');
   const scope = action?.formRef ?? null;
   for (const step of plan.steps) {
+    if (snapshot.goal === 'complete_form' && ['task_selection', 'result'].includes(step.template)) throw new FlectoError('SCHEMA_INVALID');
     for (const r of step.controlRefs) {
       const c = controls.get(r);
       if (!c || seen.has(r)) throw new FlectoError('SCHEMA_INVALID');
