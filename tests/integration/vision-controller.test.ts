@@ -39,7 +39,7 @@ function png(width: number, height: number) {
   const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(width); ihdr.writeUInt32BE(height,4); ihdr[8]=8; ihdr[9]=6;
   return 'data:image/png;base64,' + Buffer.concat([Buffer.from([137,80,78,71,13,10,26,10]),chunk('IHDR',ihdr),chunk('IDAT',deflateSync(Buffer.alloc(height*(1+width*4)))),chunk('IEND',Buffer.alloc(0))]).toString('base64');
 }
-async function harness() {
+async function harness(options: { capability?: () => Promise<unknown>; imageCapable?: boolean } = {}) {
   // The notice has multiple real input candidates in the same form, with no
   // explicit description relation. No marker or expected-answer data is used.
   document.body.innerHTML = `<form action="/continue" method="post"><label for="a">첫 항목</label><input id="a" required value="PRIVATE_A_9381">
@@ -50,14 +50,16 @@ async function harness() {
   ] as Array<[string,[number,number,number,number]]>) bounds.set(document.querySelector(selector)!, rect);
   const plan = vi.fn(async (s: PublicPageSnapshot) => buildFixturePlan(s));
   const planWithImage = vi.fn(async (s: PublicPageSnapshot, _budget: number, _signal: AbortSignal, _image: unknown) => buildFixturePlan(s));
-  const server = createPlannerServer({ dbPath: ':memory:', token, provider: { mode:'FIXTURE', model:'synthetic-controller-image', plan, planWithImage }, allowedSourceOrigins:[origin] });
+  const server = createPlannerServer({ dbPath: ':memory:', token, provider: { mode:'FIXTURE', model:'synthetic-controller-image', plan, ...(options.imageCapable === false ? {} : { planWithImage }) }, allowedSourceOrigins:[origin] });
   const tab = { id:1, windowId:2, active:true, url:origin+'/form' };
   const sender = { id:EXTENSION_ID, tab, documentId:'chrome-document', frameId:0, origin, url:tab.url, documentLifecycle:'active' } as chrome.runtime.MessageSender;
   const frame = { url:tab.url, documentId:'chrome-document', documentLifecycle:'active', errorOccurred:false };
   const area = (local = false) => ({ setAccessLevel: async () => {}, set: async () => {}, get: async () => local ? { flectoConnection:{ plannerUrl:'http://127.0.0.1:4317', token } } : {} });
   let controller!: FlectoController, broker!: BackgroundBroker;
   const messages: unknown[] = [], uploads: string[] = [], captureFocus: Element[] = [];
-  const api = { runtime:{ id:EXTENSION_ID, sendMessage: vi.fn(async (message: unknown) => { messages.push(message); return broker.handle(message,sender); }) },
+  const api = { runtime:{ id:EXTENSION_ID, sendMessage: vi.fn(async (message: unknown) => { messages.push(message);
+    if ((message as { type?: string }).type === 'FLECTO_VISION_CAPABILITIES' && options.capability) return options.capability();
+    return broker.handle(message,sender); }) },
     storage:{ local:area(true), session:area() }, webNavigation:{ getFrame:async () => frame }, scripting:{ executeScript:async () => [] },
     tabs:{ get:async () => tab, sendMessage:vi.fn(async (_tab:number, message:{type:string}) => message.type.startsWith('FLECTO_VISION_') ? controller.visionCallback(message) : {ok:true}),
       captureVisibleTab:vi.fn(async () => {
@@ -85,9 +87,9 @@ async function harness() {
   cleanups.push(async () => { await controller.close(); await server.close(); });
   const shadow = () => document.getElementById('flecto-host')!.shadowRoot!;
   const click = async (layout:boolean) => {
-    await vi.waitFor(() => expect(shadow().querySelectorAll('button[data-flecto-ref]').length).toBeGreaterThan(0));
-    const button = [...shadow().querySelectorAll<HTMLButtonElement>('button[data-flecto-ref]')].find(b => b.textContent!.includes('화면 배치 도움') === layout)!;
-    expect(button).toBeDefined(); button.click();
+    const find = () => [...shadow().querySelectorAll<HTMLButtonElement>('button[data-flecto-ref]')].find(b => b.textContent!.includes('화면 배치 도움') === layout);
+    await vi.waitFor(() => expect(find()).toBeDefined());
+    find()!.click();
   };
   return { controller, api, broker, server, plan, planWithImage, messages, uploads, shadow, click };
 }
@@ -147,4 +149,73 @@ it('refuses capture when FLECTO is still visibly painted despite isolation start
   await vi.waitFor(() => expect(h.api.tabs.sendMessage.mock.calls.some(call => call[1].type === 'FLECTO_VISION_GUARD')).toBe(true));
   await vi.waitFor(() => expect(h.shadow().textContent).toContain('관계를 정확히 확인하지 못했어요'));
   expect(h.api.tabs.captureVisibleTab).not.toHaveBeenCalled(); expect(h.planWithImage).not.toHaveBeenCalled();
+});
+
+
+it('a fixture provider without image capability hides layout assistance and keeps normal tasks usable', async () => {
+  const h = await harness({ imageCapable: false });
+  await Promise.all(h.api.runtime.sendMessage.mock.results.map(result => result.value));
+  await vi.waitFor(() => expect(h.shadow().querySelector('button[data-flecto-ref]')).not.toBeNull());
+  expect(h.shadow().textContent).not.toContain('화면 배치 도움');
+  await h.click(false);
+  await vi.waitFor(() => expect(h.plan).toHaveBeenCalledOnce());
+  expect(h.shadow().textContent).not.toContain('화면 배치 도움');
+  expect(h.planWithImage).not.toHaveBeenCalled(); expect(h.api.tabs.captureVisibleTab).not.toHaveBeenCalled();
+});
+
+it.each([
+  ['capability error', { ok: false, error: 'PROVIDER_ERROR' }],
+  ['malformed capability', { ok: true, capabilities: { enabled: 'yes', allowedOrigins: [origin] } }],
+  ['different origin', { ok: true, capabilities: { enabled: true, allowedOrigins: ['http://localhost:3001'] } }],
+  ['normalized origin alias', { ok: true, capabilities: { enabled: true, allowedOrigins: [origin + '/'] } }],
+  ['disabled', { ok: true, capabilities: { enabled: false, allowedOrigins: [origin] } }],
+])('%s hides only optional assistance', async (_label, reply) => {
+  const h = await harness({ capability: async () => reply });
+  await vi.waitFor(() => expect(h.shadow().querySelector('button[data-flecto-ref]')).not.toBeNull());
+  expect(h.shadow().textContent).not.toContain('화면 배치 도움');
+  await h.click(false); await vi.waitFor(() => expect(h.plan).toHaveBeenCalledOnce());
+  expect(h.planWithImage).not.toHaveBeenCalled();
+});
+
+it('a navigation epoch rejects an old capability reply within the same host', async () => {
+  let resolve!: (reply: unknown) => void;
+  const stale = new Promise(done => { resolve = done; }); let calls = 0;
+  const h = await harness({ capability: () => ++calls === 1 ? stale : Promise.resolve({ ok: true, capabilities: { enabled: false, allowedOrigins: [origin] } }) });
+  // Match Chrome's history event: broker revokes the old document binding first.
+  await h.broker.navigation({ tabId: 1, frameId: 0, url: origin + '/form', documentId: 'chrome-document' }, true);
+  h.controller.sourceNavigation(true);
+  await vi.waitFor(() => expect(calls).toBe(2));
+  resolve({ ok: true, capabilities: { enabled: true, allowedOrigins: [origin] } });
+  await stale; await new Promise(done => setTimeout(done, 40));
+  expect(h.shadow().textContent).not.toContain('화면 배치 도움');
+  await h.click(false); await vi.waitFor(() => expect(h.plan).toHaveBeenCalledOnce());
+});
+
+it('30s real in-flight capability: normal UI stays usable and a late reply cannot enable a closed/reopened host', async () => {
+  const started = performance.now();
+  let resolve!: (reply: unknown) => void;
+  const stale = new Promise(done => { resolve = done; }); let calls = 0;
+  const h = await harness({ capability: () => ++calls === 1 ? stale : Promise.resolve({ ok: true, capabilities: { enabled: false, allowedOrigins: [origin] } }) });
+  await h.click(false); await vi.waitFor(() => expect(h.plan).toHaveBeenCalledOnce());
+  expect(performance.now() - started).toBeLessThan(3000);
+  expect(h.shadow().textContent).not.toContain('화면 배치 도움');
+  const originalHost = document.getElementById('flecto-host');
+  await h.controller.close(); await h.controller.activate();
+  await vi.waitFor(() => expect(calls).toBe(2));
+  expect(document.getElementById('flecto-host')).not.toBe(originalHost);
+  await new Promise(done => setTimeout(done, Math.max(0, 30_000 - (performance.now() - started))));
+  expect(performance.now() - started).toBeGreaterThanOrEqual(29_900);
+  resolve({ ok: true, capabilities: { enabled: true, allowedOrigins: [origin] } });
+  await stale; await new Promise(done => setTimeout(done, 40));
+  expect(h.shadow().textContent).not.toContain('화면 배치 도움');
+  expect(h.api.tabs.captureVisibleTab).not.toHaveBeenCalled();
+  expect(h.planWithImage).not.toHaveBeenCalled();
+}, 35_000);
+
+it('a rejected capability message hides only optional assistance', async () => {
+  const h = await harness({ capability: async () => { throw new Error('disconnected'); } });
+  await vi.waitFor(() => expect(h.shadow().querySelector('button[data-flecto-ref]')).not.toBeNull());
+  expect(h.shadow().textContent).not.toContain('화면 배치 도움');
+  await h.click(false); await vi.waitFor(() => expect(h.plan).toHaveBeenCalledOnce());
+  expect(h.planWithImage).not.toHaveBeenCalled();
 });

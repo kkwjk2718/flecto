@@ -65,6 +65,8 @@ export class FlectoController {
   private sourceReviewRows: FlectoViewModel['reviewRows'] = [];
 
   private layoutTasks = new Map<string, string>();
+  private visionAvailableOrigin: string | null = null;
+  private visionCapabilityEpoch = 0;
   private visionContext: { requestId: string; epoch: number; plan: VisionCapturePlan; release: () => void; restored: Promise<boolean>; restoredDone: boolean } | null = null;
 
   constructor(private readonly doc: Document = document) {}
@@ -77,7 +79,7 @@ export class FlectoController {
     if (!this.root) return;
     this.layoutTasks.clear();
     const tasks = [...this.model.tasks];
-    if (this.model.phase === 'IDLE' && this.snapshot && this.registry && normalizeVisionAllowlist([this.snapshot.origin]).length) {
+    if (this.model.phase === 'IDLE' && this.snapshot && this.registry && this.visionAvailableOrigin === this.snapshot.origin) {
       for (const task of this.model.tasks) {
         if (!this.layoutRefs(task.ref).length) continue;
         const ref = `layout_${task.ref}`;
@@ -88,6 +90,26 @@ export class FlectoController {
     }
     this.root.render(React.createElement(FlectoApp, { model: { ...this.model, tasks }, onAction: this.enqueue }));
   }
+  /** Session-local availability only; preparation still rechecks the authenticated capability. */
+  private async loadVisionAvailability(): Promise<void> {
+    const host = this.host, documentId = this.documentInstanceId, origin = this.doc.location.origin;
+    const capabilityEpoch = ++this.visionCapabilityEpoch;
+    const wasAvailable = this.visionAvailableOrigin !== null;
+    this.visionAvailableOrigin = null;
+    if (wasAvailable) this.render();
+    if (!host || !normalizeVisionAllowlist([origin]).includes(origin)) return;
+    let enabled = false;
+    try {
+      const response = await this.send({ type: 'FLECTO_VISION_CAPABILITIES' });
+      const parsed = VisionCapabilitiesSchema.safeParse(response?.ok && 'capabilities' in response ? response.capabilities : null);
+      enabled = parsed.success && parsed.data.enabled && normalizeVisionAllowlist(parsed.data.allowedOrigins).includes(origin);
+    } catch { /* Capability failure hides only this optional action. */ }
+    if (this.host !== host || !host.isConnected || this.documentInstanceId !== documentId ||
+        this.doc.location.origin !== origin || this.visionCapabilityEpoch !== capabilityEpoch) return;
+    this.visionAvailableOrigin = enabled ? origin : null;
+    this.render();
+  }
+
   private patch(patch: Partial<FlectoViewModel>): void { this.model = { ...this.model, ...patch }; this.render(); }
   private enqueue = (action: UserAction): void => {
     if (action.kind === 'START_GOAL' && action.ref && this.layoutTasks.has(action.ref)) {
@@ -106,7 +128,7 @@ export class FlectoController {
   };
 
   async activate(restoredPending = false): Promise<void> {
-    if (this.host) { this.host.style.display = 'block'; return; }
+    if (this.host) { this.host.style.display = 'block'; void this.loadVisionAvailability(); return; }
     this.priorFocus = this.doc.activeElement instanceof HTMLElement ? this.doc.activeElement : null;
     const host = this.doc.createElement('div'); host.id = 'flecto-host';
     host.style.cssText = 'position:fixed;inset:0;z-index:2147483646;display:block;isolation:isolate;';
@@ -135,6 +157,8 @@ export class FlectoController {
     } else if (this.model.phase === 'IDLE') this.showTasks();
     await this.sendState();
     this.render();
+    // Do not put optional capability I/O on the normal activation critical path.
+    void this.loadVisionAvailability();
   }
 
   private refreshExtraction(goalRef: string | null = null): void {
@@ -663,6 +687,7 @@ export class FlectoController {
     this.cancelPrepare(false); this.review = null;
     if (!this.probeOutcome()) {
       this.documentInstanceId = nonce('doc');
+      void this.loadVisionAvailability();
       this.plan = null; this.localSourceReview = false; this.sourceReviewRows = []; this.drafts.clear(); this.lastValues.clear();
       this.refreshExtraction();
       if (this.model.phase !== 'AUTH_REQUIRED') {
@@ -707,6 +732,7 @@ export class FlectoController {
   }
   async close(): Promise<void> {
     if (this.composing.size) { this.patch({ statusMessage: '입력 중인 글자를 마친 뒤 원래 화면으로 돌아가 주세요.' }); return; }
+    this.visionAvailableOrigin = null; this.visionCapabilityEpoch++;
     this.cancelPrepare(false); this.epoch += 1; this.clearDeadline();
     if (this.tick) clearInterval(this.tick);
     if (this.mutationTimer) clearTimeout(this.mutationTimer);
