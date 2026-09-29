@@ -49,7 +49,7 @@ export const T = {
   b2L2: 206,
   // B3a input (real filled capture, if provided)
   b3FilledFrom: 236,
-  b3FilledTo: 250,
+  b3FilledTo: 242, // 6f dissolve between two real captured states keeps ghosting minimal
   // B3b step slide 02 -> 03
   b3SlideFrom: 302,
   b3SlideTo: 320,
@@ -57,7 +57,8 @@ export const T = {
   // B3c choice
   b3cL1: 332,
   b3cL2: 368,
-  b3cChoiceXfade: 356, // empty -> chosen capture, only if 03-empty exists
+  b3cChoiceXfade: 356, // empty -> chosen capture (6f), only if 03-empty exists
+  b3cChoiceXfadeLen: 6,
   // B4 review (layout B)
   b4SlideFrom: 420,
   b4SlideTo: 442,

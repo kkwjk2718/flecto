@@ -86,7 +86,7 @@ export const FlectoAd: React.FC<Props> = (props) => {
   } else if (f < T.b4SlideFrom) {
     const p = move(f, T.b3SlideFrom, T.b3SlideTo - T.b3SlideFrom);
     layers.push({asset: filled ?? '02-flecto-input', opacity: 1 - p, dy: -40 * p});
-    const choiceP = empty03 ? clamp01((f - T.b3cChoiceXfade) / 10) : 1;
+    const choiceP = empty03 ? clamp01((f - T.b3cChoiceXfade) / T.b3cChoiceXfadeLen) : 1;
     if (empty03) layers.push({asset: empty03, opacity: p, dy: 40 * (1 - p)});
     layers.push({asset: '03-flecto-choice', opacity: p * choiceP, dy: 40 * (1 - p)});
   } else if (f < T.b5ToLayoutC) {
