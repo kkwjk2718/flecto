@@ -3,7 +3,7 @@ import { FlectoError, PublicPageSnapshotSchema, type ErrorCode, type Goal, type 
 const controlSelector = 'input,textarea,select,button,a[href]';
 const excluded = '#flecto-host,[data-private],[data-flecto-private],script,style,template';
 const nonce = () => globalThis.crypto.randomUUID();
-type DocumentState = { id: string; refs: WeakMap<Element, Map<string, string>>; next: number; semantic: string; options: string; values: string; semanticRevision: number; optionRevision: number; valueRevision: number; submitted: boolean };
+type DocumentState = { id: string; refs: WeakMap<Element, Map<string, string>>; approvedText: WeakMap<Element, Map<string, { raw: string; publicText: string }>>; next: number; semantic: string; options: string; values: string; semanticRevision: number; optionRevision: number; valueRevision: number; submitted: boolean };
 type Scan = { controls: PublicControl[]; notices: PublicNotice[]; bindings: PrivateBindingRegistry['bindings']; options: PrivateBindingRegistry['options']; noticeBindings: PrivateBindingRegistry['notices']; semantic: string; optionSignature: string; values: string; blocked: ErrorCode | null };
 const documents = new WeakMap<Document, DocumentState>();
 export const registryStates = new WeakMap<PrivateBindingRegistry, { doc: Document; state: DocumentState; snapshot: PublicPageSnapshot; semantic: string; options: string; blocked: ErrorCode | null }>();
@@ -39,7 +39,7 @@ function formOf(e: Element): HTMLFormElement | null { return 'form' in e ? (e as
 function getState(doc: Document, id?: string): DocumentState {
   let state = documents.get(doc);
   if (!state || (id && state.id !== id)) {
-    state = { id: id ?? `d_${nonce()}`, refs: new WeakMap(), next: 0, semantic: '', options: '', values: '', semanticRevision: 0, optionRevision: 0, valueRevision: 0, submitted: false };
+    state = { id: id ?? `d_${nonce()}`, refs: new WeakMap(), approvedText: new WeakMap(), next: 0, semantic: '', options: '', values: '', semanticRevision: 0, optionRevision: 0, valueRevision: 0, submitted: false };
     documents.set(doc, state);
     const current = state;
     const changed = (event: Event) => { if (event.target && (event.target as Element).nodeType === 1 && isSource(event.target as Element)) current.valueRevision++; };
@@ -60,7 +60,9 @@ function scan(doc: Document, state: DocumentState): Scan {
   if (Array.from(doc.querySelectorAll('[role="checkbox"],[role="radio"],[role="switch"],[role="slider"],[role="textbox"],[role="listbox"],[role="button"],[role="link"]')).some(e => isVisible(e) && !e.matches('input,textarea,select,button,a[href]'))) return empty('UNSUPPORTED_CONTROL');
   const privateValues = new Set<string>();
   for (const e of Array.from(doc.querySelectorAll<HTMLElement>(controlSelector)).filter(e => !e.closest('#flecto-host'))) {
-    if (e.matches('input:not([type="submit"]):not([type="button"]),textarea,select')) {
+    // Choice values are source-defined option identities, not free user input.
+    // Their selected state and raw values remain only in the private registry.
+    if (e.matches('input:not([type="submit"]):not([type="button"]):not([type="radio"]):not([type="checkbox"]),textarea')) {
       const v = (e as HTMLInputElement).value;
       if (v) privateValues.add(v);
       if (e.matches('input,textarea') && e.getAttribute('value')) privateValues.add(e.getAttribute('value')!);
@@ -68,6 +70,15 @@ function scan(doc: Document, state: DocumentState): Scan {
   }
   const sentinels = [...privateValues].sort((a, b) => b.length - a.length);
   const clean = (s: string) => { for (const value of sentinels) s = s.split(value).join('[비공개]'); return s.replace(/\s+/g, ' ').trim(); };
+  const publicText = (element: Element, slot: string, raw: string): string => {
+    let slots = state.approvedText.get(element);
+    if (!slots) { slots = new Map(); state.approvedText.set(element, slots); }
+    const previous = slots.get(slot);
+    if (previous?.raw === raw) return previous.publicText;
+    // Approval belongs to this element/semantic slot and this exact raw text.
+    // New/replaced/changed text is always cleaned against CURRENT private input.
+    const text = clean(raw); slots.set(slot, { raw, publicText: text }); return text;
+  };
   const forms = Array.from(doc.forms).filter(isSource);
   const formKey = (form: HTMLFormElement | null) => form ? `form_${forms.indexOf(form)}` : 'page';
   const actionKey = (element: HTMLElement, form: HTMLFormElement | null, kind: PublicControl['kind']): string => {
@@ -76,7 +87,7 @@ function scan(doc: Document, state: DocumentState): Scan {
     if (!['http:', 'https:'].includes(url.protocol)) throw new FlectoError('UNSUPPORTED_CONTROL');
     // Query/fragment/credential-dependent actions are deliberately not reusable across documents.
     // Do not turn a private URL into a persistent hash and call it anonymous.
-    if (url.search || url.hash || url.username || url.password || clean(url.pathname) !== url.pathname) return '|action-local';
+    if (url.search || url.hash || url.username || url.password || publicText(element, 'actionPath', url.pathname) !== url.pathname) return '|action-local';
     return `|${kind === 'submit' ? element.getAttribute('formmethod') ?? form?.method ?? 'get' : 'get'}:${url.origin}${url.pathname}`;
   };
   const controls: PublicControl[] = [], notices: PublicNotice[] = [];
@@ -86,7 +97,7 @@ function scan(doc: Document, state: DocumentState): Scan {
   for (const e of elements) for (const id of (e.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean)) { const n = doc.getElementById(id); if (n && isSource(n)) noticeElements.add(n); }
   for (const e of doc.querySelectorAll('form p,form li,[role="note"],[role="alert"],details')) if (isVisible(e) && !e.querySelector(controlSelector) && !e.closest('label')) noticeElements.add(e);
   for (const e of noticeElements) {
-    const text = clean(sourceText(e));
+    const text = publicText(e, 'notice', sourceText(e));
     if (!text) continue;
     const form = formOf(e), r = ref(e, 'n');
     notices.push({ ref: r, text, kind: e.getAttribute('role') === 'alert' ? 'warning' : e.tagName === 'DETAILS' ? 'terms' : 'info', formRef: form ? ref(form, 'f') : null, semanticKey: `${formKey(form)}|notice|${text}` });
@@ -111,17 +122,17 @@ function scan(doc: Document, state: DocumentState): Scan {
     let text = label(e);
     if (kind === 'radio') text = e.closest('fieldset')?.querySelector('legend')?.textContent ?? text;
     if (!text.trim() && kind === 'submit') text = '제출';
-    const publicLabel = clean(text);
+    const publicLabel = publicText(e, 'label', text);
     if (!publicLabel) return empty('UNSUPPORTED_CONTROL');
     let semanticKey: string;
     try { semanticKey = `${formKey(form)}|${kind}|${publicLabel}${actionKey(e, form, kind)}`; } catch { return empty('UNSUPPORTED_CONTROL'); }
     const choiceElements: (HTMLOptionElement | HTMLInputElement)[] = kind === 'select' ? Array.from((e as HTMLSelectElement).options) : kind === 'radio' ? members as HTMLInputElement[] : [];
     const publicOptions = choiceElements.filter(o => kind !== 'radio' || isVisible(o)).map(o => {
       const optionRef = ref(o, 'o'); options.set(optionRef, o);
-      return { ref: optionRef, label: clean(o.tagName === 'OPTION' ? o.textContent ?? '' : label(o)), disabled: isDisabled(o) || !!o.closest('optgroup[disabled]') };
+      return { ref: optionRef, label: publicText(o, 'optionLabel', o.tagName === 'OPTION' ? o.textContent ?? '' : label(o)), disabled: isDisabled(o) || !!o.closest('optgroup[disabled]') };
     });
     const constraints: PublicControl['constraints'] = {};
-    for (const key of ['min','max','pattern'] as const) if (e.hasAttribute(key)) constraints[key] = clean(e.getAttribute(key)!);
+    for (const key of ['min','max','pattern'] as const) if (e.hasAttribute(key)) constraints[key] = publicText(e, `constraint:${key}`, e.getAttribute(key)!);
     for (const [attr, key] of [['minlength','minLength'],['maxlength','maxLength']] as const) if (e.hasAttribute(attr)) constraints[key] = Number(e.getAttribute(attr));
     const actionKind = kind === 'submit' ? 'submit' : kind === 'link' || kind === 'button' ? 'navigate' : 'none';
     const noticeRefs = (e.getAttribute('aria-describedby') ?? '').split(/\s+/).map(id => doc.getElementById(id)).filter((n): n is HTMLElement => !!n && noticeBindings.has(ref(n, 'n'))).map(n => ref(n, 'n'));
