@@ -1,4 +1,4 @@
-# 실행 상태 — 문서 검토 완료·GitHub 협업 기반 준비
+# 실행 상태 — 문서 검토·GitHub 협업 기반 완료
 
 갱신일: 2026-09-29, Asia/Seoul. 사용자 요청은 전체 문서 검토·구현 계획과 공개 GitHub 저장소 초기 설정이다. 패키지의 기본값을 아래 실제 확인 상태로 갱신했다.
 
@@ -11,6 +11,7 @@
 | model reporting | 요청 ID·작업 생성 결과 확인; 공급자 내부 실제 모델 보고는 별도 미확인 |
 | mode | PREPARE — 협업 기반 설정; 현장 제출/발표 시간 미확정 |
 | approved current scope | 자료 검토·계획·지정 모델 위임·공개 GitHub 저장소 생성/push·협업 초기 설정 |
+| GitHub 협업 | PUBLIC, main push 완료, 문서 CI PASS; [설정 기록](REPOSITORY_SETUP.md) |
 | 제품 코드·실행 | NOT_STARTED / NOT_RUN |
 | 제품 Codex | UNCONFIGURED / NOT_RUN |
 | 이미지 route | OPTIONAL_UNVERIFIED |
