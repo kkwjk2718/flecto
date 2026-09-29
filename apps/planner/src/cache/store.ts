@@ -4,6 +4,7 @@ import {
   CachedBlueprintSchema, CACHE_VERSION, PROMPT_VERSION, RunMetricSchema,
   type CachedBlueprint, type PagePlan, type PublicPageSnapshot, type RunMetric,
 } from '@flecto/contracts';
+import { rebindBlueprint } from '@flecto/core';
 
 export class BlueprintStore {
   private readonly db: DatabaseSync;
@@ -22,43 +23,43 @@ export class BlueprintStore {
     const row = this.db.prepare('SELECT id,payload FROM blueprints WHERE fingerprint=? AND model=? AND version=? AND status=? ORDER BY created_at DESC LIMIT 1')
       .get(fingerprint, model, `${PROMPT_VERSION}:${CACHE_VERSION}`, 'VERIFIED');
     if (!row) return null;
-    try { return CachedBlueprintSchema.parse(JSON.parse(String(row.payload))); }
+    try {
+      const blueprint = CachedBlueprintSchema.parse(JSON.parse(String(row.payload)));
+      if (blueprint.id !== row.id || blueprint.status !== 'VERIFIED' || blueprint.model !== model ||
+        blueprint.fingerprint !== fingerprint || blueprint.promptVersion !== PROMPT_VERSION || blueprint.cacheVersion !== CACHE_VERSION) {
+        this.quarantine(String(row.id)); return null;
+      }
+      return blueprint;
+    }
     catch { this.quarantine(String(row.id)); return null; }
   }
   candidate(snapshot: PublicPageSnapshot, plan: PagePlan, fingerprint: string, model: string): CachedBlueprint {
     const controls = new Map(snapshot.controls.map((control) => [control.ref, control]));
     const notices = new Map(snapshot.notices.map((notice) => [notice.ref, notice]));
+    const selected = snapshot.goal === 'complete_form' && snapshot.goalRef ? controls.get(snapshot.goalRef) : undefined;
+    const scopedControls = selected ? snapshot.controls.filter(c => c.ref === selected.ref || (c.formRef === selected.formRef && c.actionKind === 'none')) : snapshot.controls;
+    const stableKey = (key: string) => selected ? key.replace(/^form_\d+(?=\||$)/, 'selected_form') : key;
     const blueprint = CachedBlueprintSchema.parse({
       id: `b_${randomUUID()}`, schemaVersion: 1, cacheVersion: CACHE_VERSION, promptVersion: PROMPT_VERSION,
       model, origin: snapshot.origin, fingerprint, status: 'CANDIDATE', createdAt: Date.now(),
       steps: plan.steps.map((step) => ({
         id: step.id, template: step.template, title: step.title,
-        controlKeys: step.controlRefs.map((ref) => controls.get(ref)!.semanticKey),
-        noticeKeys: step.noticeRefs.map((ref) => notices.get(ref)!.semanticKey),
+        controlKeys: step.controlRefs.map((ref) => stableKey(controls.get(ref)!.semanticKey)),
+        noticeKeys: step.noticeRefs.map((ref) => stableKey(notices.get(ref)!.semanticKey)),
       })),
-      actionKey: plan.sourceActionRef ? controls.get(plan.sourceActionRef)!.semanticKey : null,
-      locators: snapshot.controls.map((control) => ({
-        key: control.semanticKey, kind: control.kind, formKey: null, required: control.required,
+      actionKey: plan.sourceActionRef ? stableKey(controls.get(plan.sourceActionRef)!.semanticKey) : null,
+      locators: scopedControls.map((control) => ({
+        key: stableKey(control.semanticKey), kind: control.kind,
+        formKey: control.formRef === null ? null : stableKey(control.semanticKey.split('|')[0]), required: control.required,
       })),
     });
     this.db.prepare('INSERT INTO blueprints VALUES(?,?,?,?,?,?,?)').run(blueprint.id, fingerprint, model,
       `${PROMPT_VERSION}:${CACHE_VERSION}`, blueprint.status, JSON.stringify(blueprint), blueprint.createdAt);
     return blueprint;
   }
-  rebind(blueprint: CachedBlueprint, snapshot: PublicPageSnapshot): PagePlan | null {
-    const unique = <T extends { semanticKey: string; ref: string }>(items: T[], key: string): string | null => {
-      const matches = items.filter((item) => item.semanticKey === key);
-      return matches.length === 1 ? matches[0].ref : null;
-    };
-    const steps = blueprint.steps.map((step) => ({ id: step.id, template: step.template, title: step.title,
-      controlRefs: step.controlKeys.map((key) => unique(snapshot.controls, key)),
-      noticeRefs: step.noticeKeys.map((key) => unique(snapshot.notices, key)),
-    }));
-    const actionRef = blueprint.actionKey ? unique(snapshot.controls, blueprint.actionKey) : null;
-    if (steps.some((step) => [...step.controlRefs, ...step.noticeRefs].includes(null)) || blueprint.actionKey && !actionRef) {
-      this.quarantine(blueprint.id); return null;
-    }
-    return { schemaVersion: 1, snapshotId: snapshot.snapshotId, steps: steps as PagePlan['steps'], sourceActionRef: actionRef };
+  async rebind(blueprint: CachedBlueprint, snapshot: PublicPageSnapshot): Promise<PagePlan | null> {
+    try { return await rebindBlueprint(blueprint, snapshot); }
+    catch { this.quarantine(blueprint.id); return null; }
   }
   verify(id: string): void {
     const row = this.db.prepare('SELECT payload FROM blueprints WHERE id=? AND status=?').get(id, 'CANDIDATE');

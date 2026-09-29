@@ -30,7 +30,7 @@ export function createPlannerServer(options: PlannerOptions): FastifyInstance {
   const extensionOrigin = options.extensionOrigin ?? EXTENSION_ORIGIN;
   const requests = new Map<string, Active>();
   const receipts = new Map<string, { snapshotId: string; blueprintId: string }>();
-  let running: string | null = null;
+  let running: AbortController | null = null;
   const authenticated = (request: FastifyRequest) => {
     const authorization = request.headers.authorization;
     return typeof authorization === 'string' && authorization.startsWith('Bearer ') && safeEqual(authorization.slice(7), options.token);
@@ -59,45 +59,57 @@ export function createPlannerServer(options: PlannerOptions): FastifyInstance {
 
   async function prepare(snapshot: PublicPageSnapshot, budget: number, controller: AbortController): Promise<PlannerResponse> {
     const start = performance.now();
-    const fingerprint = await structuralFingerprint(snapshot);
-    const modelLock = `${options.provider.mode}:${options.provider.model}`;
-    let blueprint = store.find(fingerprint, modelLock);
-    if (blueprint) {
-      const rebound = store.rebind(blueprint, snapshot);
-      if (rebound) {
-        try {
-          const plan = verifyPlan(rebound, snapshot);
-          receipts.set(snapshot.requestId, { snapshotId: snapshot.snapshotId, blueprintId: blueprint.id });
-          return { requestId: snapshot.requestId, snapshotId: snapshot.snapshotId, plan, mode: 'CACHE', model: options.provider.model,
-            promptVersion: PROMPT_VERSION, cacheVersion: CACHE_VERSION, blueprintId: blueprint.id, durationMs: performance.now() - start };
-        } catch { store.quarantine(blueprint.id); }
-      }
-    }
-    if (running !== null && running !== snapshot.requestId) throw new FlectoError('BUSY');
-    running = snapshot.requestId;
-    const remaining = Math.max(1, budget - (performance.now() - start));
     let timeout = false;
-    const timer = setTimeout(() => { timeout = true; controller.abort(); }, remaining);
+    const assertActive = () => {
+      if (timeout || performance.now() - start >= budget) throw new FlectoError('DEADLINE_EXCEEDED');
+      if (controller.signal.aborted) throw new FlectoError('CANCELLED');
+    };
+    const timer = setTimeout(() => { timeout = true; controller.abort(); }, budget);
     let abortListener: () => void = () => {};
     const aborted = new Promise<never>((_resolve, reject) => {
       abortListener = () => reject(new FlectoError(timeout ? 'DEADLINE_EXCEEDED' : 'CANCELLED'));
       controller.signal.addEventListener('abort', abortListener, { once: true });
+      if (controller.signal.aborted) abortListener();
     });
-    const providerTask = options.provider.plan(snapshot, remaining, controller.signal)
-      .finally(() => { if (running === snapshot.requestId) running = null; });
-    try {
-      const raw = await Promise.race([providerTask, aborted]);
-      if (controller.signal.aborted || performance.now() - start >= budget) throw new FlectoError(timeout ? 'DEADLINE_EXCEEDED' : 'CANCELLED');
+    const remember = (blueprintId: string) => {
+      receipts.set(snapshot.requestId, { snapshotId: snapshot.snapshotId, blueprintId });
+      if (receipts.size > 200) receipts.delete(receipts.keys().next().value!);
+    };
+    const execute = async (): Promise<PlannerResponse> => {
+      assertActive();
+      const fingerprint = await structuralFingerprint(snapshot);
+      assertActive();
+      const modelLock = `${options.provider.mode}:${options.provider.model}`;
+      let blueprint = store.find(fingerprint, modelLock);
+      if (blueprint) {
+        const plan = await store.rebind(blueprint, snapshot);
+        assertActive();
+        if (plan) {
+          remember(blueprint.id);
+          return { requestId: snapshot.requestId, snapshotId: snapshot.snapshotId, plan, mode: 'CACHE', model: options.provider.model,
+            promptVersion: PROMPT_VERSION, cacheVersion: CACHE_VERSION, blueprintId: blueprint.id, durationMs: performance.now() - start };
+        }
+      }
+      // Occupancy belongs to the actual invocation, including an aborted provider
+      // that has not settled. Reusing its request ID cannot create ghost work.
+      if (running !== null) throw new FlectoError('BUSY');
+      assertActive();
+      running = controller;
+      let raw: unknown;
+      try {
+        raw = await options.provider.plan(snapshot, Math.max(1, budget - (performance.now() - start)), controller.signal);
+      } finally { if (running === controller) running = null; }
+      assertActive();
       const plan = verifyPlan(raw, snapshot);
       blueprint = store.candidate(snapshot, plan, fingerprint, modelLock);
-      receipts.set(snapshot.requestId, { snapshotId: snapshot.snapshotId, blueprintId: blueprint.id });
-      if (receipts.size > 200) receipts.delete(receipts.keys().next().value!);
+      assertActive();
+      remember(blueprint.id);
       return { requestId: snapshot.requestId, snapshotId: snapshot.snapshotId, plan, mode: options.provider.mode,
         model: options.provider.model, promptVersion: PROMPT_VERSION, cacheVersion: CACHE_VERSION,
         blueprintId: blueprint.id, durationMs: performance.now() - start };
-    } finally {
-      clearTimeout(timer); controller.signal.removeEventListener('abort', abortListener);
-    }
+    };
+    try { return await Promise.race([execute(), aborted]); }
+    finally { clearTimeout(timer); controller.signal.removeEventListener('abort', abortListener); }
   }
 
   server.post('/v1/plans', async (request, reply) => {
@@ -107,7 +119,7 @@ export function createPlannerServer(options: PlannerOptions): FastifyInstance {
     if (options.allowedSourceOrigins && !options.allowedSourceOrigins.includes(snapshot.origin)) {
       return reply.code(403).send({ error: 'UNSUPPORTED_CONTROL', requestId: snapshot.requestId });
     }
-    const key = JSON.stringify({ snapshot, sessionEpoch });
+    const key = JSON.stringify({ snapshot, remainingBudgetMs, sessionEpoch });
     const existing = requests.get(snapshot.requestId);
     if (existing && existing.key !== key) return reply.code(409).send({ error: 'STALE_DOCUMENT', requestId: snapshot.requestId });
     let task = existing;
@@ -125,6 +137,7 @@ export function createPlannerServer(options: PlannerOptions): FastifyInstance {
   });
   server.delete<{ Params: { id: string } }>('/v1/plans/:id', async (request) => {
     requests.get(request.params.id)?.controller.abort();
+    receipts.delete(request.params.id);
     return { ok: true };
   });
   server.post<{ Params: { id: string } }>('/v1/blueprints/:id/verify', async (request, reply) => {
