@@ -425,7 +425,15 @@ export class FlectoController {
     this.checkingStructure = true;
     try {
       if (this.probeOutcome()) return;
-      if (this.pendingSubmit || !this.plan || !this.registry || !this.snapshot) return;
+      if (this.pendingSubmit) return;
+      if (!this.plan) {
+        if (this.model.phase !== 'PREPARING' && !['TIMED_OUT', 'CANCELLED', 'SOURCE_REJECTED', 'OUTCOME_UNKNOWN'].includes(this.model.phase)) {
+          this.refreshExtraction();
+          if (this.model.phase !== 'AUTH_REQUIRED') { this.showTasks(); await this.trySourceReview(); }
+        }
+        return;
+      }
+      if (!this.registry || !this.snapshot) return;
       const current = this.currentExtraction();
       if (current.blocked) { this.cancelPrepare(false); this.fail(current.blocked); return; }
       if (await structuralFingerprint(current.snapshot) !== this.structuralKey) {

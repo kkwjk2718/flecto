@@ -27,24 +27,24 @@
     "release:pack": "tsx scripts/release.ts"
   },
   "dependencies": {
+    "@fastify/cookie": "11.1.2",
+    "@fastify/static": "10.1.5",
+    "fastify": "5.12.5",
     "react": "19.3.0",
     "react-dom": "19.3.0",
-    "zod": "4.6.5",
-    "fastify": "5.12.5",
-    "@fastify/static": "8.3.0",
-    "@fastify/cookie": "11.1.2"
+    "zod": "4.6.5"
   },
   "devDependencies": {
-    "typescript": "5.9.3",
-    "vite": "7.3.6",
-    "@vitejs/plugin-react": "5.2.0",
-    "vitest": "4.1.11",
     "@playwright/test": "1.63.0",
+    "@types/chrome": "0.3.4",
     "@types/node": "24.19.0",
     "@types/react": "19.3.0",
     "@types/react-dom": "19.3.0",
-    "@types/chrome": "0.3.4",
+    "@vitejs/plugin-react": "5.2.0",
+    "jsdom": "27.4.0",
     "tsx": "4.23.15",
-    "jsdom": "27.4.0"
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "4.1.11"
   }
 }

@@ -20,3 +20,6 @@ export function startBackground(api: typeof chrome) {
 
 // The only startup guard: helpers/broker remain directly testable without Chrome.
 export const background = typeof chrome !== 'undefined' && chrome.runtime?.id ? startBackground(chrome) : null;
+// Diagnostics in this privileged worker can exercise the same action handler.
+// This object is not a message endpoint or available to page/content contexts.
+if (background) Object.defineProperty(globalThis, Symbol.for('flecto.background'), { value: background });

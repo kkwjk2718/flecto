@@ -62,7 +62,7 @@ export class BackgroundBroker {
   private inflight: TrackedRequest | null = null;
   private writes: Promise<void> = Promise.resolve();
 
-  constructor(private readonly api: typeof chrome, private readonly fetcher: typeof fetch = fetch) {
+  constructor(private readonly api: typeof chrome, private readonly fetcher: typeof fetch = fetch.bind(globalThis)) {
     this.ready = this.restore();
     // A failed access restriction is fail-closed; event/message calls still receive
     // the failure instead of exposing storage or injecting an unprotected context.
@@ -164,7 +164,7 @@ export class BackgroundBroker {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 1000);
     void this.fetcher(`${record.connection.plannerUrl}/v1/plans/${encodeURIComponent(record.payload.snapshot.requestId)}`, {
-      method: 'DELETE', headers: this.headers(record.connection), signal: controller.signal,
+      method: 'DELETE', headers: { Authorization: `Bearer ${record.connection.token}`, Origin: EXTENSION_ORIGIN }, signal: controller.signal,
       credentials: 'omit', redirect: 'error', cache: 'no-store',
     }).catch(() => undefined).finally(() => clearTimeout(timer));
   }

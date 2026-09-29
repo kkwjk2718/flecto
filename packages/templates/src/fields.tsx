@@ -175,6 +175,7 @@ export function ChoiceField({ control, ctx }: { control: ViewControl; ctx: Field
               <input
                 type="radio"
                 name={name}
+                aria-label={option.label}
                 value={option.ref}
                 checked={checked}
                 disabled={disabled}
@@ -256,4 +257,3 @@ export function ControlField({ control, ctx }: { control: ViewControl; ctx: Fiel
       return <TextField control={control} ctx={ctx} />;
   }
 }
-

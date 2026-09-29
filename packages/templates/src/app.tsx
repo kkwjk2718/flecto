@@ -222,6 +222,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
   const armedAt = useRef(0);
   const prevPhase = useRef(model.phase);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [, refreshArmedState] = useState(0);
 
   const emit = useCallback<Emit>((action) => onActionRef.current(action), [onActionRef]);
   const setComposing = useCallback((ref: string, composing: boolean) => {
@@ -241,6 +242,13 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
     if (Date.now() < armedAt.current) return;
     emit(action);
   };
+  const actionsArmed = Date.now() >= armedAt.current;
+  useEffect(() => {
+    const remaining = armedAt.current - Date.now();
+    if (remaining <= 0) return;
+    const timer = setTimeout(() => refreshArmedState((value) => value + 1), remaining);
+    return () => clearTimeout(timer);
+  }, [model.phase]);
 
   const view = resolveView(model);
   const step = model.steps[model.stepIndex] ?? null;
@@ -449,14 +457,14 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
             <button
               type="button"
               className="fl-btn fl-btn-primary"
-              disabled={!model.canSubmit || submit.disabled}
+              disabled={!model.canSubmit || submit.disabled || !actionsArmed}
               data-flecto-ref={submit.ref}
               onClick={primary({ kind: 'INVOKE_SOURCE', ref: submit.ref, intent: 'submit' })}
             >
               {submit.label}
             </button>
           ) : step ? (
-            <button type="button" className="fl-btn fl-btn-primary" disabled={!model.canGoNext} onClick={primary({ kind: 'LOCAL_NEXT', fromStep: step.id })}>
+            <button type="button" className="fl-btn fl-btn-primary" disabled={!model.canGoNext || !actionsArmed} onClick={primary({ kind: 'LOCAL_NEXT', fromStep: step.id })}>
               실제 값 확인하기
             </button>
           ) : null}
