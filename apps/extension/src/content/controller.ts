@@ -7,9 +7,12 @@ import {
   emptyViewModel, PlannerResponseSchema, UserSettingsSchema,
   type BackgroundReply, type ErrorCode, type FlectoViewModel,
   type PagePlan, type PrivateBindingRegistry, type PublicPageSnapshot,
-  type ReviewToken, type UserAction, type ViewControl,
+  type ReviewToken, type UserAction, type ViewControl, type PlannerRequest,
 } from '@flecto/contracts';
 import { applyUserInput, createReviewToken, extractPage, invokeSource, readControlValues, refreshRegistry, structuralFingerprint, verifyPlan, currentSnapshot } from '@flecto/core';
+
+import { buildVisionCapturePlan, normalizeVisionAllowlist, withVisionIsolation, type VisionCapturePlan } from './vision';
+import { VisionCallbackSchema, VisionCapabilitiesSchema, VisionPlannerResponseSchema, visualRelationCandidates } from '../background/validation';
 
 const messages: Record<ErrorCode, string> = {
   AUTH_REQUIRED: '원래 화면에서 먼저 로그인해 주세요. 로그인 정보는 FLECTO가 읽지 않아요.',
@@ -61,6 +64,9 @@ export class FlectoController {
   private localSourceReview = false;
   private sourceReviewRows: FlectoViewModel['reviewRows'] = [];
 
+  private layoutTasks = new Map<string, string>();
+  private visionContext: { requestId: string; epoch: number; plan: VisionCapturePlan; release: () => void; restored: Promise<boolean>; restoredDone: boolean } | null = null;
+
   constructor(private readonly doc: Document = document) {}
 
   private async send(message: unknown): Promise<BackgroundReply & { session?: { active: boolean; pendingSubmit: boolean }; sponsorAllowed?: boolean }> {
@@ -69,10 +75,25 @@ export class FlectoController {
   }
   private render(): void {
     if (!this.root) return;
-    this.root.render(React.createElement(FlectoApp, { model: this.model, onAction: this.enqueue }));
+    this.layoutTasks.clear();
+    const tasks = [...this.model.tasks];
+    if (this.model.phase === 'IDLE' && this.snapshot && this.registry && normalizeVisionAllowlist([this.snapshot.origin]).length) {
+      for (const task of this.model.tasks) {
+        if (!this.layoutRefs(task.ref).length) continue;
+        const ref = `layout_${task.ref}`;
+        this.layoutTasks.set(ref, task.ref);
+        tasks.push({ ...task, ref, label: `화면 배치 도움: ${task.label}`,
+          description: '안내와 입력 항목의 관계가 헷갈릴 때, 공개 글자 배치를 함께 확인해요.' });
+      }
+    }
+    this.root.render(React.createElement(FlectoApp, { model: { ...this.model, tasks }, onAction: this.enqueue }));
   }
   private patch(patch: Partial<FlectoViewModel>): void { this.model = { ...this.model, ...patch }; this.render(); }
   private enqueue = (action: UserAction): void => {
+    if (action.kind === 'START_GOAL' && action.ref && this.layoutTasks.has(action.ref)) {
+      void this.prepare(this.layoutTasks.get(action.ref)!, true).catch((error: unknown) => this.fail(error instanceof FlectoError ? error.code : 'SOURCE_REJECTED'));
+      return;
+    }
     // Cancellation/settings must remain responsive while prepare awaits the model.
     // Serialize source writes/submission, not the entire preparation request.
     if (['START_GOAL', 'CANCEL', 'CLOSE', 'SHOW_ORIGINAL', 'RETRY', 'DISMISS_SPONSOR', 'UPDATE_SETTINGS'].includes(action.kind)) {
@@ -182,7 +203,92 @@ export class FlectoController {
     }
   }
 
-  private async prepare(goalRef: string | null): Promise<void> {
+  private layoutRefs(goalRef: string | null): string[] {
+    if (!this.snapshot || !this.registry) return [];
+    const refs = visualRelationCandidates(this.snapshot, goalRef);
+    const notice = refs.length ? this.registry.notices.get(refs.at(-1)!) : null;
+    // A nearer source group already separating the notice from the other fields
+    // is not the missing relation this optional action is designed to help with.
+    const group = notice?.closest('fieldset,[role="group"],section,form');
+    return group && refs.slice(0, -1).every(ref => {
+      const element = this.registry!.bindings.get(ref)?.element;
+      return element?.isConnected && group.contains(element);
+    }) ? refs : [];
+  }
+
+  /** Only extension-background messages reach this method (see content/index.ts). */
+  async visionCallback(input: unknown): Promise<unknown> {
+    const parsed = VisionCallbackSchema.safeParse(input), context = this.visionContext;
+    if (!parsed.success || !context || parsed.data.requestId !== context.requestId) return null;
+    if (parsed.data.type === 'FLECTO_VISION_RELEASE') {
+      context.release();
+      return { ok: await context.restored && this.visionCurrent(context) };
+    }
+    if (!this.visionCurrent(context) || !this.registry || !this.snapshot) return null;
+    // Inline opacity alone is insufficient when source CSS transitions override it.
+    if (!context.restoredDone && (!this.host || this.doc.getElementById('flecto-host') !== this.host ||
+        this.doc.defaultView?.getComputedStyle(this.host).opacity !== '0')) return null;
+    const built = buildVisionCapturePlan({ doc: this.doc, registry: this.registry, snapshot: this.snapshot,
+      reason: 'VISUAL_RELATION_AMBIGUOUS', refs: context.plan.refs, allowedOrigins: [context.plan.origin] });
+    if (!built.ok && built.registryError === 'AUTH_REQUIRED') this.observationError(new FlectoError('AUTH_REQUIRED'));
+    return built.ok ? built.plan : null;
+  }
+  private visionCurrent(context: NonNullable<FlectoController['visionContext']>): boolean {
+    return this.visionContext === context && this.epoch === context.epoch && this.model.phase === 'PREPARING' &&
+      this.doc.visibilityState !== 'hidden' && this.snapshot?.requestId === context.requestId &&
+      performance.now() - this.prepareStart < PREPARE_DEADLINE_MS;
+  }
+  private async prepareVision(payload: PlannerRequest): Promise<Awaited<ReturnType<FlectoController['send']>>> {
+    const epoch = this.epoch;
+    const active = () => this.epoch === epoch && this.model.phase === 'PREPARING' && performance.now() - this.prepareStart < PREPARE_DEADLINE_MS;
+    const capabilitiesReply = await this.send({ type: 'FLECTO_VISION_CAPABILITIES' });
+    if (!active()) return { ok: false, error: 'CANCELLED' };
+    const capabilities = VisionCapabilitiesSchema.safeParse('capabilities' in capabilitiesReply ? capabilitiesReply.capabilities : null);
+    if (!capabilitiesReply.ok) return capabilitiesReply;
+    if (!capabilities.success || !capabilities.data.enabled || !capabilities.data.allowedOrigins.includes(payload.snapshot.origin)) return { ok: false, error: 'UNSUPPORTED_CONTROL' };
+    if (!this.registry) return { ok: false, error: 'STALE_DOCUMENT' };
+    const refs = this.layoutRefs(payload.snapshot.goalRef);
+    if (!refs.length) return { ok: false, error: 'VISUAL_RELATION_AMBIGUOUS' };
+    const built = buildVisionCapturePlan({ doc: this.doc, registry: this.registry, snapshot: payload.snapshot,
+      reason: 'VISUAL_RELATION_AMBIGUOUS', refs, allowedOrigins: capabilities.data.allowedOrigins });
+    if (!built.ok) return { ok: false, error: built.registryError === 'AUTH_REQUIRED' ? 'AUTH_REQUIRED' :
+      built.code === 'SNAPSHOT_MISMATCH' || built.code === 'REF_UNKNOWN' ? 'STALE_DOCUMENT' : 'VISUAL_RELATION_AMBIGUOUS' };
+    let release!: () => void;
+    const released = new Promise<void>(resolve => { release = resolve; });
+    let response: ReturnType<FlectoController['send']> | undefined;
+    const context = { requestId: payload.snapshot.requestId, epoch, plan: built.plan, release, restored: Promise.resolve(false), restoredDone: false };
+    this.visionContext = context;
+    // The original content timer also releases isolation when paint/messaging stalls.
+    const releaseTimer = setTimeout(release, Math.max(1, PREPARE_DEADLINE_MS - (performance.now() - this.prepareStart)));
+    try {
+      const isolationOptions = {
+        timeoutMs: Math.max(1, PREPARE_DEADLINE_MS - (performance.now() - this.prepareStart)),
+        nextPaint: () => Promise.race([new Promise<void>((resolve, reject) => {
+          const timer = setTimeout(() => reject(new FlectoError('DEADLINE_EXCEEDED')), Math.max(1, PREPARE_DEADLINE_MS - (performance.now() - this.prepareStart)));
+          requestAnimationFrame(() => requestAnimationFrame(() => { clearTimeout(timer); resolve(); }));
+        }), released.then(() => { throw new FlectoError('CANCELLED'); })]),
+      };
+      const isolated = withVisionIsolation(this.doc, built.plan, async () => {
+        if (!active()) throw new FlectoError('CANCELLED');
+        response = this.send({ type: 'FLECTO_PREPARE_VISION', request: {
+          payload: { ...payload, remainingBudgetMs: Math.max(1, Math.floor(PREPARE_DEADLINE_MS - (performance.now() - this.prepareStart))) }, capturePlan: built.plan,
+        } });
+        // A guard/capture error also releases the UI; a successful capture asks
+        // for RELEASE and waits for the restoration acknowledgement before upload.
+        await Promise.race([released, response.then(() => undefined)]);
+      }, isolationOptions);
+      context.restored = isolated.then(result => { context.restoredDone = true; return result.ok; });
+      const restored = await context.restored;
+      if (!restored || !active()) {
+        void this.send({ type: 'FLECTO_CANCEL', requestId: payload.snapshot.requestId, documentInstanceId: payload.snapshot.documentInstanceId });
+        return { ok: false, error: active() ? 'STALE_DOCUMENT' : 'CANCELLED' };
+      }
+      return response ? await response : { ok: false, error: 'VISUAL_RELATION_AMBIGUOUS' };
+    } finally { clearTimeout(releaseTimer); release(); if (this.visionContext === context) this.visionContext = null; }
+  }
+
+  private async prepare(goalRef: string | null, vision = false): Promise<void> {
+    const started = performance.now();
     if (this.pendingSubmit || this.model.phase === 'SUBMITTING') return;
     this.cancelPrepare(false);
     this.refreshExtraction(goalRef);
@@ -192,24 +298,23 @@ export class FlectoController {
     const snapshot = this.snapshot;
     const requestEpoch = ++this.epoch;
     this.plan = null; this.review = null; this.localSourceReview = false; this.sourceReviewRows = []; this.sponsorDismissed = false;
-    this.prepareStart = performance.now();
+    this.prepareStart = started;
     this.patch({ phase: 'PREPARING', title: '쉬운 화면을 준비하고 있어요',
       statusMessage: '사용하기 쉬운 화면을 준비하고 있어요.', steps: [], stepIndex: 0,
       elapsedMs: 0, sponsorVisible: false, error: null, canGoNext: false, canSubmit: false, canGoBack: false });
     this.deadlineTimer = setTimeout(() => {
       if (this.model.phase === 'PREPARING' && this.epoch === requestEpoch) this.cancelPrepare(true);
-    }, PREPARE_DEADLINE_MS);
+    }, Math.max(1, PREPARE_DEADLINE_MS - (performance.now() - started)));
     this.sponsorTimer = setTimeout(() => { void this.showSponsor(requestEpoch); }, SPONSOR_AFTER_MS + 1);
     const key = await structuralFingerprint(snapshot);
     const elapsed = performance.now() - this.prepareStart;
     if (this.epoch !== requestEpoch || this.model.phase !== 'PREPARING' || elapsed >= PREPARE_DEADLINE_MS) return;
-    const response = await this.send({ type: 'FLECTO_PREPARE', payload: {
-      snapshot, remainingBudgetMs: Math.max(1, Math.floor(PREPARE_DEADLINE_MS - elapsed)), sessionEpoch: requestEpoch,
-    } });
+    const payload = { snapshot, remainingBudgetMs: Math.max(1, Math.floor(PREPARE_DEADLINE_MS - elapsed)), sessionEpoch: requestEpoch };
+    const response = vision ? await this.prepareVision(payload) : await this.send({ type: 'FLECTO_PREPARE', payload });
     if (this.epoch !== requestEpoch || this.model.phase !== 'PREPARING' || this.doc.visibilityState === 'hidden') return;
     if (performance.now() - this.prepareStart >= PREPARE_DEADLINE_MS) { this.cancelPrepare(true); return; }
     if (!response.ok || !('result' in response)) { this.fail(response.ok ? 'SCHEMA_INVALID' : response.error); return; }
-    const parsed = PlannerResponseSchema.safeParse(response.result);
+    const parsed = (vision ? VisionPlannerResponseSchema : PlannerResponseSchema).safeParse(response.result);
     if (!parsed.success || parsed.data.requestId !== requestId || parsed.data.snapshotId !== snapshot.snapshotId) { this.fail('STALE_DOCUMENT'); return; }
     const current = this.currentExtraction();
     // Check current visible structure before binding any model references.
@@ -245,6 +350,7 @@ export class FlectoController {
     if (this.sponsorTimer) clearTimeout(this.sponsorTimer); this.sponsorTimer = null;
   }
   private cancelPrepare(timedOut: boolean): void {
+    this.visionContext?.release();
     if (this.model.phase === 'PREPARING' && this.snapshot) {
       this.epoch += 1;
       void this.send({ type: 'FLECTO_CANCEL', requestId: this.snapshot.requestId, documentInstanceId: this.documentInstanceId });

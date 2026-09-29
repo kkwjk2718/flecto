@@ -6,13 +6,15 @@ import { z } from 'zod';
 import {
   CACHE_VERSION, EXTENSION_ORIGIN, FlectoError, PlannerRequestSchema,
   PREPARE_DEADLINE_MS, PROMPT_VERSION, RunMetricSchema,
-  type ErrorCode, type PlanProvider, type PlannerResponse, type PublicPageSnapshot,
+  type ErrorCode, type PagePlan, type PlanProvider, type PlannerResponse, type PublicPageSnapshot,
 } from '@flecto/contracts';
 import { structuralFingerprint, verifyPlan } from '@flecto/core';
+import { VisionPlannerRequestSchema, VisionPlannerResponseSchema, VISION_MAX_IMAGE_BYTES, visualRelationCandidates, type VisionPlannerResponse } from '../../extension/src/background/validation';
+import { visionAllowlist, validateVisionPlan } from '../../extension/src/background/vision';
 import { BlueprintStore } from './cache/store';
 
 export type PlannerOptions = {
-  dbPath: string; token: string; provider: PlanProvider;
+  dbPath: string; token: string; provider: PlanProvider & { planWithImage?: (snapshot: PublicPageSnapshot, budget: number, signal: AbortSignal, image: { dataUrl: string; mimeType: 'image/png' }) => Promise<PagePlan> };
   extensionOrigin?: string; allowedSourceOrigins?: string[];
 };
 type Active = { key: string; controller: AbortController; promise: Promise<PlannerResponse> };
@@ -28,6 +30,7 @@ export function createPlannerServer(options: PlannerOptions): FastifyInstance {
   const store = new BlueprintStore(options.dbPath);
   const server = Fastify({ logger: false, bodyLimit: 256 * 1024, requestTimeout: 12_000 });
   const extensionOrigin = options.extensionOrigin ?? EXTENSION_ORIGIN;
+  const visionOrigins = visionAllowlist(options.allowedSourceOrigins ?? []);
   const requests = new Map<string, Active>();
   const receipts = new Map<string, { snapshotId: string; blueprintId: string }>();
   let running: AbortController | null = null;
@@ -64,6 +67,80 @@ export function createPlannerServer(options: PlannerOptions): FastifyInstance {
   server.post('/v1/connect', async () => ({ ok: true, version: '0.1.0', mode: options.provider.mode, model: options.provider.model }));
   server.get('/v1/diagnostics/cache', async () => ({ ...stats, quarantines: store.quarantines,
     modelTokensActual: null, scope: 'process_aggregate', durationUnit: 'ms', controlsReadyMeasured: false }));
+
+  server.get('/v1/vision/capabilities', async (_request, reply) => {
+    reply.header('Cache-Control', 'no-store');
+    return { enabled: typeof options.provider.planWithImage === 'function' && visionOrigins.length > 0, allowedOrigins: visionOrigins };
+  });
+
+  async function prepareVision(input: ReturnType<typeof VisionPlannerRequestSchema.parse>, controller: AbortController): Promise<VisionPlannerResponse> {
+    const { request: { payload: { snapshot, remainingBudgetMs } }, image } = input;
+    const start = performance.now(), budget = Math.min(remainingBudgetMs, PREPARE_DEADLINE_MS);
+    let timedOut = false;
+    const assertActive = () => {
+      if (timedOut || performance.now() - start >= budget) throw new FlectoError('DEADLINE_EXCEEDED');
+      if (controller.signal.aborted) throw new FlectoError('CANCELLED');
+    };
+    const timer = setTimeout(() => { timedOut = true; controller.abort(); }, budget);
+    let onAbort = () => {};
+    const aborted = new Promise<never>((_resolve, reject) => {
+      onAbort = () => reject(new FlectoError(timedOut ? 'DEADLINE_EXCEEDED' : 'CANCELLED'));
+      controller.signal.addEventListener('abort', onAbort, { once: true });
+    });
+    const execute = async (): Promise<VisionPlannerResponse> => {
+      assertActive();
+      if (!options.provider.planWithImage) throw new FlectoError('UNSUPPORTED_CONTROL');
+      if (running !== null) throw new FlectoError('BUSY');
+      running = controller;
+      let raw: unknown;
+      try {
+        raw = await options.provider.planWithImage(snapshot, Math.max(1, Math.floor(budget - (performance.now() - start))), controller.signal,
+          { dataUrl: image.dataUrl, mimeType: 'image/png' });
+      } finally { if (running === controller) running = null; }
+      assertActive();
+      const plan = verifyPlan(raw, snapshot);
+      assertActive();
+      // No cache lookup, candidate, verification receipt, image metric or prompt log.
+      return VisionPlannerResponseSchema.parse({ requestId: snapshot.requestId, snapshotId: snapshot.snapshotId, plan,
+        mode: options.provider.mode, model: options.provider.model, promptVersion: PROMPT_VERSION, cacheVersion: CACHE_VERSION,
+        blueprintId: null, durationMs: performance.now() - start, transport: 'VISION' });
+    };
+    try { return await Promise.race([execute(), aborted]); }
+    finally { clearTimeout(timer); controller.signal.removeEventListener('abort', onAbort); }
+  }
+
+  server.post('/v1/vision/plans', { bodyLimit: 6 * 1024 * 1024 }, async (request, reply) => {
+    reply.header('Cache-Control', 'no-store');
+    const parsed = VisionPlannerRequestSchema.safeParse(request.body);
+    if (!parsed.success) return reply.code(400).send({ error: 'SCHEMA_INVALID' });
+    const { request: { payload: { snapshot }, capturePlan }, image } = parsed.data;
+    if (!visionOrigins.includes(snapshot.origin)) return reply.code(403).send({ error: 'UNSUPPORTED_CONTROL' });
+    if (!validateVisionPlan(capturePlan) || JSON.stringify(visualRelationCandidates(snapshot, snapshot.goalRef)) !== JSON.stringify(capturePlan.refs)) {
+      return reply.code(422).send({ error: 'VISUAL_RELATION_AMBIGUOUS' });
+    }
+    // Bound the decoded PNG too, and require header dimensions to match the declared image.
+    const bytes = Buffer.from(image.dataUrl.slice(22), 'base64');
+    if (bytes.length < 33 || bytes.length > VISION_MAX_IMAGE_BYTES || bytes.toString('base64') !== image.dataUrl.slice(22) ||
+        !bytes.subarray(0, 8).equals(Buffer.from([137, 80, 78, 71, 13, 10, 26, 10])) ||
+        bytes.readUInt32BE(8) !== 13 || bytes.toString('ascii', 12, 16) !== 'IHDR' ||
+        bytes.readUInt32BE(16) !== image.width || bytes.readUInt32BE(20) !== image.height) return reply.code(400).send({ error: 'SCHEMA_INVALID' });
+    if (!options.provider.planWithImage) return reply.code(422).send({ error: 'UNSUPPORTED_CONTROL' });
+    if (requests.has(snapshot.requestId)) return reply.code(409).send({ error: 'STALE_DOCUMENT' });
+    const controller = new AbortController();
+    const disconnect = () => { if (!reply.raw.writableEnded) controller.abort(); };
+    reply.raw.once('close', disconnect);
+    const task: Active = { key: `vision:${snapshot.snapshotId}`, controller, promise: prepareVision(parsed.data, controller) };
+    requests.set(snapshot.requestId, task);
+    try { return await task.promise; }
+    catch (error) {
+      const code = errorCode(error);
+      return reply.code(code === 'BUSY' ? 409 : code === 'DEADLINE_EXCEEDED' ? 504 : code === 'CANCELLED' ? 499 : 422)
+        .send({ error: code, requestId: snapshot.requestId });
+    } finally {
+      reply.raw.removeListener('close', disconnect);
+      if (requests.get(snapshot.requestId) === task) requests.delete(snapshot.requestId);
+    }
+  });
 
   async function prepare(snapshot: PublicPageSnapshot, budget: number, controller: AbortController): Promise<PlannerResponse> {
     const start = performance.now();

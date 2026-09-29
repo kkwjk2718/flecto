@@ -7,9 +7,14 @@ async function activateWhenReady(pendingSubmit = false): Promise<void> {
 }
 if (!scope.__flectoController) {
   scope.__flectoController = new FlectoController(document);
-  chrome.runtime.onMessage.addListener((message: unknown, sender) => {
+  chrome.runtime.onMessage.addListener((message: unknown, sender, sendResponse) => {
     if (sender.id !== chrome.runtime.id || !message || typeof message !== 'object') return;
     const item = message as { type?: string; pendingSubmit?: boolean };
+    if (item.type === 'FLECTO_VISION_GUARD' || item.type === 'FLECTO_VISION_RELEASE') {
+      if (sender.tab) return; // callbacks are background-only, never another content script
+      void scope.__flectoController!.visionCallback(message).then(sendResponse, () => sendResponse(null));
+      return true;
+    }
     if (item.type === 'FLECTO_ACTIVATE') void activateWhenReady(!!item.pendingSubmit);
     if (item.type === 'FLECTO_SOURCE_NAVIGATION') scope.__flectoController!.sourceNavigation();
     if (item.type === 'FLECTO_DEACTIVATE') void scope.__flectoController!.close();

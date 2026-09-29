@@ -3,16 +3,17 @@ import {
   PlannerErrorSchema, PlannerResponseSchema, PREPARE_DEADLINE_MS, UserSettingsSchema,
   type BackgroundReply, type ErrorCode, type PlannerRequest, type PlannerResponse,
 } from '@flecto/contracts';
-import { httpOrigin, MessageSchema, plannerOrigin, SessionSchema, sourceIdentity, type Session } from './validation';
+import { captureVisionImage, validateVisionPlan, visionAllowlist } from './vision';
+import { VisionImageSchema, VisionCapabilitiesSchema, VisionCapturePlanSchema, VisionPlannerResponseSchema, visualRelationCandidates, type VisionRequest, httpOrigin, MessageSchema, plannerOrigin, SessionSchema, sourceIdentity, type Session } from './validation';
 
-type Reply = BackgroundReply | { ok: true; session: Pick<Session, 'active' | 'pendingSubmit'> } | { ok: true; sponsorAllowed: boolean };
+type Reply = BackgroundReply | { ok: true; capabilities: { enabled: boolean; allowedOrigins: string[] } } | { ok: true; session: Pick<Session, 'active' | 'pendingSubmit'> } | { ok: true; sponsorAllowed: boolean };
 type Connection = { plannerUrl: string; token: string };
 type Owner = { tabId: number; documentId: string; session: Session; epoch: number; windowId: number };
 type TrackedRequest = {
   owner: Owner; sender: chrome.runtime.MessageSender; payload: PlannerRequest; key: string;
   operation: Operation; promise: Promise<PlannerResponse>; delivered: PlannerResponse | null;
   connection?: Connection; sent: boolean; deleted: boolean;
-  verifications: Set<Operation>;
+  verifications: Set<Operation>; vision?: VisionRequest['capturePlan'];
 };
 type Navigation = { tabId: number; frameId: number; url: string; documentId?: string };
 
@@ -187,19 +188,59 @@ export class BackgroundBroker {
     return body;
   }
 
+  private async visionCapabilities(connection: Connection, operation: Operation) {
+    const response = await operation.wait(this.fetcher(`${connection.plannerUrl}/v1/vision/capabilities`, {
+      headers: this.headers(connection), signal: operation.controller.signal, credentials: 'omit', redirect: 'error', cache: 'no-store',
+    }));
+    const parsed = VisionCapabilitiesSchema.safeParse(await operation.wait(this.response(response)));
+    if (!parsed.success) fail('SCHEMA_INVALID');
+    return { enabled: parsed.data.enabled, allowedOrigins: visionAllowlist(parsed.data.allowedOrigins) };
+  }
+
   private async runPlan(record: TrackedRequest): Promise<PlannerResponse> {
     const { operation, owner, sender, payload } = record;
     try {
       record.connection = await operation.wait(this.connection());
       await operation.wait(this.current(owner, sender));
       operation.check();
+      let visionBody: { request: VisionRequest; image: { dataUrl: string; mimeType: 'image/png'; width: number; height: number } } | undefined;
+      if (record.vision) {
+        const capturePlan = record.vision;
+        const capabilities = await this.visionCapabilities(record.connection, operation);
+        if (!capabilities.enabled || !capabilities.allowedOrigins.includes(payload.snapshot.origin)) fail('UNSUPPORTED_CONTROL');
+        if (!validateVisionPlan(capturePlan) || JSON.stringify(visualRelationCandidates(payload.snapshot, payload.snapshot.goalRef)) !== JSON.stringify(capturePlan.refs)) fail('VISUAL_RELATION_AMBIGUOUS');
+        const callback = (type: 'FLECTO_VISION_GUARD' | 'FLECTO_VISION_RELEASE') => operation.wait(this.api.tabs.sendMessage(owner.tabId,
+          { type, requestId: payload.snapshot.requestId }, { documentId: owner.documentId, frameId: 0 }));
+        const captured = await operation.wait(captureVisionImage({
+          expected: { tabId: owner.tabId, windowId: owner.windowId, frameId: 0, documentId: owner.documentId, origin: payload.snapshot.origin },
+          plan: capturePlan, allowedOrigins: capabilities.allowedOrigins, chrome: this.api,
+          guard: async () => {
+            const response: unknown = await callback('FLECTO_VISION_GUARD');
+            const parsed = VisionCapturePlanSchema.safeParse(response);
+            return parsed.success ? parsed.data : null;
+          },
+          budget: { startedAt: operation.started, deadlineAt: operation.started + operation.budget, reserveMs: 500 },
+          signal: operation.controller.signal,
+        }));
+        if (!captured.ok) fail(captured.error === 'DEADLINE_EXCEEDED' ? 'DEADLINE_EXCEEDED' : captured.error === 'CANCELLED' ? 'CANCELLED' : 'VISUAL_RELATION_AMBIGUOUS');
+        if (!VisionImageSchema.safeParse(captured.image).success) fail('SCHEMA_INVALID');
+        // Restore content isolation and verify focus/values BEFORE any network upload.
+        const restored: unknown = await callback('FLECTO_VISION_RELEASE');
+        if (!restored || typeof restored !== 'object' || (restored as { ok?: unknown }).ok !== true) fail('STALE_DOCUMENT');
+        const after = VisionCapturePlanSchema.safeParse(await callback('FLECTO_VISION_GUARD'));
+        if (!after.success || JSON.stringify(after.data) !== JSON.stringify(capturePlan)) fail('STALE_DOCUMENT');
+        await operation.wait(this.current(owner, sender));
+        operation.check();
+        visionBody = { request: { payload: { ...payload, remainingBudgetMs: operation.remaining() }, capturePlan }, image: captured.image };
+      }
       record.sent = true;
-      const response = await operation.wait(this.fetcher(`${record.connection.plannerUrl}/v1/plans`, {
+      const response = await operation.wait(this.fetcher(`${record.connection.plannerUrl}${record.vision ? '/v1/vision/plans' : '/v1/plans'}`, {
         method: 'POST', headers: this.headers(record.connection), signal: operation.controller.signal,
         credentials: 'omit', redirect: 'error', cache: 'no-store',
-        body: JSON.stringify({ ...payload, remainingBudgetMs: operation.remaining() }),
+        body: JSON.stringify(visionBody ?? { ...payload, remainingBudgetMs: operation.remaining() }),
       }));
-      const parsed = PlannerResponseSchema.safeParse(await operation.wait(this.response(response)));
+      visionBody = undefined;
+      const parsed = (record.vision ? VisionPlannerResponseSchema : PlannerResponseSchema).safeParse(await operation.wait(this.response(response)));
       if (!parsed.success) fail('SCHEMA_INVALID');
       const result = parsed.data;
       if (result.requestId !== payload.snapshot.requestId || result.snapshotId !== payload.snapshot.snapshotId ||
@@ -215,12 +256,12 @@ export class BackgroundBroker {
     }
   }
 
-  private prepare(payload: PlannerRequest, owner: Owner, sender: chrome.runtime.MessageSender, operation: Operation) {
+  private prepare(payload: PlannerRequest, owner: Owner, sender: chrome.runtime.MessageSender, operation: Operation, vision?: VisionRequest['capturePlan']) {
     this.assertOwner(owner);
     if (payload.snapshot.origin !== owner.session.origin) fail('AUTH_REQUIRED');
     const document = this.bindDocument(owner, payload.snapshot.documentInstanceId);
     if (document.clientEpoch !== undefined && payload.sessionEpoch < document.clientEpoch) fail('STALE_DOCUMENT');
-    const key = JSON.stringify(payload);
+    const key = JSON.stringify(vision ? { payload, vision } : payload);
     const existing = this.requests.get(payload.snapshot.requestId);
     if (existing) {
       if (existing.owner.tabId !== owner.tabId || existing.owner.documentId !== owner.documentId ||
@@ -236,7 +277,7 @@ export class BackgroundBroker {
       if (record.owner.tabId === owner.tabId) { this.cancelRecord(record); this.requests.delete(id); }
     }
     const record: TrackedRequest = {
-      owner, sender, payload, key, operation, sent: false, deleted: false, delivered: null, verifications: new Set(),
+      owner, sender, payload, key, operation, vision, sent: false, deleted: false, delivered: null, verifications: new Set(),
       promise: undefined as unknown as Promise<PlannerResponse>,
     };
     this.requests.set(payload.snapshot.requestId, record);
@@ -250,7 +291,8 @@ export class BackgroundBroker {
     const parsed = MessageSchema.safeParse(input);
     if (!parsed.success) return { ok: false, error: 'SCHEMA_INVALID' };
     const message = parsed.data;
-    const operation = new Operation(message.type === 'FLECTO_PREPARE' ? Math.min(PREPARE_DEADLINE_MS, message.payload.remainingBudgetMs) : PREPARE_DEADLINE_MS);
+    const budget = message.type === 'FLECTO_PREPARE' ? message.payload.remainingBudgetMs : message.type === 'FLECTO_PREPARE_VISION' ? message.request.payload.remainingBudgetMs : PREPARE_DEADLINE_MS;
+    const operation = new Operation(Math.min(PREPARE_DEADLINE_MS, budget));
     try {
       return await operation.wait((async (): Promise<Reply> => {
         await operation.wait(this.ready);
@@ -281,6 +323,13 @@ export class BackgroundBroker {
             if (!message.active) this.invalidate(owner.tabId);
             await operation.wait(this.persist());
             return { ok: true };
+          case 'FLECTO_VISION_CAPABILITIES': {
+            await operation.wait(this.current(owner, sender));
+            return { ok: true, capabilities: await this.visionCapabilities(await operation.wait(this.connection()), operation) };
+          }
+          case 'FLECTO_PREPARE_VISION':
+            await operation.wait(this.current(owner, sender));
+            return { ok: true, result: await operation.wait(this.prepare(message.request.payload, owner, sender, operation, message.request.capturePlan)) };
           case 'FLECTO_PREPARE':
             await operation.wait(this.current(owner, sender));
             return { ok: true, result: await operation.wait(this.prepare(message.payload, owner, sender, operation)) };
