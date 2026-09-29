@@ -574,7 +574,7 @@
           "requirement": "이전 document/ref 폐기 및 새 instance 요구",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background N02 navigation and restart",
             "invalidates old references on full navigation and requires a new instance"
@@ -586,7 +586,7 @@
           "requirement": "이전 document/ref 폐기 및 새 instance 요구",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background N02 navigation and restart",
             "invalidates old references on full navigation and requires a new instance"
@@ -689,11 +689,11 @@
           "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
           ],
-          "assertion": "expect(after).toEqual(before);",
+          "assertion": "const lifecycle = await control.stopAndWake();\n      const after = await storedState(options, tabId, [privateMarker]);\n      expect(after).toEqual(before);",
           "project": "",
           "instances": 1
         },
@@ -701,11 +701,11 @@
           "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
           ],
-          "assertion": "await expect(dialog(page)).toHaveAttribute('data-font', '30');",
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'IDLE');\n      await expect(dialog(page)).toHaveAttribute('data-font', '30');\n      await expect(page.locator('body > main input[name=\"orderNumber\"]')).toHaveValue('');\n      await expect(page.locator('body > main input[name=\"consent\"]')).not.toBeChecked();",
           "project": "",
           "instances": 1
         },
@@ -713,7 +713,7 @@
           "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
           ],
@@ -722,10 +722,22 @@
           "instances": 1
         },
         {
+          "requirement": "실제 service worker 중지·재시작 후 비개인 상태 복구",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
+          "titlePath": [
+            "T11: stopping the worker after an actual submit preserves pending state without replaying the source action"
+          ],
+          "assertion": "const lifecycle = await control.stopAndWake();\n      await expect(page).toHaveURL(/\\/receipt\\//);\n      await expect(dialog(page)).toHaveAttribute('data-phase', 'SUCCESS');",
+          "project": "",
+          "instances": 1
+        },
+        {
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
           ],
@@ -737,7 +749,7 @@
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
           ],
@@ -749,7 +761,7 @@
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11: stopping the worker after an actual submit preserves pending state without replaying the source action"
           ],
@@ -761,7 +773,7 @@
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11: stopping the worker after an actual submit preserves pending state without replaying the source action"
           ],
@@ -773,11 +785,23 @@
           "requirement": "이전 계획·제출 동작 자동 재실행 없음",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11: stopping the worker after an actual submit preserves pending state without replaying the source action"
           ],
           "assertion": "expect(posts).toEqual(['/apply/submit']);",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "이전 계획·제출 동작 자동 재실행 없음",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
+          "titlePath": [
+            "T11: stopping the worker after an actual submit preserves pending state without replaying the source action"
+          ],
+          "assertion": "await expect.poll(async () => (await storedState(options, tabId, ['FLECTO-2026-001'])).session?.pendingSubmit).toBe(false);",
           "project": "",
           "instances": 1
         }
@@ -1659,11 +1683,11 @@
           "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
           ],
-          "assertion": "await expect(dialog(page)).toHaveAttribute('data-font', '30');",
+          "assertion": "const lifecycle = await control.stopAndWake();\n      const after = await storedState(options, tabId, [privateMarker]);\n      expect(after).toEqual(before);",
           "project": "",
           "instances": 1
         },
@@ -1671,7 +1695,19 @@
           "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
+          "titlePath": [
+            "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
+          ],
+          "assertion": "await expect(dialog(page)).toHaveAttribute('data-phase', 'IDLE');\n      await expect(dialog(page)).toHaveAttribute('data-font', '30');\n      await expect(page.locator('body > main input[name=\"orderNumber\"]')).toHaveValue('');\n      await expect(page.locator('body > main input[name=\"consent\"]')).not.toBeChecked();",
+          "project": "",
+          "instances": 1
+        },
+        {
+          "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
+          "run": "fixture-final",
+          "file": "tests/e2e-fixture/worker-restart.spec.ts",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
           ],
@@ -1683,7 +1719,7 @@
           "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
           ],
@@ -1695,7 +1731,7 @@
           "requirement": "worker 재시작 후 설정·구조 cache 유지 및 이전 private input 복원 안 함",
           "run": "fixture-final",
           "file": "tests/e2e-fixture/worker-restart.spec.ts",
-          "sourceSha256": "bd647d8c97bbf11cdff1bbe91337680c0e7fa6a3dc258eb00a8d67a66fae4245",
+          "sourceSha256": "6eb7cde68063b5d4c07ad4782f2c9d4aba30c51bc34baf018b52e33633296587",
           "titlePath": [
             "T11 T25 partial: actual worker stop preserves settings/cache, restores same-origin activation, and never restores private input"
           ],
@@ -1764,7 +1800,7 @@
           "requirement": "LOCAL_NEXT/LOCAL_BACK가 로컬 UI action만 발행",
           "run": "unit-final",
           "file": "tests/unit/ui-templates.test.ts",
-          "sourceSha256": "68e6ce7a9d498d5fc28ba9eea310257a10423d575d611a4e72f3cf491dc5a17d",
+          "sourceSha256": "013f6128aed2cfc238268b81e6d3dfc2bb847d68613895347eb6fb1a563dba1e",
           "titlePath": [
             "grouped form",
             "next and back send local step actions; next respects canGoNext"
@@ -2095,7 +2131,7 @@
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
           "run": "unit-final",
           "file": "tests/unit/ui-templates.test.ts",
-          "sourceSha256": "68e6ce7a9d498d5fc28ba9eea310257a10423d575d611a4e72f3cf491dc5a17d",
+          "sourceSha256": "013f6128aed2cfc238268b81e6d3dfc2bb847d68613895347eb6fb1a563dba1e",
           "titlePath": [
             "FLECTO shell",
             "renders model text as plain text, never as HTML"
@@ -2107,7 +2143,7 @@
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
           "run": "unit-final",
           "file": "tests/unit/ui-templates.test.ts",
-          "sourceSha256": "68e6ce7a9d498d5fc28ba9eea310257a10423d575d611a4e72f3cf491dc5a17d",
+          "sourceSha256": "013f6128aed2cfc238268b81e6d3dfc2bb847d68613895347eb6fb1a563dba1e",
           "titlePath": [
             "FLECTO shell",
             "renders model text as plain text, never as HTML"
@@ -2119,7 +2155,7 @@
           "requirement": "HTML/JS 실행 금지 및 plain text 렌더",
           "run": "unit-final",
           "file": "tests/unit/ui-templates.test.ts",
-          "sourceSha256": "68e6ce7a9d498d5fc28ba9eea310257a10423d575d611a4e72f3cf491dc5a17d",
+          "sourceSha256": "013f6128aed2cfc238268b81e6d3dfc2bb847d68613895347eb6fb1a563dba1e",
           "titlePath": [
             "FLECTO shell",
             "renders model text as plain text, never as HTML"
@@ -2357,7 +2393,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects foreign extension without planner access"
@@ -2369,7 +2405,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects foreign extension without planner access"
@@ -2381,7 +2417,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects missing tab without planner access"
@@ -2393,7 +2429,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects missing tab without planner access"
@@ -2405,7 +2441,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects subframe without planner access"
@@ -2417,7 +2453,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects subframe without planner access"
@@ -2429,7 +2465,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects missing document without planner access"
@@ -2441,7 +2477,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects missing document without planner access"
@@ -2453,7 +2489,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects opaque origin without planner access"
@@ -2465,7 +2501,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects opaque origin without planner access"
@@ -2477,7 +2513,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects cached document without planner access"
@@ -2489,7 +2525,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects cached document without planner access"
@@ -2501,7 +2537,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects non-HTTP page without planner access"
@@ -2513,7 +2549,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects non-HTTP page without planner access"
@@ -2525,7 +2561,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects cross origin without planner access"
@@ -2537,7 +2573,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "rejects cross origin without planner access"
@@ -2549,7 +2585,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "checks actual current frame document rather than trusting sender.tab"
@@ -2561,7 +2597,7 @@
           "requirement": "위조 sender의 tab·frame·document 요청 거부",
           "run": "unit-final",
           "file": "tests/unit/background.test.ts",
-          "sourceSha256": "c8626ceebf886be16b8d3de0a95d3582564b89db427207db3f67d8473c61d47e",
+          "sourceSha256": "b54f4c739bc25f921e47379e7a225960f9cdf1330c977483da00c42878296e2e",
           "titlePath": [
             "background authorization and storage boundary",
             "checks actual current frame document rather than trusting sender.tab"
@@ -2887,7 +2923,7 @@
           "requirement": "READY 시 광고 제거 및 즉시 primary click 차단",
           "run": "unit-final",
           "file": "tests/unit/ui-templates.test.ts",
-          "sourceSha256": "68e6ce7a9d498d5fc28ba9eea310257a10423d575d611a4e72f3cf491dc5a17d",
+          "sourceSha256": "013f6128aed2cfc238268b81e6d3dfc2bb847d68613895347eb6fb1a563dba1e",
           "titlePath": [
             "final review",
             "ignores a primary click that lands right after preparation ends"
