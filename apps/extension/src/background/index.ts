@@ -19,4 +19,4 @@ export function startBackground(api: typeof chrome) {
 }
 
 // The only startup guard: helpers/broker remain directly testable without Chrome.
-if (typeof chrome !== 'undefined' && chrome.runtime?.id) startBackground(chrome);
+export const background = typeof chrome !== 'undefined' && chrome.runtime?.id ? startBackground(chrome) : null;

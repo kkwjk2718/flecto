@@ -1,8 +1,14 @@
-// C01 build seam only; no source behavior or product success is claimed here.
-if (!document.getElementById('flecto-host')) {
-  const host = document.createElement('div');
-  host.id = 'flecto-host';
-  host.attachShadow({ mode: 'open' }).textContent = 'FLECTO 설치 연결 확인 — 제품 연결 구현 중';
-  document.documentElement.append(host);
+import { FlectoController } from './controller';
+
+const scope = globalThis as typeof globalThis & { __flectoController?: FlectoController };
+if (!scope.__flectoController) {
+  scope.__flectoController = new FlectoController(document);
+  chrome.runtime.onMessage.addListener((message: unknown, sender) => {
+    if (sender.id !== chrome.runtime.id || !message || typeof message !== 'object') return;
+    const item = message as { type?: string; pendingSubmit?: boolean };
+    if (item.type === 'FLECTO_ACTIVATE') void scope.__flectoController!.activate(!!item.pendingSubmit);
+    if (item.type === 'FLECTO_SOURCE_NAVIGATION') scope.__flectoController!.sourceNavigation();
+    if (item.type === 'FLECTO_DEACTIVATE') void scope.__flectoController!.close();
+  });
 }
-export {};
+void scope.__flectoController.activate();

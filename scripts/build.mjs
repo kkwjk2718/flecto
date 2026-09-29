@@ -31,4 +31,5 @@ const files = ['manifest.json', 'content.js', 'background.js', 'options.html', '
 const hashes = {};
 for (const name of files) hashes[name] = createHash('sha256').update(await readFile(resolve(extension, name))).digest('hex');
 await writeFile(resolve(root, 'dist/extension-hashes.json'), JSON.stringify(hashes, null, 2) + '\n');
+await build({ configFile: resolve(root, 'apps/demo-culture/vite.config.ts'), logLevel: 'warn' });
 console.log('Extension build complete: dist/extension (file hashes: dist/extension-hashes.json)');

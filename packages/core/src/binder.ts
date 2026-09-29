@@ -79,7 +79,9 @@ export async function invokeSource(ref: string, registry: PrivateBindingRegistry
     if (control.actionKind !== intent) throw new FlectoError('UNSUPPORTED_CONTROL');
     if (intent === 'submit') {
       if (!review || review.sourceActionRef !== ref || review.documentInstanceId !== registry.documentInstanceId || review.semanticRevision !== registry.semanticRevision || review.optionRevision !== registry.optionRevision || review.privateValueRevision !== registry.privateValueRevision) throw new FlectoError('STALE_DOCUMENT');
-      if (!binding.form || binding.form.noValidate || binding.element.hasAttribute('formnovalidate') || !binding.form.checkValidity()) throw new FlectoError('SOURCE_REJECTED');
+      // A source may use noValidate with its own React validation. We still run
+      // native constraint checks and click the source button, preserving its handler.
+      if (!binding.form || !binding.form.checkValidity()) throw new FlectoError('SOURCE_REJECTED');
       state.submitted = true;
     }
     binding.element.click();
