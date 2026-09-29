@@ -1,4 +1,4 @@
-import { test, expect, beginBenefits, fillBenefits, dialog, benefitsRecords } from './fixtures';
+import { test, expect, beginBenefits, fillBenefits, dialog, benefitsRecords, captureAsset } from './fixtures';
 
 test('T01 T09: FLECTO source handlers and full-navigation confirmation reach the original database', async ({ page, activate, system, consoleErrors }) => {
   await beginBenefits(page, activate);
@@ -18,5 +18,6 @@ test('T01 T09: FLECTO source handlers and full-navigation confirmation reach the
   expect(result.count).toBe(1); expect(result.insertionCount).toBe(1);
   expect(result.records[0]).toMatchObject({ orderNumber: 'FLECTO-2026-001', purchaseDate: '2026-09-01', category: '가전' });
   expect(consoleErrors).toEqual([]);
+  await captureAsset(page, '05-flecto-success.png');
   await page.screenshot({ path: '/tmp/flecto-integration-shots/benefits-complete.png' });
 });

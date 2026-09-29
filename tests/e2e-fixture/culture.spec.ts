@@ -1,4 +1,4 @@
-import { test, expect, dialog, QA_PORTS } from './fixtures';
+import { test, expect, dialog, QA_PORTS, captureAsset } from './fixtures';
 
 test('T02 T05 T10: React culture application preserves values across source SPA steps and saves once', async ({ page, activate, system, consoleErrors }) => {
   await page.goto(`http://127.0.0.1:${QA_PORTS.culture}/login`);
@@ -42,5 +42,6 @@ test('T02 T05 T10: React culture application preserves values across source SPA 
   expect(oracle.count).toBe(1);
   expect(oracle.reservations[0]).toMatchObject({ courseId: 'yoga', timeId: 'yoga-tue-thu-1000', applicantName: '김하늘' });
   expect(consoleErrors).toEqual([]);
+  await captureAsset(page, '06-culture-success.png');
   await page.screenshot({ path: '/tmp/flecto-integration-shots/culture-complete.png' });
 });

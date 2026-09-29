@@ -75,6 +75,11 @@ export const test = base.extend<AppFixtures, WorkerFixtures>({
 });
 export { expect };
 export const dialog = (page: Page) => page.getByRole('dialog', { name: 'FLECTO 쉬운 화면' });
+export async function captureAsset(page: Page, name: string) {
+  if (process.env.FLECTO_CAPTURE !== '1') return;
+  await mkdir('.flecto/creative/assets', { recursive: true });
+  await page.screenshot({ path: resolve('.flecto/creative/assets', name) });
+}
 export async function loginBenefits(page: Page) {
   await page.goto(`http://127.0.0.1:${QA_PORTS.benefits}/login`);
   await page.getByLabel('아이디', { exact: true }).fill('demo');
@@ -83,9 +88,11 @@ export async function loginBenefits(page: Page) {
   await expect(page).toHaveURL(`http://127.0.0.1:${QA_PORTS.benefits}/`);
 }
 export async function beginBenefits(page: Page, activate: (page: Page) => Promise<void>) {
-  await loginBenefits(page); await page.goto(`http://127.0.0.1:${QA_PORTS.benefits}/apply`); await activate(page);
+  await loginBenefits(page); await page.goto(`http://127.0.0.1:${QA_PORTS.benefits}/apply`);
+  await captureAsset(page, '01-source-benefits.png'); await activate(page);
   await dialog(page).getByRole('button', { name: '신청 내용 확인', exact: true }).click();
   await expect(dialog(page).getByLabel('주문번호', { exact: false })).toBeVisible();
+  await captureAsset(page, '02-flecto-input.png');
 }
 export async function fillBenefits(page: Page, order = 'FLECTO-2026-001') {
   const ui = dialog(page);
@@ -96,6 +103,7 @@ export async function fillBenefits(page: Page, order = 'FLECTO-2026-001') {
   await expect(ui.getByRole('button', { name: '다음', exact: true })).toBeEnabled();
   await ui.getByRole('button', { name: '다음', exact: true }).click();
   await expect(ui.getByRole('heading', { name: '원하시는 항목을 선택해 주세요', exact: true })).toBeVisible();
+  await captureAsset(page, '03-flecto-choice.png');
   await ui.getByRole('radio', { name: '가전', exact: true }).click();
   await expect(ui.getByRole('radio', { name: '가전', exact: true })).toBeChecked();
   await expect(page.locator('main select[name="category"]')).toHaveValue('가전');
@@ -105,6 +113,7 @@ export async function fillBenefits(page: Page, order = 'FLECTO-2026-001') {
   await expect(page.locator('main input[name="consent"]')).toBeChecked();
   await ui.getByRole('button', { name: '입력 내용 확인하기', exact: true }).click();
   await expect(ui.getByRole('button', { name: '신청 내용 확인', exact: true })).toBeVisible();
+  await captureAsset(page, '04-flecto-review.png');
 }
 export async function benefitsRecords(system: RunningSystem) {
   const response = await fetch(`http://127.0.0.1:${system.ports.benefits}/__qa/records`, { headers: { 'x-flecto-qa-token': system.credentials.benefitsToken } });
