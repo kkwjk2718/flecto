@@ -105,6 +105,17 @@ export function validatePhone(value: string): string {
 }
 
 export function formatDateTime(iso: string): string {
+  return formatDateTimeInner(iso);
+}
+
+export function formatPhone(value: string): string {
+  const digits = value.replace(/[\s-]/g, '');
+  if (digits.length === 11) return digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7);
+  if (digits.length === 10) return digits.slice(0, 3) + '-' + digits.slice(3, 6) + '-' + digits.slice(6);
+  return value.trim();
+}
+
+function formatDateTimeInner(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return iso;
   return new Intl.DateTimeFormat('ko-KR', { dateStyle: 'long', timeStyle: 'short', timeZone: 'Asia/Seoul' }).format(date);

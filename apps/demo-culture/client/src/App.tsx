@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
-import { ApiFailure, api, formatDateTime, newSubmissionId, validateName, validatePhone, type ApiErrorDetail, type Course, type Reservation, type User } from './api';
+import { ApiFailure, api, formatDateTime, formatPhone, newSubmissionId, validateName, validatePhone, type ApiErrorDetail, type Course, type Reservation, type User } from './api';
 import { Link, RouterProvider, useRouter } from './router';
 
 const SITE_NAME = '한빛 생활문화센터';
@@ -193,7 +193,7 @@ function Site() {
       <header className="site-header">
         <div className="utility-bar">
           <div className="container utility-inner">
-            <span>평일 09:00 ~ 21:00 · 토요일 09:00 ~ 13:00 운영</span>
+            <span className="utility-hours">평일 09:00 ~ 21:00 · 토요일 09:00 ~ 13:00 운영</span>
             <div className="account">
               {session.user ? (
                 <>
@@ -725,7 +725,7 @@ function ReviewStep({ courses, draft, updateDraft, refreshCourses, onSessionExpi
         <div><dt>수업 시간</dt><dd>{time.label} <SeatBadge remaining={time.remaining} /></dd><dd className="edit"><Link to="/apply/course">변경</Link></dd></div>
         <div><dt>수강료</dt><dd>{course.fee}</dd></div>
         <div><dt>신청자 이름</dt><dd>{draft.applicantName.trim()}</dd><dd className="edit"><Link to="/apply/applicant">변경</Link></dd></div>
-        <div><dt>휴대전화 번호</dt><dd>{draft.phone.trim()}</dd><dd className="edit"><Link to="/apply/applicant">변경</Link></dd></div>
+        <div><dt>휴대전화 번호</dt><dd>{formatPhone(draft.phone)}</dd><dd className="edit"><Link to="/apply/applicant">변경</Link></dd></div>
         <div><dt>안내 확인·동의</dt><dd>동의함</dd></div>
       </dl>
       {error ? (
