@@ -246,18 +246,24 @@ describe('VIS01 unknown paint over approved regions', () => {
 });
 
 describe('VIS01 shadows, filters, shadow hosts and list markers fail closed', () => {
-  it('rejects text-shadow that can reach a region, and any unbounded text-shadow', () => {
+  it('rejects any text-shadow on unknown text (no bound), while approved text may keep one', () => {
     const p = page('<p id="far">멀리</p>');
     place('#far', [10, 200, 100, 20]);
     expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
-    const spy = styleStub({ far: { textShadow: 'rgb(255, 0, 0) 0px -40px 0px' } });
+    let spy = styleStub({ far: { textShadow: 'rgb(255, 0, 0) 0px -40px 0px' } });
     expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
     spy.mockRestore();
-    styleStub({ far: { textShadow: 'red 1em 0 0' } });
+    spy = styleStub({ far: { textShadow: 'rgb(255, 0, 0) 1px 1px 0px' } }); // far from every region: still rejected
     expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    spy = styleStub({ name: { textShadow: 'rgb(255, 0, 0) 1px 1px 0px' } }); // form control value text
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    styleStub({ notice: { textShadow: 'rgb(0, 0, 0) 1px 1px 0px' } }); // approved public text
+    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
   });
 
-  it('rejects drop-shadow/blur filters that spread private or unknown pixels, and any unbounded filter', () => {
+  it('rejects every painted filter, including far away and color-only ones', () => {
     const p = page('<div data-private id="pv">비밀</div><div id="far">x</div>');
     place('#pv', [10, 200, 50, 10]); place('#far', [700, 500, 10, 10]);
     expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
@@ -268,7 +274,7 @@ describe('VIS01 shadows, filters, shadow hosts and list markers fail closed', ()
     expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
     spy.mockRestore();
     styleStub({ far: { filter: 'grayscale(1)' } });
-    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
   });
 
   it('rejects ancestor filters and inset shadows, and a masked control whose box-shadow leaves its mask', () => {
@@ -287,6 +293,20 @@ describe('VIS01 shadows, filters, shadow hosts and list markers fail closed', ()
     spy.mockRestore();
     styleStub({ name: { boxShadow: 'rgb(255, 0, 0) 0px 0px 0px 20px' } });
     expect(buildVisionCapturePlan(input(page()))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+  });
+
+  it('keeps a far box-shadow bounded but fails closed once a transform/zoom can scale it', () => {
+    const p = page('<div id="far">x</div>');
+    place('#far', [700, 500, 10, 10]);
+    let spy = styleStub({ far: { boxShadow: 'rgb(0, 0, 0) 0px 0px 4px 0px' } });
+    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
+    spy.mockRestore();
+    spy = styleStub({ far: { boxShadow: 'rgb(0, 0, 0) 0px 0px 4px 0px', transform: 'matrix(40, 0, 0, 40, 0, 0)' } });
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    styleStub({ far: { boxShadow: 'rgb(0, 0, 0) 0px 0px 4px 0px' }, f: { zoom: '3' } });
+    // #far is outside #f, so the zoomed form does not scale it: still bounded and far.
+    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
   });
 
   it('fails closed on custom elements and shadow hosts unless contain:paint bounds them away from regions', () => {
@@ -320,8 +340,11 @@ describe('VIS01 shadows, filters, shadow hosts and list markers fail closed', ()
     expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
     spy.mockRestore();
     place('#li1', [700, 500, 100, 24]);
-    styleStub({ li1: { display: 'list-item', listStyleType: 'disc', fontSize: '20px' } });
+    spy = styleStub({ li1: { display: 'list-item', listStyleType: 'disc', fontSize: '20px' } });
     expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
+    spy.mockRestore();
+    styleStub({ li1: { display: 'list-item', listStyleType: 'disc', fontSize: '20px' }, ul: { transform: 'matrix(20, 0, 0, 20, 0, 0)' } });
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
   });
 
   it('never plans next to a password/OTP field', () => {

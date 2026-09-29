@@ -150,19 +150,19 @@ function shadowExtent(value: string | null | undefined): number {
   }
   return Number.isFinite(sum) ? 3 * sum : Infinity;
 }
-const COLOR_FILTERS = ['brightness', 'contrast', 'grayscale', 'hue-rotate', 'invert', 'opacity', 'saturate', 'sepia'];
-/** Spread (CSS px) of a computed filter; Infinity for url()/unknown functions or unparsed text. */
-function filterExtent(value: string | null | undefined): number {
-  if (!value || value === 'none') return 0;
-  let sum = 0;
-  let seen = '';
-  for (const m of value.matchAll(/([a-z-]+)\(((?:[^()]|\([^()]*\))*)\)/gi)) {
-    seen += m[0];
-    const fn = m[1].toLowerCase();
-    if (fn === 'blur' || fn === 'drop-shadow') sum += shadowExtent(m[2]);
-    else if (!COLOR_FILTERS.includes(fn)) return Infinity;
-  }
-  return seen.replace(/\s+/g, '') === value.replace(/\s+/g, '') && Number.isFinite(sum) ? sum : Infinity;
+/**
+ * True when e or an ancestor is transformed, scaled, rotated or zoomed. CSS-length bounds
+ * (box-shadow, list markers) no longer hold in viewport px there, so callers fail closed.
+ */
+function transformed(e: Element | null, win: Window, cache: Map<Element, boolean>): boolean {
+  if (!e) return false;
+  const known = cache.get(e);
+  if (known !== undefined) return known;
+  const st = win.getComputedStyle(e);
+  const zoom = st.zoom;
+  const out = !noneValue(st.transform) || !noneValue(st.scale) || !noneValue(st.rotate) || (!!zoom && zoom !== '1' && zoom !== 'normal') || transformed(e.parentElement, win, cache);
+  cache.set(e, out);
+  return out;
 }
 function hasMarker(win: Window, e: Element, st: CSSStyleDeclaration): boolean {
   if (!st.display?.includes('list-item')) return false;
@@ -193,20 +193,6 @@ function textRects(doc: Document, node: Node): VisionRect[] {
   if (typeof range.getClientRects !== 'function') fail('BAD_GEOMETRY');
   range.selectNodeContents(node);
   return Array.from(range.getClientRects(), (r) => ({ x: r.left, y: r.top, width: r.width, height: r.height }));
-}
-/** Union of every element and text box in a subtree (what a filter on its root can spread). */
-function subtreeBox(e: Element): VisionRect {
-  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
-  const add = (r: VisionRect) => {
-    if (!finite(r)) fail('BAD_GEOMETRY');
-    if (r.width <= 0 && r.height <= 0) return;
-    x0 = Math.min(x0, r.x); y0 = Math.min(y0, r.y); x1 = Math.max(x1, r.x + r.width); y1 = Math.max(y1, r.y + r.height);
-  };
-  add(rectOf(e));
-  for (const d of Array.from(e.querySelectorAll('*'))) add(rectOf(d));
-  const walker = e.ownerDocument.createTreeWalker(e, 4 /* NodeFilter.SHOW_TEXT */);
-  for (let t = walker.nextNode(); t; t = walker.nextNode()) for (const r of textRects(e.ownerDocument, t)) add(r);
-  return x0 === Infinity ? rectOf(e) : { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
 }
 /** Same text rule as core extraction: text nodes, skipping form controls. */
 function rawText(e: Element): string {
@@ -266,7 +252,7 @@ function checkAncestors(e: Element, region: VisionRect): void {
     if (!noneValue(st.getPropertyValue('-webkit-box-reflect'))) fail('UNSAFE_OVERLAP');
     if (hasMarker(win!, n, st) || shadowHost(n)) fail('UNSAFE_OVERLAP');
     // An outer box-shadow is clipped to outside the border box: safe only if the region lies inside it.
-    if (!noneValue(st.boxShadow) && (/\binset\b/i.test(st.boxShadow) || !inside(region, rectOf(n)))) fail('UNSAFE_OVERLAP');
+    if (!noneValue(st.boxShadow) && (/\binset\b/i.test(st.boxShadow) || transformed(n, win!, new Map()) || !inside(region, rectOf(n)))) fail('UNSAFE_OVERLAP');
     for (const pseudo of ['::before', '::after', '::marker']) {
       const box = pseudoBox(win!, n, pseudo);
       if (!box) continue;
@@ -407,6 +393,7 @@ function build({ doc, registry, snapshot, reason, refs, allowedOrigins }: Vision
   // Everything else is unknown and fails closed.
   const covered = (hit: VisionRect) => privateMasksCover(masks, hit);
   const cache = new Map<Element, boolean>();
+  const tcache = new Map<Element, boolean>();
   for (const { element, region } of regions) checkAncestors(element, region.rect);
   // Extra paint of element e may cover any region it does not contain (contained ones: checkAncestors).
   const spill = (e: Element, area: VisionRect) => {
@@ -434,20 +421,23 @@ function build({ doc, registry, snapshot, reason, refs, allowedOrigins }: Vision
       }
     }
     const inApproved = regions.some(({ element }) => element === e || element.contains(e));
-    if (!noneValue(st.getPropertyValue('-webkit-box-reflect'))) fail('UNSAFE_OVERLAP');
+    // Effects that re-paint content elsewhere are never bounded heuristically: any painted
+    // filter, backdrop filter or reflection, and any text-shadow on a form control, fails closed.
+    if (!noneValue(st.filter) || !noneValue(st.backdropFilter) || !noneValue(st.getPropertyValue('-webkit-backdrop-filter')) || !noneValue(st.getPropertyValue('-webkit-box-reflect'))) fail('UNSAFE_OVERLAP');
+    if (e.matches('input,textarea,select') && !noneValue(st.textShadow)) fail('UNSAFE_OVERLAP');
     // Shadow content escapes every pass here; only contain:paint bounds it to the host box.
     if (shadowHost(e) && (inApproved || !/\b(paint|strict|content)\b/.test(st.contain ?? ''))) fail('UNSAFE_OVERLAP');
     if (hasMarker(win!, e, st)) {
-      if (inApproved || pseudoBox(win!, e, '::marker')) fail('UNSAFE_OVERLAP');
+      if (inApproved || pseudoBox(win!, e, '::marker') || transformed(e, win!, tcache)) fail('UNSAFE_OVERLAP');
       const font = Number.parseFloat(st.fontSize) || 16;
       spill(e, grow(r, 3 * font, font)); // outside markers sit beside the first line box
     }
-    if (!inApproved || privateAncestry.has(e) || e.closest(PRIVATE_SELECTOR)) {
-      const boxExt = shadowExtent(st.boxShadow) + (e.matches('input,textarea,select') ? shadowExtent(st.textShadow) : 0);
-      const filterExt = filterExtent(st.filter);
-      if (!Number.isFinite(boxExt) || !Number.isFinite(filterExt)) fail('UNSAFE_OVERLAP');
-      if (boxExt > 0) spill(e, grow(r, boxExt));
-      if (!noneValue(st.filter)) spill(e, grow(subtreeBox(e), filterExt));
+    // box-shadow paints only a color in the box's shape (no page content), so it keeps a
+    // bound; a transformed chain or an unparsable value fails closed.
+    if (!noneValue(st.boxShadow) && (!inApproved || privateAncestry.has(e) || e.closest(PRIVATE_SELECTOR))) {
+      const ext = shadowExtent(st.boxShadow);
+      if (!Number.isFinite(ext) || transformed(e, win!, tcache)) fail('UNSAFE_OVERLAP');
+      spill(e, grow(r, ext));
     }
     // Generated boxes can leave their element's box; allow them only when they provably cannot.
     for (const pseudo of ['::before', '::after']) {
@@ -466,13 +456,12 @@ function build({ doc, registry, snapshot, reason, refs, allowedOrigins }: Vision
     const parent = t.parentElement;
     if (approved.has(t) || !parent || ours(parent) || !norm(t.textContent ?? '')) continue;
     if (suppressed(parent, win!, cache) || hiddenVisibility(win!.getComputedStyle(parent))) continue;
-    // text-shadow paints offset/blurred copies of the glyphs.
-    const shadow = shadowExtent(win!.getComputedStyle(parent).textShadow);
-    if (!Number.isFinite(shadow)) fail('UNSAFE_OVERLAP');
+    // text-shadow re-paints unknown glyphs elsewhere: never bounded, always fails closed.
+    if (!noneValue(win!.getComputedStyle(parent).textShadow)) fail('UNSAFE_OVERLAP');
     for (const r of textRects(doc, t)) {
       if (!finite(r)) fail('BAD_GEOMETRY');
       if (r.width <= 0 || r.height <= 0) continue;
-      const box = grow(r, TEXT_PAD + shadow);
+      const box = grow(r, TEXT_PAD);
       for (const { region } of regions) {
         const hit = intersect(box, region.rect);
         if (hit && !covered(hit)) fail('UNSAFE_OVERLAP');
