@@ -10,10 +10,10 @@
 | context | Astra 872,000 설정 / 현재 대화 828,400 가용 / 자동 압축 784,800; Opus 카탈로그 1,000,000 |
 | OpenCodex | 2.70.0, health ok=true, ready=true; 네이티브 v1 Opus 단문 실응답 PASS |
 | model reporting | OpenCodex requested/resolved Opus 5.5·HTTP 200 확인; 제품 런타임 검증과 분리 |
-| mode | PREPARE — 개발 환경 준비; 현장 제출/발표 시간 미확정 |
+| mode | CONTEST / SESSION_LOOP — 사용자 명시 개발 시작; 오늘 16:00 완료. state/RUN_SETTINGS.md 참조 |
 | approved current scope | 자료·계획·공개 GitHub 협업 기반·컨텍스트 설정·지정 모델 시험·개발 환경 준비 |
 | GitHub 협업 | PUBLIC, main push 완료, 문서 CI PASS; [설정 기록](REPOSITORY_SETUP.md) |
-| 제품 코드·실행 | NOT_STARTED / NOT_RUN |
+| 제품 코드·실행 | IN_PROGRESS — C01 계약·최소 확장 빌드 기준점, 제품 흐름은 아직 NOT_RUN |
 | 제품 Codex | UNCONFIGURED / NOT_RUN |
 | 이미지 route | OPTIONAL_UNVERIFIED |
 | G0/G1/G2/G3/G4 | NOT_RUN |

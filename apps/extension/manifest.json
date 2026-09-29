@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "FLECTO — 쉬운 화면",
+  "version": "0.1.0",
+  "description": "원래 사이트를 큰 글씨와 단계별 화면으로 이용합니다. 입력과 제출은 사용자가 직접 합니다.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "storage",
+    "webNavigation"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_title": "FLECTO 쉬운 화면 열기"
+  },
+  "options_page": "options.html",
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'none'"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArfsw7s4byXANRlUF0DaxFXT8UZdNhD9WcQJrMiq6M3mo6XFmhZpPr9BWZ/5H8p9nKDpO1bw2600FdBgvYIRDBbR8SRHwsW25hrfiKw5FWT/x80aJ3HTCousZ9BPE6ep9eC4dgFMRMVcKkq72rq14xNJZjPGwt5sV0Z5JXuyS+RyBSn5xPnEELkxQ4GtwoSSjbgiArQRqSrEPIm7TWb1vAz1CCzB0NFRA4pcSpuFZo8xY7A+4yZ2ziyaGO5LYj1LDNknWKPOIDCSYJ/tAoORhv8R4qJmhugJVdQSAUbPI9zI74HKpDOE0mL+4b1hy8BrP9PP5DtANQuV3xpWV9cQHTQIDAQAB"
+}
