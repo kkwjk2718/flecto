@@ -26,13 +26,16 @@ export function loginForm(csrf: string, error = ''): string {
 export function applicationForm(csrf: string, variant: Variant, values: Values, errors: Record<string, string> = {}, formToken = ''): string {
   const prefix = variant === 'decorations' ? `entry-${randomBytes(5).toString('hex')}-` : '';
   const id = (name: string) => prefix + name;
-  const attrs = (name: string) => errors[name] ? ` aria-invalid="true" aria-describedby="${id(name)}-error"` : '';
+  const attrs = (name: string, hint = false) => {
+    const descriptions = [...(hint ? [`${id(name)}-hint`] : []), ...(errors[name] ? [`${id(name)}-error`] : [])];
+    return `${errors[name] ? ' aria-invalid="true"' : ''}${descriptions.length ? ` aria-describedby="${descriptions.join(' ')}"` : ''}`;
+  };
   const error = (name: string) => errors[name] ? `<p class="field-error" id="${id(name)}-error">${escape(errors[name])}</p>` : '';
   return `<div class="intro"><h1>구매 혜택 신청</h1><p>주문 정보를 입력하고 안내를 확인해 주세요. 다음 화면에서 다시 검토할 수 있습니다.</p></div>
   ${Object.keys(errors).length ? `<section role="alert" class="error"><h2>입력 내용을 확인해 주세요</h2><ul>${Object.entries(errors).map(([key, text]) => `<li>${key === 'form' ? escape(text) : `<a href="#${id(key)}">${escape(text)}</a>`}</li>`).join('')}</ul></section>` : ''}
   <form class="panel" method="post" action="/apply">${hidden('csrf', csrf)}${hidden('formToken', formToken)}<fieldset><legend>구매 정보 <span class="muted">모두 필수 입력</span></legend>
-  <div class="field"><label for="${id('orderNumber')}">주문번호</label><input id="${id('orderNumber')}" name="orderNumber" value="${escape(values.orderNumber)}" required maxlength="80" autocomplete="off" spellcheck="false"${attrs('orderNumber')}><p class="hint">시연 주문 예: FLECTO-2026-001</p>${error('orderNumber')}</div>
-  <div class="field"><label for="${id('purchaseDate')}">구매일</label><input id="${id('purchaseDate')}" name="purchaseDate" type="date" value="${escape(values.purchaseDate)}" required${attrs('purchaseDate')}><p class="hint">시연 구매일: 2026년 9월 1일</p>${error('purchaseDate')}</div>
+  <div class="field"><label for="${id('orderNumber')}">주문번호</label><input id="${id('orderNumber')}" name="orderNumber" value="${escape(values.orderNumber)}" required maxlength="80" autocomplete="off" spellcheck="false"${attrs('orderNumber', true)}><p class="hint" id="${id('orderNumber')}-hint">시연 주문 예: FLECTO-2026-001</p>${error('orderNumber')}</div>
+  <div class="field"><label for="${id('purchaseDate')}">구매일</label><input id="${id('purchaseDate')}" name="purchaseDate" type="date" value="${escape(values.purchaseDate)}" required${attrs('purchaseDate', true)}><p class="hint" id="${id('purchaseDate')}-hint">시연 구매일: 2026년 9월 1일</p>${error('purchaseDate')}</div>
   <div class="field"><label for="${id('category')}">상품분류</label><select id="${id('category')}" name="category" required${attrs('category')}><option value="">선택해 주세요</option>${categories.map(c => `<option value="${c}"${values.category === c ? ' selected' : ''}>${c}</option>`).join('')}</select>${error('category')}</div>
   ${variant === 'required' ? `<div class="field"><label for="${id('contactMethod')}">안내 수신 방법</label><select id="${id('contactMethod')}" name="contactMethod" required${attrs('contactMethod')}><option value="">선택해 주세요</option>${contactMethods.map(c => `<option value="${c}"${values.contactMethod === c ? ' selected' : ''}>${c}</option>`).join('')}</select>${error('contactMethod')}</div>` : ''}</fieldset>
   ${notice(variant)}<div class="consent"><input id="${id('consent')}" name="consent" type="checkbox" value="yes" required${values.consent ? ' checked' : ''}${attrs('consent')}><label for="${id('consent')}">위 신청 조건과 주문 정보 저장에 동의합니다. (필수)</label></div>${error('consent')}<div class="actions"><button type="submit">신청 내용 확인</button><a href="/">다음에 신청하기</a></div></form>

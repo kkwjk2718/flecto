@@ -197,6 +197,7 @@ export type FlectoViewModel = {
   sourceName: string;
   reviewEditMode?: 'local' | 'source';
   planTransport?: 'DOM' | 'VISION';
+  focusRef?: string;
 };
 export type UserAction =
   | { kind: 'LOCAL_NEXT'; fromStep: string }

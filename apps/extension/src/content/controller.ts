@@ -423,7 +423,7 @@ export class FlectoController {
     return valid;
   }
 
-  private selectStep(index: number): void {
+  private selectStep(index: number, focusRef?: string): void {
     if (!this.plan || !this.registry) return;
     const step = this.plan.steps[Math.max(0, Math.min(index, this.plan.steps.length - 1))];
     index = this.plan.steps.indexOf(step);
@@ -436,7 +436,7 @@ export class FlectoController {
         value: typeof control.value === 'boolean' ? control.value ? '동의함' : '동의하지 않음' :
           control.options.find((option) => option.ref === control.value)?.label ?? String(control.value || '입력하지 않음'),
       }));
-    this.patch({ phase: reviewing ? 'REVIEW' : 'READY', title: step.title, statusMessage: '', stepIndex: index,
+    this.patch({ phase: reviewing ? 'REVIEW' : 'READY', title: step.title, statusMessage: '', stepIndex: index, focusRef,
       controls, reviewRows: this.localSourceReview ? this.sourceReviewRows : rows, reviewEditMode: this.localSourceReview ? 'source' : 'local',
       canGoBack: index > 0 || this.localSourceReview, canGoNext: !reviewing, canSubmit: reviewing && !!this.review,
       sponsorVisible: false, error: null });
@@ -482,7 +482,7 @@ export class FlectoController {
         }
         if (action.targetRef) {
           const target = this.plan.steps.findIndex((step) => step.controlRefs.includes(action.targetRef!));
-          if (target >= 0) { this.selectStep(target); return; }
+          if (target >= 0) { this.selectStep(target, action.targetRef); return; }
         }
         this.selectStep(this.model.stepIndex - 1); return;
       }

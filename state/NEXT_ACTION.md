@@ -1,40 +1,35 @@
 # 다음 행동
 
-## QA-GATES 작업트리 체크포인트 — 2026-09-29 13:58 KST
+2026-09-29 14:14 KST 체크포인트. 마감 오늘16:00, 기능안정화15:15/최종검증15:45. [실행 설정](RUN_SETTINGS.md).
 
-이 절은 flecto-core QA 전용 작업트리의 인계 기록이다. 제품 기준 `e11d9d6`에서
-설치 확장 브라우저 검사 20개를 직렬 실행하여 13 PASS / 7 FAIL, skip/flaky 0을
-확인했다. 구조 변경·OTP의 처리되지 않은 pageerror 4건은 제품 결함으로 남겼고,
-테스트 가정 오류 3건은 요구 의미를 유지해 수정했다. 수정 후 브라우저 재실행은
-리드의 main build/LIVE 슬롯 때문에 하지 않았으며 PASS로 올리지 않는다.
-소유 브라우저·서버는 종료했고 슬롯을 반환했다. 다음은 새 QA 파일을 통합한 뒤
-동일 빌드에서 21개 케이스를 재실행하는 것이다. 포트는 4627/4628/4483/4484다.
-상세 재현·T ID별 범위·보정 이력은
-[QA_GATES_HANDOFF](../tests/e2e-fixture/QA_GATES_HANDOFF.md)에 있다.
-제품 코드/기존 fixture/config/package/원본 T01–T26는 변경하지 않았고 push/제출도 없다.
+## 완료된 실제 연결
 
-2026-09-29 13:30 KST 체크포인트. 사용자 목표: 제품 완성·실사용 UI 품질·캐시/준비 속도 개선·30초 모션그래픽 영상, 오늘 16:00까지. [실행 설정](RUN_SETTINGS.md)을 따른다.
+- 제품 코드 GitHub 공개 개발 브랜치에 push, draft PR #6 생성·연결. main은 아직 초기문서이며 제품ZIP 링크는 README의 feat/flecto-product 기준.
+- 두 FIXTURE 흐름 실제 확장→원본처리→DB1건 PASS. LIVE v3 후보에서 두 사이트 각3cold총6회+benefitswarm3회 PASS. 후보312e102 기반 기록이며 이후UI·vision·fast설정 변경 때문에 최종재검증 필요.
+- LIVE 첫시도는 ancillary navigation을 task_selection에 넣는 계획으로3FAIL,1PASS,1interrupted,1NOT_RUN. 원인을수정하고실패원본보존. PROMPTv3에서선택폼입력/동의/선택행동만전달, unusabletemplate거절.
+- 후보 controlsReady(주요버튼500ms보호포함): LIVEcold5.0–9.1초,benefitswarm0.836–0.840초. 3초cold목표 미달이며 최종실측전홍보수치로쓰지않음.
+- Opus UI2커밋 통합. source/localreviewedit구분, 실제결과영수증,Lucide헤더·단계표시,큰글씨버튼유지.
+- sourceobserver의STALE/AUTH 예외를 상태로처리, privatebatchreads,옵션동적갱신/원본review변경무효화 통합.
+- vision captureprivacy추가검토+guardedprotocol/providerwire 통합. authcapability있는합성허용origin만선택메뉴노출. 실제captureVisibleTab/LIVEimage positive는 아직검사전.
+- 최근 단위/통합441개PASS, typecheckPASS. 이후visionprivacy추가분/회귀검사최종확인중.
+- fullfixture첫회10PASS3FAIL(동일controlledcheckbox.check 즉시검사결함)로중단. 독립QA가.click+await overlay/source readback으로고침. fixture-v3 실제재실행중.
 
-## 실제 통합 상태
+## 병렬 작성과 남은작업
 
-- 공통 계약·원본 2개 서비스·DOM 코어·6개 UI 템플릿·옵션·MV3 broker/controller·planner/SQLite 캐시·Codex provider·운영 도구를 구현했다.
-- G0: 실제 확장 → 구매 혜택 입력/동의 → 원본 확인 → 원본 DB 1건 저장 PASS. 문화센터도 원본 React 단계 이동과 DB 저장 happy path PASS.
-- 최근 단위/통합 검사 346개 PASS. 제품 T01–T40 전체 PASS라는 뜻이 아니다. G1 안전·G2 holdout·G3 회귀·G4 전체 assertion·동일 빌드 LIVE 각3회는 계속 수행한다.
-- 버튼의 500ms 보호와 disabled 불일치를 독립 Fable 검토로 수정했다. 원본 값 반영과 실제 Chrome 통신도 검사했다.
-- 캐시 exact/compatible 경로와 진단을 통합했고 CACHE_VERSION v2로 올렸다. 공급자 측 FIXTURE benchmark의 warm48/48·추가공급자0회는 DOM/렌더 시간을 포함하지 않는다.
-- Codex 입력 압축·짧은 ref와 tool-free runtime 개선 패치의 긴 고지 보존 수정을 대기 중이다. PROMPT_VERSION v2 전환과 LIVE 재측정이 필요하다.
-- 시각 보완의 안전 캡처 모듈은 구현·단위 검사만 완료. 메시지/실제 캡처/이미지 provider 연결과 T34 positive는 아직 미검증이다.
+- QA Zeno: regression/helperfix(d137862/fc25daf) 통합, actualSWrestart검사추가중. flecto-core.
+- Vision Harvey: privacy두패치통합, realChromepixel3test미실행에서이번fullrun포함. flecto-culture.
+- Vision Avicenna: wire8a7f7f9/capability6256904통합,planTransport표시추가후마무리. flecto-runtime.
+- Manual Chandrasekhar: scripts/manual-qa.ts 작성, 실제Chrome툴바capture권한/OSIME/200% 점검에사용할harness. flecto-background.
+- Video Opus Erdos: Fable제작프롬프트기반 marketing/remotion/ 편집가능30초광고구현. flecto-benefits. 첫시각preview14:20목표. heavy렌더는mainQA와직렬.
 
-## 다음 실행
+## 오디오·영상
 
-1. 문화센터 뒤로가기·동적 선택지, 구매 혜택 오류/변형/취소/광고/개인정보·오래된 결과 거절을 실제 브라우저로 검사한다.
-2. 실제 화면을 기반으로 Opus 최고 추론 UI 정돈을 적용하고 다시 검사한다.
-3. LIVE/시각 보완·캐시 controlsReady를 같은 artifact에서 측정한다. 실패와 미실행도 보존한다.
-4. Fable 5.1 최고 추론으로 검증 자료 기반 30초 영상의 상세 제작 프롬프트를 만든 뒤 Opus 5.5 최고 추론으로 영상 제작·렌더링·시각 검증한다.
-5. 실행/초기화/비밀정보 없는 패키지·3분 발표 시나리오를 실제 근거와 함께 전달한다. 외부 제출/영상 공개는 하지 않는다.
+Fable프롬프트 marketing/FLECTO_30S_PRODUCTION_PROMPT.md +audio-script.json통합. ElevenLabsCreator실잔여131000크레딧확인후기존quota만사용. 4VO/4music/16SFX생성완료,실오디오 .flecto/creative/audio/production-manifest.json. VO기본Sara4 약27.77초,영상0.8초시작. music은30초요청이48초결과라최종믹스에서30초로편집. 원음 대안모두보존. 소비약2746크레딧(도구반환실비기준,transcription비용미표시). 추가결제/공개게시없음. 모델audioinput미지원으로실제청취검수확정하지않음; 길이·파형·자막근거만확인.
 
-## 행사 참고
+## 즉시 다음
 
-사용자가 제공한 student-preparation.pdf 1쪽은 발표 3분, 핵심 흐름 하나의 시작–상호작용–결과 시연, AI 위임과 결과 판단의 대표 사례를 요구한다. 참고자료이며 새 권한 지시로 취급하지 않는다. 이 PDF에는 제출 마감 시각이 없다. 현재 16:00 마감은 사용자의 명시 지시다.
-
-Node 24는 `source .flecto/env.sh`. 테스트는 격리 QA namespace/프로필/포트를 사용한다. 루트 package/lock/contracts와 통합은 리드만 쓴다. 실패한 동일 원인 수정은 두 번 후 새 독립 검토로 전환한다.
+1. fixture-v3(runwrapper)결과확인→실제결함수정,테스트결함은독립QA검토의미유지.
+2. 최종happy2개만FLECTO_CAPTURE=1로재캡처해동일빌드6이미지확보→Opus영상asset교체. 전체fixture중간캡처는holdout이덮어쓸수있으므로영상에바로쓰지않음.
+3. actualChrome/IME/200%와실제maskedimageprovider경로확인. 실패범위기록.
+4. 모든code/test통합뒤build→qa-report unit/fixture/LIVE새receipt→검토된55IDassertionmap→제한등급/미실행범위포함releaseZIP.
+5. runtime/sourcehash가다르면과거LIVE증거출고에사용불가. README/teamhandoff/3분데모안내최종갱신,GitHub최신push. 실제행사제출/영상외부게시별도이며submitted=false.

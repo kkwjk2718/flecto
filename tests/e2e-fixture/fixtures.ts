@@ -1,5 +1,6 @@
 import { test as base, expect, chromium, type BrowserContext, type Page, type Worker } from '@playwright/test';
-import { mkdtemp, mkdir } from 'node:fs/promises';
+import { mkdtemp, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
 import { resolve } from 'node:path';
 import { startSystem, type RunningSystem } from '../../scripts/system';
 import { EXTENSION_ID } from '@flecto/contracts';
@@ -29,6 +30,7 @@ export const test = base.extend<AppFixtures, WorkerFixtures>({
     const context = await chromium.launchPersistentContext(profile, {
       channel: 'chromium', headless: process.env.FLECTO_HEADED !== '1',
       viewport: { width: 1440, height: 1100 },
+      deviceScaleFactor: process.env.FLECTO_CAPTURE_RETINA === '1' ? 2 : 1,
       args: [`--disable-extensions-except=${resolve('dist/extension')}`, `--load-extension=${resolve('dist/extension')}`],
     });
     try {
@@ -82,7 +84,13 @@ export const dialog = (page: Page) => page.getByRole('dialog', { name: 'FLECTO �
 export async function captureAsset(page: Page, name: string) {
   if (process.env.FLECTO_CAPTURE !== '1') return;
   await mkdir('.flecto/creative/assets', { recursive: true });
-  await page.screenshot({ path: resolve('.flecto/creative/assets', name) });
+  const target = resolve('.flecto/creative/assets', name);
+  await page.screenshot({ path: target });
+  const pixels = await readFile(target);
+  await writeFile(target.replace(/\.png$/, '.json'), JSON.stringify({ file: name,
+    sha256: createHash('sha256').update(pixels).digest('hex'), width: pixels.readUInt32BE(16), height: pixels.readUInt32BE(20),
+    viewport: page.viewportSize(), deviceScaleFactor: await page.evaluate(() => devicePixelRatio),
+    artifact: await readVerifiedArtifact(process.cwd()), data: 'synthetic demonstration only' }, null, 2));
 }
 export async function loginBenefits(page: Page) {
   await page.goto(`http://127.0.0.1:${QA_PORTS.benefits}/login`);
@@ -104,13 +112,15 @@ export async function fillBenefits(page: Page, order = 'FLECTO-2026-001') {
   await ui.getByLabel('구매일', { exact: false }).fill('2026-09-01');
   await expect(page.locator('main input[name="orderNumber"]')).toHaveValue(order);
   await expect(page.locator('main input[name="purchaseDate"]')).toHaveValue('2026-09-01');
+  await captureAsset(page, '02-flecto-input-filled.png');
   await expect(ui.getByRole('button', { name: '다음', exact: true })).toBeEnabled();
   await ui.getByRole('button', { name: '다음', exact: true }).click();
   await expect(ui.getByRole('heading', { name: '원하시는 항목을 선택해 주세요', exact: true })).toBeVisible();
-  await captureAsset(page, '03-flecto-choice.png');
+  await captureAsset(page, '03-flecto-choice-empty.png');
   await ui.getByRole('radio', { name: '가전', exact: true }).click();
   await expect(ui.getByRole('radio', { name: '가전', exact: true })).toBeChecked();
   await expect(page.locator('main select[name="category"]')).toHaveValue('가전');
+  await captureAsset(page, '03-flecto-choice.png');
   await ui.getByRole('button', { name: '다음', exact: true }).click();
   await ui.getByRole('checkbox', { name: /위 신청 조건과 주문 정보 저장/ }).click();
   await expect(ui.getByRole('checkbox', { name: /위 신청 조건과 주문 정보 저장/ })).toBeChecked();

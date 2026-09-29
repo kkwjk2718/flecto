@@ -299,15 +299,16 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
   useEffect(() => {
     const root = rootRef.current;
     if (!root || composingRefs.current.size > 0) return;
-    if (errorsKey) {
-      const firstRef = errorsKey.split('|')[0];
+    if (!errorsKey) root.scrollTop = 0;
+    if (errorsKey || model.focusRef) {
+      const firstRef = errorsKey ? errorsKey.split('|')[0] : model.focusRef;
       const target = Array.from(root.querySelectorAll<HTMLElement>('[data-flecto-ref]'))
         .filter((el) => el.getAttribute('data-flecto-ref') === firstRef && el.matches('input, textarea, select, button'))
         .find((el) => !(el instanceof HTMLInputElement && el.type === 'radio') || el.checked || !(el as HTMLInputElement).disabled);
       if (target) { target.focus(); return; }
     }
-    headingRef.current?.focus();
-  }, [viewKey, errorsKey]);
+    headingRef.current?.focus({ preventScroll: true });
+  }, [viewKey, errorsKey, model.focusRef]);
 
   const onKeyDown = (e: ReactKeyboardEvent<HTMLDivElement>) => {
     const root = rootRef.current;
@@ -444,7 +445,9 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
     const template = view.template;
     title = model.phase === 'IDLE' ? (model.title || TEMPLATE_TITLE.task_selection) : (step?.title || model.title || TEMPLATE_TITLE[template]);
     intro = TEMPLATE_INTRO[template][explain];
-    const noticeNodes = notices.map((n) => <NoticeBlock key={n.ref} notice={n} />);
+    const fieldNotices = new Set(['grouped_form', 'item_selection', 'consent'].includes(template)
+      ? controls.filter(c => !['submit', 'button', 'link'].includes(c.kind)).flatMap(c => c.noticeRefs) : []);
+    const noticeNodes = notices.filter(n => !fieldNotices.has(n.ref)).map((n) => <NoticeBlock key={n.ref} notice={n} />);
     const fieldNodes = controls.map((c) => <ControlField key={c.ref} control={c} ctx={ctx} />);
     const nextStep = model.steps[model.stepIndex + 1] ?? null;
     const sourceReview = template === 'final_review' && model.reviewEditMode === 'source';
