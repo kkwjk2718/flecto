@@ -45,15 +45,16 @@ const useLocalFont = () => {
 const has = (name: string) => getStaticFiles().some((f) => f.name === 'assets/' + name + '.png');
 const firstExisting = (names: string[]) => names.find(has);
 
-// Field rects in asset coordinates (logical 1440x1100). 01 matches the brief; 02 and 04 were re-measured
-// from the current captures (04 is captured scrolled ~30px so its value rows sit higher than the brief says).
-const SRC_FIELD = {x: 247, y: 481, w: 600, h: 96};
-const DST_FIELD = {x: 367, y: 322, w: 706, h: 122};
+// Field rects in asset coordinates (logical 1440x1100), re-measured from the 14:51 2x captures.
+// Source: label + input + "시연 주문 예" hint. FLECTO: label + "원래 사이트 안내" hint box + input.
+const SRC_FIELD = {x: 247, y: 481, w: 600, h: 130};
+const DST_FIELD = {x: 367, y: 322, w: 706, h: 232};
+// Bottom edge of each review value (04 top scroll reset moved rows +24 vs. the earlier capture).
 const REVIEW_VALUES = [
-  {x: 367, y: 436, w: 237},
-  {x: 367, y: 563, w: 154},
-  {x: 367, y: 691, w: 45},
-  {x: 367, y: 819, w: 68},
+  {x: 367, y: 460, w: 237},
+  {x: 367, y: 587, w: 154},
+  {x: 367, y: 715, w: 45},
+  {x: 367, y: 843, w: 68},
 ];
 
 export const FlectoAd: React.FC<Props> = (props) => {
