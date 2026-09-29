@@ -45,14 +45,22 @@ export function NoticeBlock({ notice, id }: { notice: PublicNotice; id?: string 
 function helpParts(control: ViewControl, ctx: FieldContext) {
   const ids: string[] = [];
   const nodes: ReactElement[] = [];
+  // One hint per text: a source notice that repeats the field description (or an earlier
+  // notice) is shown once, so the same sentence never stacks under a single field.
+  const shown = new Set<string>();
+  const key = (value: string) => value.normalize('NFC').replace(/\s+/g, ' ').trim();
   if (control.description) {
     const id = ctx.idFor(control.ref, 'help');
     ids.push(id);
+    shown.add(key(control.description));
     nodes.push(<p key="help" className="fl-help" id={id}>{control.description}</p>);
   }
   for (const noticeRef of control.noticeRefs) {
     const notice = ctx.noticeByRef.get(noticeRef);
     if (!notice) continue;
+    const text = key(notice.text);
+    if (shown.has(text)) continue;
+    shown.add(text);
     const id = ctx.idFor(control.ref, 'n-' + noticeRef);
     ids.push(id);
     nodes.push(<NoticeBlock key={noticeRef} notice={notice} id={id} />);
