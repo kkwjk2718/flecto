@@ -31,6 +31,12 @@ export function createPlannerServer(options: PlannerOptions): FastifyInstance {
   const requests = new Map<string, Active>();
   const receipts = new Map<string, { snapshotId: string; blueprintId: string }>();
   let running: AbortController | null = null;
+  const stats = { exactHits: 0, compatibleHits: 0, misses: 0, providerCalls: 0,
+    durations: { exact: { count: 0, totalMs: 0, maxMs: 0 }, compatible: { count: 0, totalMs: 0, maxMs: 0 },
+      provider: { count: 0, totalMs: 0, maxMs: 0 }, prepare: { count: 0, totalMs: 0, maxMs: 0 } } };
+  const duration = (phase: keyof typeof stats.durations, ms: number) => {
+    const aggregate = stats.durations[phase]; aggregate.count++; aggregate.totalMs += ms; aggregate.maxMs = Math.max(aggregate.maxMs, ms);
+  };
   const authenticated = (request: FastifyRequest) => {
     const authorization = request.headers.authorization;
     return typeof authorization === 'string' && authorization.startsWith('Bearer ') && safeEqual(authorization.slice(7), options.token);
@@ -56,6 +62,8 @@ export function createPlannerServer(options: PlannerOptions): FastifyInstance {
   server.options('/*', async (_request, reply) => reply.code(204).send());
   server.get('/health', async () => ({ ok: true, version: '0.1.0', schemaVersion: 1, mode: options.provider.mode, model: options.provider.model, busy: running !== null }));
   server.post('/v1/connect', async () => ({ ok: true, version: '0.1.0', mode: options.provider.mode, model: options.provider.model }));
+  server.get('/v1/diagnostics/cache', async () => ({ ...stats, quarantines: store.quarantines,
+    modelTokensActual: null, scope: 'process_aggregate', durationUnit: 'ms', controlsReadyMeasured: false }));
 
   async function prepare(snapshot: PublicPageSnapshot, budget: number, controller: AbortController): Promise<PlannerResponse> {
     const start = performance.now();
@@ -85,20 +93,33 @@ export function createPlannerServer(options: PlannerOptions): FastifyInstance {
         const plan = await store.rebind(blueprint, snapshot);
         assertActive();
         if (plan) {
+          stats.exactHits++; duration('exact', performance.now() - start);
           remember(blueprint.id);
           return { requestId: snapshot.requestId, snapshotId: snapshot.snapshotId, plan, mode: 'CACHE', model: options.provider.model,
             promptVersion: PROMPT_VERSION, cacheVersion: CACHE_VERSION, blueprintId: blueprint.id, durationMs: performance.now() - start };
         }
       }
+      const compatible = store.findCompatible(snapshot, modelLock);
+      assertActive();
+      if (compatible) {
+        stats.compatibleHits++; duration('compatible', performance.now() - start);
+        remember(compatible.blueprint.id);
+        return { requestId: snapshot.requestId, snapshotId: snapshot.snapshotId, plan: compatible.plan, mode: 'CACHE',
+          model: options.provider.model, promptVersion: PROMPT_VERSION, cacheVersion: CACHE_VERSION,
+          blueprintId: compatible.blueprint.id, durationMs: performance.now() - start };
+      }
+      stats.misses++;
       // Occupancy belongs to the actual invocation, including an aborted provider
       // that has not settled. Reusing its request ID cannot create ghost work.
       if (running !== null) throw new FlectoError('BUSY');
       assertActive();
       running = controller;
       let raw: unknown;
+      stats.providerCalls++;
+      const providerStart = performance.now();
       try {
         raw = await options.provider.plan(snapshot, Math.max(1, budget - (performance.now() - start)), controller.signal);
-      } finally { if (running === controller) running = null; }
+      } finally { duration('provider', performance.now() - providerStart); if (running === controller) running = null; }
       assertActive();
       const plan = verifyPlan(raw, snapshot);
       blueprint = store.candidate(snapshot, plan, fingerprint, modelLock);
@@ -109,7 +130,7 @@ export function createPlannerServer(options: PlannerOptions): FastifyInstance {
         blueprintId: blueprint.id, durationMs: performance.now() - start };
     };
     try { return await Promise.race([execute(), aborted]); }
-    finally { clearTimeout(timer); controller.signal.removeEventListener('abort', abortListener); }
+    finally { duration('prepare', performance.now() - start); clearTimeout(timer); controller.signal.removeEventListener('abort', abortListener); }
   }
 
   server.post('/v1/plans', async (request, reply) => {

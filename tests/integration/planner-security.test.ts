@@ -41,8 +41,8 @@ function publicPlan(s: PublicPageSnapshot): PagePlan {
   const action = s.controls.find(c => c.ref === s.goalRef)!;
   const inputs = s.controls.filter(c => c.formRef === action.formRef && c.actionKind === 'none');
   return { schemaVersion: 1, snapshotId: s.snapshotId, sourceActionRef: action.ref, steps: [
-    { id: 'details', template: 'grouped_form', title: '정보', controlRefs: inputs.filter(c => c.kind !== 'checkbox').map(c => c.ref), noticeRefs: [] },
-    { id: 'consent', template: 'consent', title: '조건', controlRefs: inputs.filter(c => c.kind === 'checkbox').map(c => c.ref), noticeRefs: s.notices.map(n => n.ref) },
+    { id: 'details', template: 'grouped_form', title: '필요한 정보를 입력해 주세요', controlRefs: inputs.filter(c => c.kind !== 'checkbox').map(c => c.ref), noticeRefs: [] },
+    { id: 'consent', template: 'consent', title: '안내를 읽고 동의해 주세요', controlRefs: inputs.filter(c => c.kind === 'checkbox').map(c => c.ref), noticeRefs: s.notices.map(n => n.ref) },
   ] };
 }
 const token = 'planner-qa-only-pairing-token-12345';
