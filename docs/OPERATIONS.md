@@ -101,7 +101,7 @@ OPS-EVIDENCE 체크포인트: 서버/프롬프트 변이, 수정 작업 트리�
 통합 리드용 순서(이 작업자는 제품 build/브라우저/LIVE 실행하지 않음):
 
 ```sh
-export PATH=/Users/kkwjk2718/Documents/kakao-ralphthon-main/.flecto/toolchains/node-v24.21.0-darwin-arm64/bin:$PATH
+node --version # Node 24.x 환경에서 실행
 # 위 build.mjs 연결과 모든 구현/테스트 소스 통합 후:
 npm run build
 npx tsx scripts/qa-report.ts run --runner vitest --id unit --out .flecto/qa/unit-01 -- --maxWorkers=2

@@ -2,7 +2,7 @@
 
 **PATCH_READY. No tests, browser, build, provider, QA emitter or release command was run by this worker.** This is a reviewed mapping for future receipts, not a results report. `complete` describes assertion coverage; it is never an execution PASS.
 
-- Owned checkout: `/Users/kkwjk2718/.codex/worktrees/flecto-options/kakao-ralphthon-main`.
+- Owned checkout: isolated `flecto-options` worktree.
 - Reviewed HEAD: `f7af2f1346f15cd7687c06ac78a28215bad0e6a6`; clean on entry.
 - Review began 2026-09-29 14:23 KST; checkpoint review 14:33 KST. Run settings template says PREPARE/UNSELECTED, while historical state says CONTEST/SESSION_LOOP. This source-only assignment changes neither and does not extend any deadline.
 - Scope: only this file and `evidence/assertion-map.json`. No tests/spec/package/lock/runtime/state changes. Lead owns the final candidate and actual execution.
@@ -98,7 +98,7 @@ The original condition/pass wording is reproduced for comparison. Source locatio
 
 The user's newly supplied checkpoint was read from the explicitly provided main-checkout path only:
 
-`/Users/kkwjk2718/Documents/kakao-ralphthon-main/.flecto/qa/manual/run-YSSUpl/checkpoint.json`
+`.flecto/qa/manual/run-YSSUpl/checkpoint.json`
 
 Observed checkpoint SHA-256: `4fd9c3c6aeac7cd9dac825fef9f4a392ec1c8d0999971c6bc31e3ce8b64d3121`. This is a human-review citation only, not an automated mapping source or a substitute receipt. Checkpoint updatedAt is `2026-09-29T05:32:58.988Z`; state STOPPED, exitReason OPERATOR_STOP.
 

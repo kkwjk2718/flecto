@@ -168,7 +168,7 @@ export type UserSettings = {
   reducedMotion: boolean;
 };
 export const DEFAULT_SETTINGS: UserSettings = {
-  fontSize: 26, contrast: 'normal', explanation: 'brief', reducedMotion: false,
+  fontSize: 30, contrast: 'normal', explanation: 'brief', reducedMotion: false,
 };
 export const UserSettingsSchema = z.strictObject({
   fontSize: z.union([z.literal(22), z.literal(26), z.literal(30)]),
