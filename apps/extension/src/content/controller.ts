@@ -515,7 +515,7 @@ export class FlectoController {
       if (!this.plan) {
         if (this.model.phase !== 'PREPARING' && !['TIMED_OUT', 'CANCELLED', 'SOURCE_REJECTED', 'OUTCOME_UNKNOWN'].includes(this.model.phase)) {
           this.refreshExtraction();
-          if (this.model.phase !== 'AUTH_REQUIRED') { this.showTasks(); await this.trySourceReview(); }
+          if (!['AUTH_REQUIRED'].includes(this.model.phase)) { this.showTasks(); await this.trySourceReview(); }
         }
         return;
       }
