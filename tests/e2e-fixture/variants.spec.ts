@@ -119,7 +119,7 @@ test('T21 T37 partial: warm plan plus synthetic reset does not restore a previou
   });
   expect(reset.ok).toBeTruthy(); expect((await benefitsRecords(system)).count).toBe(0);
   // A real second login rotates the source session; extension storage/cache remain.
-  await dialog(page).getByRole('button', { name: '원래 화면에서 내역 보기', exact: true }).click();
+  await dialog(page).locator('footer [data-action="SHOW_ORIGINAL"]').click();
   await beginBenefits(page, activate, system);
   await expect(dialog(page).getByLabel('주문번호', { exact: false })).toHaveValue('');
   await expect(page.locator('main input[name="consent"]')).not.toBeChecked();
