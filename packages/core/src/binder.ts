@@ -14,6 +14,9 @@ function checkedBinding(ref: string, registry: PrivateBindingRegistry): PrivateB
 export function readControlValue(binding: PrivateBinding, registry: PrivateBindingRegistry): string | boolean {
   refreshRegistry(registry);
   if (registry.bindings.get(binding.ref) !== binding) throw new FlectoError('STALE_DOCUMENT');
+  return localValue(binding, registry);
+}
+function localValue(binding: PrivateBinding, registry: PrivateBindingRegistry): string | boolean {
   if (binding.kind === 'checkbox') return (binding.element as HTMLInputElement).checked;
   if (binding.kind === 'radio') {
     const control = registryStates.get(registry)!.snapshot.controls.find(c => c.ref === binding.ref)!;
@@ -21,6 +24,11 @@ export function readControlValue(binding: PrivateBinding, registry: PrivateBindi
     return selected?.value ?? '';
   }
   return 'value' in binding.element ? (binding.element as HTMLInputElement).value : '';
+}
+/** One current-DOM check for a synchronous local read batch; never transported. */
+export function readControlValues(registry: PrivateBindingRegistry): Map<string, string | boolean> {
+  refreshRegistry(registry);
+  return new Map([...registry.bindings].map(([ref, binding]) => [ref, localValue(binding, registry)]));
 }
 function nativeValue(element: HTMLElement, value: string): void {
   const win = element.ownerDocument.defaultView!;

@@ -18,8 +18,8 @@ async function prepare(page: Page, label: string, source: string, timings: Timin
   await expect(ui).toHaveAttribute('data-phase', /^(READY|REVIEW)$/);
   await expect(ui.locator('.fl-footer .fl-btn-primary')).toBeEnabled();
   const end = await page.evaluate(() => performance.now());
-  const mode = await ui.locator('.fl-tech').innerText();
-  expect(mode).not.toContain('FIXTURE');
+  const mode = await ui.locator('.fl-tech').textContent() ?? '';
+  expect(mode).toContain(source.endsWith('-warm') ? '(CACHE)' : '(LIVE_CODEX)');
   timings.push({ source, mode, controlsReadyMs: end - start });
 }
 /** Drive the displayed controls, independent of the model's grouping/order. */
