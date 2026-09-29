@@ -175,7 +175,14 @@ export class FlectoController {
   private showTasks(): void {
     if (!this.snapshot) return;
     const controls = this.snapshot.controls.filter((control) => ['submit', 'navigate'].includes(control.actionKind) && !control.disabled);
-    controls.sort((a, b) => Number(!!this.registry?.bindings.get(b.ref)?.element.closest('main')) - Number(!!this.registry?.bindings.get(a.ref)?.element.closest('main')));
+    const taskPriority = (control: PublicPageSnapshot['controls'][number]) => {
+      const inMain = !!this.registry?.bindings.get(control.ref)?.element.closest('main');
+      const fields = control.formRef ? this.snapshot!.controls.filter(field => field.formRef === control.formRef && field.actionKind === 'none' && !field.disabled).length : 0;
+      return Number(inMain) * 100 + Number(control.actionKind === 'submit') * 10 + Math.min(fields, 8);
+    };
+    // Prefer the actual current form over dense portal navigation, using only
+    // current public form semantics rather than a site name or hidden answer.
+    controls.sort((a, b) => taskPriority(b) - taskPriority(a));
     const tasks = controls
       .map((control) => ({ ref: control.ref, label: control.label, kind: control.actionKind as 'submit' | 'navigate', disabled: control.disabled }));
     this.patch({ phase: tasks.length ? 'IDLE' : 'UNSUPPORTED', title: '무엇을 하시겠어요?', tasks,
