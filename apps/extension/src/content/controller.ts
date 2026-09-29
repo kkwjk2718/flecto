@@ -349,7 +349,7 @@ export class FlectoController {
     if (performance.now() - this.prepareStart >= PREPARE_DEADLINE_MS) { this.cancelPrepare(true); return; }
     this.clearDeadline();
     this.structuralKey = key;
-    this.model = { ...this.model, mode: parsed.data.mode, steps: this.plan.steps, stepIndex: 0, controls: this.viewControls(),
+    this.model = { ...this.model, mode: parsed.data.mode, planTransport: vision ? 'VISION' : 'DOM', steps: this.plan.steps, stepIndex: 0, controls: this.viewControls(),
       notices: this.viewNotices(), sponsorVisible: false, elapsedMs: performance.now() - this.prepareStart, tasks: this.model.tasks };
     this.selectStep(0);
     if (parsed.data.blueprintId) void this.send({ type: 'FLECTO_VERIFY', requestId, snapshotId: snapshot.snapshotId, blueprintId: parsed.data.blueprintId });
