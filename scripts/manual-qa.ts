@@ -145,6 +145,7 @@ async function main() {
   process.once('SIGINT', stop); process.once('SIGTERM', stop);
   const exchanges: Exchange[] = [], pending = new Set<Promise<void>>(), controllers = new Set<AbortController>();
   const observations: Record<string, Observation> = Object.fromEntries(['activation','vision-ui','ime','zoom','focus','source-values'].map(key => [key, 'NOT_RUN']));
+  let diagnostics: unknown = null;
   let state = 'STARTING', exitReason = 'OPERATOR_STOP', artifactAfter: typeof artifact | null = null;
   let storageAudit: Awaited<ReturnType<typeof auditPlannerStorage>> | null = null;
   let writes = Promise.resolve();
@@ -153,7 +154,7 @@ async function main() {
     const file = resolve(runDir, 'checkpoint.json');
     const contents = JSON.stringify({ schemaVersion: 1, updatedAt: new Date().toISOString(), mode, provider: 'LIVE_CODEX',
       state, exitReason, artifactBefore: artifact, artifactAfter, artifactUnchanged: artifactAfter ? JSON.stringify(artifact) === JSON.stringify(artifactAfter) : null,
-      ports: PORTS, proxyPort: useProxy ? PROXY_PORT : null, observations, exchanges, storageAudit,
+      ports: PORTS, proxyPort: useProxy ? PROXY_PORT : null, observations, exchanges, storageAudit, diagnostics,
       t34: 'LEAD_REVIEW_REQUIRED', nativeCapture: 'NO_MOCK_OR_BROKER_ACTIVATION',
       sourcePostByHarness: false, controlsReadyMeasured: false, submitted: false,
       nextAction: 'Lead: inspect masked PNG and live response, verify native activation/rendering, OS Korean IME and 200% focus; do not promote NOT_RUN.' }, null, 2) + '\n';
@@ -280,6 +281,20 @@ async function main() {
     terminal = createInterface({ input: process.stdin, terminal: false });
     terminal.on('line', line => {
       const value = line.trim();
+      if (value === 'diagnostics') {
+        void (async () => {
+          const worker = context!.serviceWorkers()[0];
+          diagnostics = await worker.evaluate(async (sourceUrl) => {
+            const broker = (globalThis as unknown as Record<symbol, { lastVisionDiagnostic?: unknown }>)[Symbol.for('flecto.background')];
+            const tab = (await chrome.tabs.query({})).find(t => t.url === sourceUrl);
+            const content = tab?.id === undefined ? null : (await chrome.scripting.executeScript({ target: { tabId: tab.id },
+              func: () => (globalThis as unknown as { __flectoController?: { lastVisionDiagnostic?: unknown } }).__flectoController?.lastVisionDiagnostic ?? null }))[0]?.result;
+            return { background: broker?.lastVisionDiagnostic ?? null, content };
+          }, page.url());
+          console.log(JSON.stringify(diagnostics)); await checkpoint();
+        })().catch(() => console.log('Bounded diagnostics unavailable'));
+        return;
+      }
       if (value === 'quit') { stop(); return; }
       const match = /^(activation|vision-ui|ime|zoom|focus|source-values) (pass|fail)$/.exec(value);
       if (match) observations[match[1]] = match[2] === 'pass' ? 'PASS_MANUAL_REPORTED' : 'FAIL_MANUAL_REPORTED';

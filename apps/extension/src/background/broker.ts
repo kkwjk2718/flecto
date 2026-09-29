@@ -55,6 +55,8 @@ class Operation {
 }
 
 export class BackgroundBroker {
+  // Privileged-worker diagnostics only: bounded reason codes, never pixels or page values.
+  lastVisionDiagnostic: { stage: string; code: string } | null = null;
   readonly ready: Promise<void>;
   private sessions = new Map<number, Session>();
   private documents = new Map<number, { documentId: string; instanceId?: string; clientEpoch?: number }>();
@@ -222,6 +224,7 @@ export class BackgroundBroker {
           budget: { startedAt: operation.started, deadlineAt: operation.started + operation.budget, reserveMs: 500 },
           signal: operation.controller.signal,
         }));
+        this.lastVisionDiagnostic = { stage: 'capture', code: captured.ok ? 'OK' : captured.error };
         if (!captured.ok) fail(captured.error === 'DEADLINE_EXCEEDED' ? 'DEADLINE_EXCEEDED' : captured.error === 'CANCELLED' ? 'CANCELLED' : 'VISUAL_RELATION_AMBIGUOUS');
         if (!VisionImageSchema.safeParse(captured.image).success) fail('SCHEMA_INVALID');
         // Restore content isolation and verify focus/values BEFORE any network upload.

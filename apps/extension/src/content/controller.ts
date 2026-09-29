@@ -34,6 +34,8 @@ const waitFrame = () => new Promise<void>((resolve) => requestAnimationFrame(() 
 const inputKinds = new Set(['text', 'email', 'tel', 'date', 'number', 'textarea', 'select', 'radio', 'checkbox']);
 
 export class FlectoController {
+  // This instance is in the extension isolated world, not the page's JS world.
+  lastVisionDiagnostic: { stage: string; code: string } | null = null;
   private documentInstanceId = nonce('doc');
   private model = emptyViewModel();
   private registry: PrivateBindingRegistry | null = null;
@@ -275,6 +277,7 @@ export class FlectoController {
     if (!refs.length) return { ok: false, error: 'VISUAL_RELATION_AMBIGUOUS' };
     const built = buildVisionCapturePlan({ doc: this.doc, registry: this.registry, snapshot: payload.snapshot,
       reason: 'VISUAL_RELATION_AMBIGUOUS', refs, allowedOrigins: capabilities.data.allowedOrigins });
+    this.lastVisionDiagnostic = { stage: 'plan', code: built.ok ? 'OK' : built.code };
     if (!built.ok) return { ok: false, error: built.registryError === 'AUTH_REQUIRED' ? 'AUTH_REQUIRED' :
       built.code === 'SNAPSHOT_MISMATCH' || built.code === 'REF_UNKNOWN' ? 'STALE_DOCUMENT' : 'VISUAL_RELATION_AMBIGUOUS' };
     let release!: () => void;
