@@ -1,0 +1,222 @@
+{
+  "meta": {
+    "project": "FLECTO",
+    "deliverable": "30s motion-graphics ad voiceover + music + sfx cue sheet",
+    "spec": "1920x1080 30fps, 900 frames, 30.000s",
+    "language": "ko-KR",
+    "locked_at": "2026-09-29T13:58:00+09:00",
+    "worktree_base": "e11d9d6",
+    "owner": "creative brief (Fable 5.1) -> generation by lead (ElevenLabs existing Creator credits) -> implementation by Opus 5.5 (Remotion)",
+    "on_screen_brand_spelling": "FLECTO",
+    "tts_brand_spelling": "플렉토",
+    "budget_rule": "existing quota only (131,000 credits observed 13:57 by lead); no purchases, no auto top-up; lead verifies balance and per-generation cost in the ElevenLabs UI before each run"
+  },
+  "voice": {
+    "persona": "일상적이고 자신 있는 사람의 목소리. 차분하지만 늘어지지 않고, 과장·아나운서 톤·광고 외침·합성 느낌 없음. 고령자에게 가르치듯 말하지 않는다. 30~50대 한국어 원어민 톤.",
+    "prohibited": [
+      "실제 인물 클로닝",
+      "유명인 모사",
+      "감정 과장",
+      "어린이/애교 톤",
+      "속삭임"
+    ],
+    "candidates": [
+      {
+        "take": "T1",
+        "voice_id": "xyE2KXhy5mfTGV7xRXpD",
+        "name": "Sara Kim — Warm Korean Narrator",
+        "note": "natural conversational female; default first choice"
+      },
+      {
+        "take": "T2",
+        "voice_id": "brrODMoSdgeiEBNhadpu",
+        "name": "Sun — Calm Warm",
+        "note": "calm warm; second"
+      },
+      {
+        "take": "T3",
+        "voice_id": "0KAffrKIwvdtnXfLpNRl",
+        "name": "Hongsuk — conversational male",
+        "note": "conversational male; third"
+      }
+    ],
+    "elevenlabs_settings": {
+      "model_id": "eleven_multilingual_v2",
+      "output_format": "pcm_48000 (or mp3_44100_192 if pcm unavailable)",
+      "voice_settings": {
+        "stability": 0.5,
+        "similarity_boost": 0.75,
+        "style": 0.1,
+        "use_speaker_boost": true,
+        "speed": 0.94
+      },
+      "retake_rule": "한 테이크가 목표 구간보다 0.4s 이상 빠르면 speed 0.90으로 1회만 재생성. 각 보이스 최대 2테이크, 총 6테이크 상한.",
+      "timestamps": "가능하면 with-timestamps 엔드포인트로 문자 정렬(alignment) JSON을 함께 저장해 Remotion 자막 동기에 사용. 불가하면 ffmpeg silencedetect로 세그먼트 시작을 측정.",
+      "selection": "리드가 3테이크를 듣고 가장 자연스러운 호흡 1개를 선택; 선택 테이크 ID를 렌더 노트에 기록"
+    },
+    "file_naming": "marketing/remotion/public/audio/vo_{take}_{voice_id}.wav"
+  },
+  "segments": [
+    {
+      "id": "V1",
+      "start": 0.8,
+      "end": 5,
+      "text": "하고 싶은 일은 하나인데, 화면은 먼저 복잡합니다.",
+      "direction": "담담한 관찰. '하나인데' 뒤 짧은 호흡, '복잡합니다'는 힘 빼고 사실처럼.",
+      "on_screen": "하고 싶은 일은 하나. / 화면은 먼저 복잡합니다."
+    },
+    {
+      "id": "V2",
+      "start": 6.2,
+      "end": 10.4,
+      "text": "플렉토는 그 화면을, 필요한 순서로 다시 보여줍니다.",
+      "direction": "브랜드 첫 언급. '플렉토는' 또렷하고 따뜻하게, '다시 보여줍니다'는 확신 있게 내려놓듯.",
+      "on_screen": "같은 화면, / 필요한 순서로."
+    },
+    {
+      "id": "V3",
+      "start": 11.4,
+      "end": 14.2,
+      "text": "큰 글씨, 큰 버튼. 한 번에 하나씩.",
+      "direction": "짧은 구 세 개. 각 구 사이 0.3s 호흡, 리듬감 있지만 구호처럼 외치지 않기.",
+      "on_screen": "큰 글씨, 큰 버튼. / 한 번에 하나씩."
+    },
+    {
+      "id": "V4",
+      "start": 15.2,
+      "end": 18.8,
+      "text": "입력도 선택도, 마지막 확인도 내 손으로.",
+      "direction": "'내 손으로'에 살짝 자부심. 사용자가 주체라는 느낌, 부드럽게.",
+      "on_screen": "입력도, 선택도, / 마지막 확인도 / 내 손으로."
+    },
+    {
+      "id": "V5",
+      "start": 20,
+      "end": 23.8,
+      "text": "신청은 원래 사이트에서 그대로 처리됩니다.",
+      "direction": "안심시키는 사실 전달. '그대로'를 아주 약간 늘려 강조, 나머지는 평탄하게.",
+      "on_screen": "신청은 / 원래 사이트에서 / 그대로."
+    },
+    {
+      "id": "V6",
+      "start": 25.2,
+      "end": 28.6,
+      "text": "사용자를 바꾸는 대신, 화면을 바꿉니다. 플렉토.",
+      "direction": "마무리. 쉼표에서 0.4s 호흡, '화면을 바꿉니다'는 결론처럼 차분히. '플렉토'는 0.5s 뒤 따로, 낮고 짧게 서명하듯 (28.0–28.6).",
+      "on_screen": "사용자를 바꾸는 대신, / 화면을 바꿉니다. + FLECTO 락업"
+    }
+  ],
+  "fullText": "하고 싶은 일은 하나인데, 화면은 먼저 복잡합니다. 플렉토는 그 화면을, 필요한 순서로 다시 보여줍니다. 큰 글씨, 큰 버튼. 한 번에 하나씩. 입력도 선택도, 마지막 확인도 내 손으로. 신청은 원래 사이트에서 그대로 처리됩니다. 사용자를 바꾸는 대신, 화면을 바꿉니다. 플렉토.",
+  "ttsText": "하고 싶은 일은 하나인데, 화면은 먼저 복잡합니다. <break time=\"1.2s\" /> 플렉토는 그 화면을, 필요한 순서로 다시 보여줍니다. <break time=\"1.0s\" /> 큰 글씨, 큰 버튼. 한 번에 하나씩. <break time=\"1.0s\" /> 입력도 선택도, 마지막 확인도 내 손으로. <break time=\"1.2s\" /> 신청은 원래 사이트에서 그대로 처리됩니다. <break time=\"1.4s\" /> 사용자를 바꾸는 대신, 화면을 바꿉니다. <break time=\"0.5s\" /> 플렉토.",
+  "ttsNote": "한 번에 전체 ttsText로 생성해 호흡이 이어지게 한다(세그먼트별 분할 생성은 톤이 끊기므로 피함). break 태그가 지원되지 않으면 문장 끝 마침표 뒤 줄바꿈 2개로 대체. 생성 후 앞뒤 무음을 0.8s 시작에 맞춰 트리밍.",
+  "music": {
+    "engine": "ElevenLabs Music v2 (instrumental)",
+    "duration_seconds": 30,
+    "prompt": "Instrumental only, no vocals. A warm, restrained 30-second cue for a calm Korean tech commercial about making a website screen easier to use. Felt piano as the lead voice, soft upright bass, light brushed percussion entering around 10 seconds, a thin string pad underneath. 84 BPM, D major, sparse and patient, real-instrument texture, no EDM, no risers, no whooshes, no trap hi-hats, no synth leads. Structure: 0-5s a single felt-piano motif over near silence; 5-10s gentle movement; 10-20s bass and brushed percussion carry a steady, confident pulse; 20-25s opens up warmly with strings; 25-28s resolves; at exactly 28.0s a two-note rising brand ending (felt piano plus one soft glockenspiel strike, D up to A) and then the tail decays to complete silence by 30.0s. Leave headroom for a voiceover; keep the melody simple and unobtrusive. Do not imitate any specific artist, song, or brand jingle.",
+    "negative": "vocals, choir, artist imitation, EDM drops, risers, cinematic booms, trap drums, synth leads, sudden loudness changes",
+    "sonic_ending": {
+      "start": 28,
+      "end": 29.4,
+      "description": "2-note rising fifth (D->A), felt piano + single soft glockenspiel; decays to silence by 30.0"
+    },
+    "delivery": "48kHz WAV, peak -6 dBFS before mix; if the generation does not land the ending at 28.0s, generate up to 3 variants and pick the closest; do not time-stretch more than ±3%",
+    "file": "marketing/remotion/public/audio/music_flecto30.wav"
+  },
+  "soundEffects": {
+    "engine": "ElevenLabs SFX v2",
+    "global_style": "quiet, short, physical materials (paper, felt, wood); no electronic beeps, no chimes, no whooshes; each under 180 ms except sheet_settle",
+    "cues": [
+      {
+        "id": "sheet_settle",
+        "frame": 192,
+        "time": 6.4,
+        "prompt": "a single sheet of thick paper settling onto a wooden desk, very soft, close-miked, 250 ms, no room reverb",
+        "level_lufs": -30,
+        "optional": true
+      },
+      {
+        "id": "ui_focus",
+        "frame": 234,
+        "time": 7.8,
+        "prompt": "very soft felt-tipped tap on wood, single, 60 ms, muted, no click transient",
+        "level_lufs": -30,
+        "optional": true
+      },
+      {
+        "id": "select_tick",
+        "frame": 378,
+        "time": 12.6,
+        "prompt": "a small wooden tick, like a pencil touching a table once, 80 ms, warm, dry",
+        "level_lufs": -28,
+        "optional": false
+      },
+      {
+        "id": "press_soft",
+        "frame": 560,
+        "time": 18.67,
+        "prompt": "soft rounded thump of a thumb pressing a felt-covered button, 120 ms, low-mid, no click",
+        "level_lufs": -27,
+        "optional": false
+      },
+      {
+        "id": "done_soft",
+        "frame": 612,
+        "time": 20.4,
+        "prompt": "one soft wooden marimba note in D4, mallet with felt head, 400 ms natural decay, dry",
+        "level_lufs": -28,
+        "optional": false
+      },
+      {
+        "id": "sheet_slide",
+        "frames": [
+          312,
+          430,
+          660
+        ],
+        "times": [
+          10.4,
+          14.33,
+          22
+        ],
+        "prompt": "thin paper sliding a short distance across a smooth desk, 150 ms, very quiet, no whoosh",
+        "level_lufs": -32,
+        "optional": true
+      }
+    ],
+    "file_naming": "marketing/remotion/public/audio/sfx_{id}.wav"
+  },
+  "mix": {
+    "vo": {
+      "integrated_lufs": -16,
+      "true_peak_dbtp": -3,
+      "channel": "mono center",
+      "eq": "HPF 70 Hz; +1 dB around 2.5 kHz for clarity; gentle de-esser",
+      "compression": "2:1, slow attack, transparent"
+    },
+    "music": {
+      "under_vo_lufs": -24,
+      "in_gaps_lufs": -19,
+      "sidechain": {
+        "duck_db": 4,
+        "attack_ms": 200,
+        "release_ms": 600
+      }
+    },
+    "sfx": {
+      "lufs": -28
+    },
+    "master": {
+      "integrated_lufs": -14,
+      "true_peak_dbtp": -1,
+      "sample_rate_hz": 48000,
+      "end": "true silence at 30.000s; no fade-to-black"
+    },
+    "silent_version": "also deliver a render with captions on and no audio for muted playback contexts"
+  },
+  "captions": {
+    "mode_prop": "showCaptions",
+    "style": "bottom y=1000, 32px, ink #172033 at 80%, one line per segment, appear at segment start, hide at segment end + 0.3s",
+    "source": "segments[].text, times corrected by measured take offsets (segmentOffsets prop)"
+  }
+}
+

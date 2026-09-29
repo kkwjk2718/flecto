@@ -1,0 +1,203 @@
+{
+  "gateVersion": 1,
+  "productCommit": "e11d9d6",
+  "mode": "FIXTURE / FAULT_INJECTION; no LIVE",
+  "startTime": "2026-09-29T04:52:38.741Z",
+  "durationMs": 132743.30099999998,
+  "counts": {
+    "pass": 13,
+    "fail": 7,
+    "skip": 0,
+    "flaky": 0
+  },
+  "extensionHashes": {
+    "manifest.json": "b125ef03974fd67234d27d71aa10ae53fc855c31ac797491cb09d3fe4ac92c70",
+    "content.js": "ce0edb1b3c30f137a858d25b7931926f14514ced41e20e705db1b409052fd8cd",
+    "background.js": "018838d7701def1f42946bac921e958fce8e1306c06fb4bb2a6cbb50ee280839",
+    "options.html": "2cffec7a1aaaf80b8c5996a505b966a89e7f88d7ef9af0a1354f995246be4a21",
+    "options.js": "255283ea588b6ca97a17bcca2b235c4b0c0adc096972e7e1c3f2587c237066a1"
+  },
+  "ports": {
+    "planner": 4527,
+    "proxy": 4528,
+    "benefits": 4383,
+    "culture": 4384
+  },
+  "measurements": {
+    "firstEditableColdWith2900msTransportHold": 2914.0999999940395,
+    "firstEditableWarm": 12.800000004470348,
+    "timeoutMs": 9999.59999999404
+  },
+  "cases": [
+    {
+      "title": "T15 T21 partial: 2.9s cold transport and warm cache record real readiness with no ad",
+      "ids": [
+        "T15",
+        "T21"
+      ],
+      "status": "PASS",
+      "durationMs": 5224
+    },
+    {
+      "title": "T16 T36 partial: sponsor is present only during preparation, READY removes it without submitting",
+      "ids": [
+        "T16",
+        "T36"
+      ],
+      "status": "PASS",
+      "durationMs": 5223
+    },
+    {
+      "title": "T19 partial: dismissing the sponsor preserves the same preparation request",
+      "ids": [
+        "T19"
+      ],
+      "status": "PASS",
+      "durationMs": 5782
+    },
+    {
+      "title": "T17: 10s timeout offers original and rejects the 11s late planner response",
+      "ids": [
+        "T17"
+      ],
+      "status": "PASS",
+      "durationMs": 12621
+    },
+    {
+      "title": "T18 T33 partial: cancel followed by a new goal epoch rejects the first late result",
+      "ids": [
+        "T18",
+        "T33"
+      ],
+      "status": "PASS",
+      "durationMs": 3344
+    },
+    {
+      "title": "T18 partial: cancel while sponsor is visible remains terminal after late response",
+      "ids": [
+        "T18"
+      ],
+      "status": "PASS",
+      "durationMs": 6656
+    },
+    {
+      "title": "T03 T06 T27: required errors, explicit consent, and local-next never submit the source",
+      "ids": [
+        "T03",
+        "T06",
+        "T27"
+      ],
+      "status": "FAIL",
+      "durationMs": 12152
+    },
+    {
+      "title": "T08: source rejection never becomes success or an automatic resubmission",
+      "ids": [
+        "T08"
+      ],
+      "status": "PASS",
+      "durationMs": 3539
+    },
+    {
+      "title": "T08 partial: response lost after commit creates one record and never auto-replays",
+      "ids": [
+        "T08"
+      ],
+      "status": "FAIL",
+      "durationMs": 13646
+    },
+    {
+      "title": "T20 T29 partial: private values and QA tokens never enter planner transport, cache, or service logs",
+      "ids": [
+        "T20",
+        "T29"
+      ],
+      "status": "PASS",
+      "durationMs": 1234
+    },
+    {
+      "title": "T22: blocking only the plan endpoint after READY still permits input, correction, and source save",
+      "ids": [
+        "T22"
+      ],
+      "status": "PASS",
+      "durationMs": 2390
+    },
+    {
+      "title": "T40 partial: visible login/password and later OTP pause extraction without planning",
+      "ids": [
+        "T40"
+      ],
+      "status": "FAIL",
+      "durationMs": 1442
+    },
+    {
+      "title": "T24 partial: Escape restores the original form and retains entered value",
+      "ids": [
+        "T24"
+      ],
+      "status": "PASS",
+      "durationMs": 1168
+    },
+    {
+      "title": "T12 T26 partial: newly required holdout field invalidates the installed extension plan",
+      "ids": [
+        "T12",
+        "T26"
+      ],
+      "status": "FAIL",
+      "durationMs": 3400
+    },
+    {
+      "title": "T14: changed important notice rejects prior review and generates the new notice",
+      "ids": [
+        "T14"
+      ],
+      "status": "FAIL",
+      "durationMs": 3459
+    },
+    {
+      "title": "T28: original value changes after review revoke submission until latest values are reviewed",
+      "ids": [
+        "T28"
+      ],
+      "status": "PASS",
+      "durationMs": 2310
+    },
+    {
+      "title": "T13: duplicate-labelled actions remain in the selected form through full-navigation save",
+      "ids": [
+        "T13"
+      ],
+      "status": "PASS",
+      "durationMs": 2369
+    },
+    {
+      "title": "T10 T05 partial: actual SPA back/forward rebinds the correct step and controlled time",
+      "ids": [
+        "T10",
+        "T05"
+      ],
+      "status": "PASS",
+      "durationMs": 2306
+    },
+    {
+      "title": "T21 T37 partial: warm plan plus synthetic reset does not restore a previous login session input",
+      "ids": [
+        "T21",
+        "T37"
+      ],
+      "status": "FAIL",
+      "durationMs": 17424
+    },
+    {
+      "title": "T21 T37 partial: live source capacity refresh removes a closed option from a prepared plan",
+      "ids": [
+        "T21",
+        "T37"
+      ],
+      "status": "FAIL",
+      "durationMs": 21269
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "strict": true,
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "types": ["node", "chrome"],
+    "baseUrl": ".",
+    "paths": {
+      "@flecto/contracts": ["packages/contracts/src/index.ts"],
+      "@flecto/core": ["packages/core/src/index.ts"],
+      "@flecto/templates": ["packages/templates/src/index.tsx"],
+      "@flecto/design-tokens": ["packages/design-tokens/src/index.ts"]
+    }
+  },
+  "include": ["apps/**/*.ts", "apps/**/*.tsx", "packages/**/*.ts", "packages/**/*.tsx", "tests/**/*.ts", "scripts/**/*.ts", "*.config.ts"],
+  "exclude": ["node_modules", "dist", ".flecto"]
+}

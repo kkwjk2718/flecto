@@ -1,0 +1,10 @@
+{
+  "schema": "flecto.product-runtime.v1",
+  "requestedModel": "gpt-6-luna",
+  "reasoningEffort": "low",
+  "serviceTierConfig": "fast",
+  "validatedCliVersion": "0.158.0-alpha.2.1",
+  "transport": "existing Codex CLI authentication; no separate API key",
+  "toolPolicy": "all product model tools disabled; structured plan output only",
+  "notes": "Requested configuration, not a claim that the runtime reports the served model. Other CLI versions need their own compatibility validation. Fast uses the existing account allowance."
+}

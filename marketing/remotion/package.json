@@ -1,0 +1,31 @@
+{
+  "name": "flecto-ad-30s",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FLECTO 30s motion-graphics ad. Isolated Remotion package, not part of the root npm workspace.",
+  "scripts": {
+    "sync": "sh scripts/sync-assets.sh",
+    "studio": "remotion studio src/index.ts --no-open",
+    "typecheck": "tsc --noEmit",
+    "analyze:audio": "node scripts/analyze-audio.mjs",
+    "stills": "node scripts/render-stills.mjs",
+    "render": "remotion render src/index.ts FlectoAd30 out/flecto-30s.mp4",
+    "render:captions": "remotion render src/index.ts FlectoAd30Captions out/flecto-30s-captions.mp4",
+    "render:silent": "remotion render src/index.ts FlectoAd30Silent out/flecto-30s-silent-captions.mp4 --muted",
+    "poster": "remotion still src/index.ts FlectoAd30 out/flecto-30s-poster.png --frame=872 --image-format=png"
+  },
+  "dependencies": {
+    "@remotion/bundler": "4.0.529",
+    "@remotion/cli": "4.0.529",
+    "@remotion/media": "4.0.529",
+    "@remotion/renderer": "4.0.529",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "remotion": "4.0.529",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@types/react": "19.3.0",
+    "typescript": "5.9.3"
+  }
+}

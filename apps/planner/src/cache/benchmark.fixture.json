@@ -1,0 +1,35 @@
+{
+  "measuredAt": "2026-09-29T04:16:45.772Z",
+  "node": "v24.21.0",
+  "baseCommit": "7488c139497a4db3b91c119f54c1470b2d78e74d",
+  "scope": "Fastify inject + real SQLite + real extracted DOM; extraction excluded; zero-delay fixture provider; not controlsReady/LIVE",
+  "versions": {
+    "CACHE_VERSION": "flecto-blueprint-v1",
+    "PROMPT_VERSION": "flecto-plan-v1",
+    "COMPATIBILITY_VERSION": "strict-options-v1"
+  },
+  "summary": {
+    "cold": {
+      "count": 24,
+      "medianMs": 0.9299170000000458,
+      "p95Ms": 20.085041000000047
+    },
+    "exact": {
+      "count": 24,
+      "medianMs": 0.6001659999999447,
+      "p95Ms": 2.595790999999963
+    },
+    "compatible": {
+      "count": 24,
+      "medianMs": 0.5473329999999805,
+      "p95Ms": 1.0779999999999745
+    }
+  },
+  "warmToColdMedian": {
+    "exact": 0.6453973849278108,
+    "compatible": 0.5885826369449677
+  },
+  "totalHitRate": 0.6666666666666666,
+  "warmHitRate": 1,
+  "providerCalls": 24
+}

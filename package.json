@@ -3,10 +3,10 @@
   "version": "0.0.0",
   "private": true,
   "license": "UNLICENSED",
-  "description": "FLECTO collaboration workspace and implementation specifications",
+  "description": "FLECTO accessible Chrome assistant with verified source-DOM bindings",
   "type": "module",
   "engines": {
-    "node": ">=24.0.0"
+    "node": ">=24.0.0 <25"
   },
   "workspaces": [
     "apps/*",
@@ -14,6 +14,38 @@
   ],
   "scripts": {
     "check": "node scripts/check-repository.mjs",
-    "check:repo": "node scripts/check-repository.mjs"
+    "check:repo": "node scripts/check-repository.mjs",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run",
+    "build": "node scripts/build.mjs",
+    "dev": "tsx scripts/dev.ts",
+    "doctor": "tsx scripts/doctor.ts",
+    "test:fixture": "playwright test --config playwright.config.ts",
+    "test:live": "playwright test --config playwright.live.config.ts",
+    "demo:start": "tsx scripts/demo.ts",
+    "demo:reset": "tsx scripts/reset.ts",
+    "release:pack": "tsx scripts/release.ts"
+  },
+  "dependencies": {
+    "@fastify/cookie": "11.1.2",
+    "@fastify/static": "10.1.5",
+    "fastify": "5.12.5",
+    "lucide-react": "1.48.0",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.63.0",
+    "@types/chrome": "0.3.4",
+    "@types/node": "24.19.0",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@vitejs/plugin-react": "5.2.0",
+    "jsdom": "27.4.0",
+    "tsx": "4.23.15",
+    "typescript": "5.9.3",
+    "vite": "7.3.6",
+    "vitest": "4.1.11"
   }
 }
