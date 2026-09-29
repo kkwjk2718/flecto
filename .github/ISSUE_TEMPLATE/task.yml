@@ -1,0 +1,33 @@
+name: 구현 작업
+description: 담당 경로와 수용 조건을 정하고 작업을 나눕니다.
+title: "[TASK] "
+body:
+  - type: input
+    id: ticket
+    attributes:
+      label: 작업 ID
+      description: ops/01_TASK_GRAPH.md의 ID 또는 COM 작업 ID
+      placeholder: C01
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: 목표와 수정 경로
+      description: 기대 동작, 담당 경로, 이번 작업에서 제외할 범위
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: 선행 작업과 계약
+      description: 관련 이슈, 계약 버전, 다른 작업자와 겹치는 경로
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 수용 조건과 검증
+      description: 검사 ID, 원본 결과, 필요한 UI 상태와 실제 완료 근거
+    validations:
+      required: true

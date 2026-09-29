@@ -1,0 +1,19 @@
+{
+  "name": "flecto",
+  "version": "0.0.0",
+  "private": true,
+  "license": "UNLICENSED",
+  "description": "FLECTO collaboration workspace and implementation specifications",
+  "type": "module",
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "check": "node scripts/check-repository.mjs",
+    "check:repo": "node scripts/check-repository.mjs"
+  }
+}
