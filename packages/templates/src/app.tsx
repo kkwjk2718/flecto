@@ -651,6 +651,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
           <summary>시연 정보</summary>
           <dl>
             <dt>계획 방식</dt><dd>{model.mode ? MODE_LABEL[model.mode] : '아직 없음'}</dd>
+            {model.planTransport ? <><dt>입력 근거</dt><dd>{model.planTransport === 'VISION' ? 'DOM과 가린 화면 (VISION)' : 'DOM 구조'}</dd></> : null}
             <dt>화면 상태</dt><dd>{model.phase}</dd>
             <dt>경과 시간</dt><dd>{(model.elapsedMs / 1000).toFixed(1)}초</dd>
             {model.error ? <><dt>오류 코드</dt><dd>{model.error}</dd></> : null}
