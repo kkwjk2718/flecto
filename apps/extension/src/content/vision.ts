@@ -83,6 +83,14 @@ export function normalizeVisionAllowlist(entries: readonly string[]): string[] {
 }
 
 function inPrivate(e: Element): boolean { return !!e.closest('#' + HOST_ID + ',[data-private],[data-flecto-private]'); }
+/** Password, one-time-code and payment-card inputs. Their values are never read here. */
+function isSensitive(e: Element): boolean {
+  if (e.tagName !== 'INPUT') return false;
+  return (e as HTMLInputElement).type === 'password' || /(^|\s)(one-time-code|current-password|new-password|cc-[a-z-]+)(\s|$)/i.test(e.getAttribute('autocomplete') ?? '');
+}
+function sensitiveControl(doc: Document): boolean {
+  return Array.from(doc.querySelectorAll('input')).some((e) => !ours(e) && isSensitive(e));
+}
 /** FLECTO's own host (hidden during capture) or one of its capture-time mask overlays. */
 function ours(e: Element): boolean {
   if (e.closest('#' + HOST_ID)) return true;
@@ -126,6 +134,52 @@ function pseudoBox(win: Window, e: Element, pseudo: string): CSSStyleDeclaration
   return !content || content === 'none' || content === 'normal' ? null : st;
 }
 const hasGeneratedText = (st: CSSStyleDeclaration) => st.content !== '""' && st.content !== "''";
+/**
+ * Conservative extra paint extent (CSS px) of a computed shadow list (text-shadow,
+ * box-shadow, drop-shadow() arguments): 3x the sum of all lengths. Infinity when any
+ * token cannot be bounded (non-px unit, unknown syntax).
+ */
+function shadowExtent(value: string | null | undefined): number {
+  if (!value || value === 'none') return 0;
+  let sum = 0;
+  for (const token of value.replace(/[a-z-]+\([^()]*\)/gi, ' ').split(/[\s,]+/).filter(Boolean)) {
+    const px = /^(-?(?:\d+\.?\d*|\.\d+)(?:e[-+]?\d+)?)px$/i.exec(token);
+    if (px) { sum += Math.abs(Number(px[1])); continue; }
+    if (/^-?0*\.?0+$/.test(token) || /^[a-z-]+$/i.test(token) || /^#[0-9a-f]{3,8}$/i.test(token)) continue;
+    return Infinity;
+  }
+  return Number.isFinite(sum) ? 3 * sum : Infinity;
+}
+const COLOR_FILTERS = ['brightness', 'contrast', 'grayscale', 'hue-rotate', 'invert', 'opacity', 'saturate', 'sepia'];
+/** Spread (CSS px) of a computed filter; Infinity for url()/unknown functions or unparsed text. */
+function filterExtent(value: string | null | undefined): number {
+  if (!value || value === 'none') return 0;
+  let sum = 0;
+  let seen = '';
+  for (const m of value.matchAll(/([a-z-]+)\(((?:[^()]|\([^()]*\))*)\)/gi)) {
+    seen += m[0];
+    const fn = m[1].toLowerCase();
+    if (fn === 'blur' || fn === 'drop-shadow') sum += shadowExtent(m[2]);
+    else if (!COLOR_FILTERS.includes(fn)) return Infinity;
+  }
+  return seen.replace(/\s+/g, '') === value.replace(/\s+/g, '') && Number.isFinite(sum) ? sum : Infinity;
+}
+function hasMarker(win: Window, e: Element, st: CSSStyleDeclaration): boolean {
+  if (!st.display?.includes('list-item')) return false;
+  return (!!st.listStyleType && st.listStyleType !== 'none') || !noneValue(st.listStyleImage) || !!pseudoBox(win, e, '::marker');
+}
+/** Elements allowed to attach an author shadow root (plus any custom element). */
+const SHADOW_CAPABLE = new Set(['ARTICLE', 'ASIDE', 'BLOCKQUOTE', 'BODY', 'DIV', 'FOOTER', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'HEADER', 'MAIN', 'NAV', 'P', 'SECTION', 'SPAN']);
+/** True for an element that holds (or, as a custom element, may hold) shadow content we cannot measure. */
+function shadowHost(e: Element): boolean {
+  if (e.namespaceURI === 'http://www.w3.org/1999/xhtml' && e.localName.includes('-')) return true;
+  if (e.shadowRoot) return true;
+  if (!SHADOW_CAPABLE.has(e.tagName)) return false;
+  // Content scripts can see closed roots too; elsewhere only open roots are visible.
+  const dom = (globalThis as unknown as { chrome?: { dom?: { openOrClosedShadowRoot?: (el: HTMLElement) => ShadowRoot | null } } }).chrome?.dom;
+  try { return !!dom?.openOrClosedShadowRoot?.(e as HTMLElement); } catch { return true; }
+}
+const grow = (r: VisionRect, dx: number, dy = dx): VisionRect => ({ x: r.x - dx, y: r.y - dy, width: r.width + 2 * dx, height: r.height + 2 * dy });
 /** Text nodes counted by rawText(): the only text allowed to paint inside a public region. */
 function approvedText(e: Element, out: Set<Node>): void {
   for (const n of Array.from(e.childNodes)) {
@@ -139,6 +193,20 @@ function textRects(doc: Document, node: Node): VisionRect[] {
   if (typeof range.getClientRects !== 'function') fail('BAD_GEOMETRY');
   range.selectNodeContents(node);
   return Array.from(range.getClientRects(), (r) => ({ x: r.left, y: r.top, width: r.width, height: r.height }));
+}
+/** Union of every element and text box in a subtree (what a filter on its root can spread). */
+function subtreeBox(e: Element): VisionRect {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  const add = (r: VisionRect) => {
+    if (!finite(r)) fail('BAD_GEOMETRY');
+    if (r.width <= 0 && r.height <= 0) return;
+    x0 = Math.min(x0, r.x); y0 = Math.min(y0, r.y); x1 = Math.max(x1, r.x + r.width); y1 = Math.max(y1, r.y + r.height);
+  };
+  add(rectOf(e));
+  for (const d of Array.from(e.querySelectorAll('*'))) add(rectOf(d));
+  const walker = e.ownerDocument.createTreeWalker(e, 4 /* NodeFilter.SHOW_TEXT */);
+  for (let t = walker.nextNode(); t; t = walker.nextNode()) for (const r of textRects(e.ownerDocument, t)) add(r);
+  return x0 === Infinity ? rectOf(e) : { x: x0, y: y0, width: x1 - x0, height: y1 - y0 };
 }
 /** Same text rule as core extraction: text nodes, skipping form controls. */
 function rawText(e: Element): string {
@@ -160,7 +228,7 @@ const round = (r: VisionRect): VisionRect => ({ x: +r.x.toFixed(2), y: +r.y.toFi
 function privateValues(doc: Document): string[] {
   const values = new Set<string>();
   for (const e of Array.from(doc.querySelectorAll<HTMLInputElement>('input,textarea'))) {
-    if (ours(e)) continue;
+    if (ours(e) || isSensitive(e)) continue;
     if (e.matches('input[type="submit"],input[type="button"],input[type="radio"],input[type="checkbox"],input[type="hidden"]')) continue;
     if (e.value && norm(e.value).length >= 2) values.add(norm(e.value));
   }
@@ -186,13 +254,19 @@ function checkNoImage(e: Element): void {
  * allowed there. Their own direct text is measured separately (unknown-text pass), so a
  * normal <body> that merely CONTAINS the label is not rejected.
  */
-function checkAncestors(e: Element): void {
+function checkAncestors(e: Element, region: VisionRect): void {
   const win = e.ownerDocument.defaultView;
   if (!win) fail('UNSAFE_OVERLAP');
   for (let n = e.parentElement; n; n = n.parentElement) {
     const st = win!.getComputedStyle(n);
     if (hasImage(st)) fail('UNKNOWN_IMAGE');
-    if (st.display?.includes('list-item') && st.listStyleType !== 'none' && st.listStylePosition === 'inside') fail('UNSAFE_OVERLAP');
+    // Filters/reflections re-paint the whole subtree (private controls included) elsewhere;
+    // markers (inside or outside) and shadow content are unmeasured generated paint.
+    if (!noneValue(st.filter) || !noneValue(st.backdropFilter) || !noneValue(st.getPropertyValue('-webkit-backdrop-filter'))) fail('UNSAFE_OVERLAP');
+    if (!noneValue(st.getPropertyValue('-webkit-box-reflect'))) fail('UNSAFE_OVERLAP');
+    if (hasMarker(win!, n, st) || shadowHost(n)) fail('UNSAFE_OVERLAP');
+    // An outer box-shadow is clipped to outside the border box: safe only if the region lies inside it.
+    if (!noneValue(st.boxShadow) && (/\binset\b/i.test(st.boxShadow) || !inside(region, rectOf(n)))) fail('UNSAFE_OVERLAP');
     for (const pseudo of ['::before', '::after', '::marker']) {
       const box = pseudoBox(win!, n, pseudo);
       if (!box) continue;
@@ -270,6 +344,8 @@ function build({ doc, registry, snapshot, reason, refs, allowedOrigins }: Vision
   if (!normalizeVisionAllowlist(allowedOrigins).includes(origin) || snapshot.origin !== origin) fail('ORIGIN_NOT_ALLOWED');
   try { refreshRegistry(registry); }
   catch (error) { throw new Reject('REGISTRY_BLOCKED', error instanceof FlectoError ? error.code : 'UNKNOWN'); }
+  // Password/OTP/card fields: never read, never captured.
+  if (sensitiveControl(doc)) throw new Reject('REGISTRY_BLOCKED', 'AUTH_REQUIRED');
   if (snapshot.documentInstanceId !== registry.documentInstanceId || snapshot.semanticRevision !== registry.semanticRevision || snapshot.optionRevision !== registry.optionRevision) fail('SNAPSHOT_MISMATCH');
   const uniq = [...new Set(refs)];
   if (!uniq.length || uniq.length !== refs.length || uniq.length > VISION_MAX_REFS) fail('REF_UNKNOWN');
@@ -331,13 +407,25 @@ function build({ doc, registry, snapshot, reason, refs, allowedOrigins }: Vision
   // Everything else is unknown and fails closed.
   const covered = (hit: VisionRect) => privateMasksCover(masks, hit);
   const cache = new Map<Element, boolean>();
-  for (const { element } of regions) checkAncestors(element);
+  for (const { element, region } of regions) checkAncestors(element, region.rect);
+  // Extra paint of element e may cover any region it does not contain (contained ones: checkAncestors).
+  const spill = (e: Element, area: VisionRect) => {
+    for (const { region, element } of regions) {
+      if (e === element || e.contains(element)) continue;
+      const hit = intersect(area, region.rect);
+      if (hit && !covered(hit)) fail('UNSAFE_OVERLAP');
+    }
+  };
+  // Elements that are, contain, or sit inside private content never count as approved paint.
+  const privateAncestry = new Set<Element>();
+  for (const m of maskElements) for (let n: Element | null = m; n; n = n.parentElement) privateAncestry.add(n);
   const others = Array.from(doc.documentElement.querySelectorAll('*')).filter((e) => !ours(e) && !['OPTION', 'OPTGROUP', 'BR'].includes(e.tagName));
   for (const e of others) {
     if (suppressed(e, win!, cache)) continue;
-    if (!hiddenVisibility(win!.getComputedStyle(e))) {
-      const r = rectOf(e);
-      if (!finite(r)) fail('BAD_GEOMETRY');
+    const st = win!.getComputedStyle(e);
+    const r = rectOf(e);
+    if (!finite(r)) fail('BAD_GEOMETRY');
+    if (!hiddenVisibility(st)) {
       for (const { region, element } of regions) {
         // Ancestors: own paint checked by checkAncestors + the text pass. Descendants: rawText + checkNoImage.
         if (e === element || e.contains(element) || element.contains(e)) continue;
@@ -345,11 +433,26 @@ function build({ doc, registry, snapshot, reason, refs, allowedOrigins }: Vision
         if (hit && !covered(hit)) fail('UNSAFE_OVERLAP');
       }
     }
+    const inApproved = regions.some(({ element }) => element === e || element.contains(e));
+    if (!noneValue(st.getPropertyValue('-webkit-box-reflect'))) fail('UNSAFE_OVERLAP');
+    // Shadow content escapes every pass here; only contain:paint bounds it to the host box.
+    if (shadowHost(e) && (inApproved || !/\b(paint|strict|content)\b/.test(st.contain ?? ''))) fail('UNSAFE_OVERLAP');
+    if (hasMarker(win!, e, st)) {
+      if (inApproved || pseudoBox(win!, e, '::marker')) fail('UNSAFE_OVERLAP');
+      const font = Number.parseFloat(st.fontSize) || 16;
+      spill(e, grow(r, 3 * font, font)); // outside markers sit beside the first line box
+    }
+    if (!inApproved || privateAncestry.has(e) || e.closest(PRIVATE_SELECTOR)) {
+      const boxExt = shadowExtent(st.boxShadow) + (e.matches('input,textarea,select') ? shadowExtent(st.textShadow) : 0);
+      const filterExt = filterExtent(st.filter);
+      if (!Number.isFinite(boxExt) || !Number.isFinite(filterExt)) fail('UNSAFE_OVERLAP');
+      if (boxExt > 0) spill(e, grow(r, boxExt));
+      if (!noneValue(st.filter)) spill(e, grow(subtreeBox(e), filterExt));
+    }
     // Generated boxes can leave their element's box; allow them only when they provably cannot.
     for (const pseudo of ['::before', '::after']) {
       const box = pseudoBox(win!, e, pseudo);
       if (!box || hiddenVisibility(box) || (!hasGeneratedText(box) && !hasImage(box))) continue;
-      const st = win!.getComputedStyle(e);
       const clipped = !!st.overflowX && !!st.overflowY && st.overflowX !== 'visible' && st.overflowY !== 'visible';
       if ((box.position && box.position !== 'static') || !noneValue(box.transform) || !clipped) fail('UNSAFE_OVERLAP');
     }
@@ -363,10 +466,13 @@ function build({ doc, registry, snapshot, reason, refs, allowedOrigins }: Vision
     const parent = t.parentElement;
     if (approved.has(t) || !parent || ours(parent) || !norm(t.textContent ?? '')) continue;
     if (suppressed(parent, win!, cache) || hiddenVisibility(win!.getComputedStyle(parent))) continue;
+    // text-shadow paints offset/blurred copies of the glyphs.
+    const shadow = shadowExtent(win!.getComputedStyle(parent).textShadow);
+    if (!Number.isFinite(shadow)) fail('UNSAFE_OVERLAP');
     for (const r of textRects(doc, t)) {
       if (!finite(r)) fail('BAD_GEOMETRY');
       if (r.width <= 0 || r.height <= 0) continue;
-      const box = { x: r.x - TEXT_PAD, y: r.y - TEXT_PAD, width: r.width + 2 * TEXT_PAD, height: r.height + 2 * TEXT_PAD };
+      const box = grow(r, TEXT_PAD + shadow);
       for (const { region } of regions) {
         const hit = intersect(box, region.rect);
         if (hit && !covered(hit)) fail('UNSAFE_OVERLAP');
@@ -417,7 +523,7 @@ function focusState(doc: Document): Element[] {
   return chain;
 }
 function valueState(doc: Document): [Element, string, boolean][] {
-  return Array.from(doc.querySelectorAll<HTMLInputElement>('input,textarea,select')).map((e) => [e, e.value, !!e.checked]);
+  return Array.from(doc.querySelectorAll<HTMLInputElement>('input,textarea,select')).filter((e) => !isSensitive(e)).map((e) => [e, e.value, !!e.checked]);
 }
 
 /**
@@ -427,6 +533,8 @@ function valueState(doc: Document): [Element, string, boolean][] {
  * value, or the host's inline style could not be restored exactly.
  */
 export async function withVisionIsolation<T>(doc: Document, plan: VisionCapturePlan, capture: () => Promise<T>, options: VisionIsolationOptions = {}): Promise<VisionIsolationResult<T>> {
+  // Never isolate/capture next to a password/OTP/card field, and never read its value.
+  if (sensitiveControl(doc)) return { ok: false, code: 'ISOLATION_FAILED' };
   const host = doc.getElementById(HOST_ID) as HTMLElement | null;
   const focusBefore = focusState(doc);
   const valuesBefore = valueState(doc);
@@ -468,6 +576,8 @@ export async function withVisionIsolation<T>(doc: Document, plan: VisionCaptureP
   }
   const restored = !host || (host.style.getPropertyValue('opacity') === prevOpacity && host.style.getPropertyPriority('opacity') === prevPriority);
   if (!restored) return { ok: false, code: 'ISOLATION_FAILED' };
+  // A sensitive control that appeared (or changed type) during capture: reject before any value read.
+  if (sensitiveControl(doc)) return { ok: false, code: 'STATE_CHANGED' };
   const focusAfter = focusState(doc);
   const valuesAfter = valueState(doc);
   const same = focusAfter.length === focusBefore.length && focusAfter.every((e, i) => e === focusBefore[i])

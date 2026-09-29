@@ -62,6 +62,20 @@ function pseudoStub(id: string, pseudo: string, style: CSSStyleDeclaration) {
   const real = window.getComputedStyle.bind(window);
   return vi.spyOn(window, 'getComputedStyle').mockImplementation((el: Element, p?: string | null) => (el.id === id && p === pseudo ? style : real(el, p)));
 }
+/** Overrides computed properties of elements (by id) for the element itself (no pseudo). */
+function styleStub(over: Record<string, Record<string, string>>) {
+  const real = window.getComputedStyle.bind(window);
+  return vi.spyOn(window, 'getComputedStyle').mockImplementation((el: Element, p?: string | null) => {
+    const base = real(el, p);
+    const o = p ? undefined : over[el.id];
+    if (!o) return base;
+    return new Proxy(base, { get: (t, k) => {
+      if (typeof k === 'string' && k in o) return o[k];
+      const v = (t as unknown as Record<string | symbol, unknown>)[k];
+      return typeof v === 'function' ? v.bind(t) : v;
+    } });
+  });
+}
 
 describe('VIS01 content capture plan', () => {
   it('builds a deterministic plan: only exact public label/notice text, all controls masked, values untouched', () => {
@@ -231,6 +245,91 @@ describe('VIS01 unknown paint over approved regions', () => {
   });
 });
 
+describe('VIS01 shadows, filters, shadow hosts and list markers fail closed', () => {
+  it('rejects text-shadow that can reach a region, and any unbounded text-shadow', () => {
+    const p = page('<p id="far">멀리</p>');
+    place('#far', [10, 200, 100, 20]);
+    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
+    const spy = styleStub({ far: { textShadow: 'rgb(255, 0, 0) 0px -40px 0px' } });
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    styleStub({ far: { textShadow: 'red 1em 0 0' } });
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+  });
+
+  it('rejects drop-shadow/blur filters that spread private or unknown pixels, and any unbounded filter', () => {
+    const p = page('<div data-private id="pv">비밀</div><div id="far">x</div>');
+    place('#pv', [10, 200, 50, 10]); place('#far', [700, 500, 10, 10]);
+    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
+    let spy = styleStub({ pv: { filter: 'drop-shadow(rgb(0, 0, 0) 0px -50px 0px)' } });
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    spy = styleStub({ far: { filter: 'url("#warp")' } });
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    styleStub({ far: { filter: 'grayscale(1)' } });
+    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
+  });
+
+  it('rejects ancestor filters and inset shadows, and a masked control whose box-shadow leaves its mask', () => {
+    let spy = styleStub({ anc: { filter: 'blur(2px)' } });
+    expect(buildVisionCapturePlan(input(wrapped()))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    spy = styleStub({ anc: { boxShadow: 'rgb(0, 0, 0) 0px 2px 6px 0px inset' } });
+    expect(buildVisionCapturePlan(input(wrapped()))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    // An outer ancestor shadow reaching the OTHER region (the notice) is still unknown paint.
+    spy = styleStub({ anc: { boxShadow: 'rgb(0, 0, 0) 0px 2px 6px 0px' } });
+    expect(buildVisionCapturePlan(input(wrapped()))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    spy = styleStub({ anc: { boxShadow: 'rgb(0, 0, 0) 0px 0px 1px 0px' } });
+    expect(buildVisionCapturePlan(input(wrapped()))).toMatchObject({ ok: true });
+    spy.mockRestore();
+    styleStub({ name: { boxShadow: 'rgb(255, 0, 0) 0px 0px 0px 20px' } });
+    expect(buildVisionCapturePlan(input(page()))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+  });
+
+  it('fails closed on custom elements and shadow hosts unless contain:paint bounds them away from regions', () => {
+    const custom = page('<x-widget id="xw">위젯</x-widget>');
+    place('#xw', [700, 500, 10, 10]);
+    expect(buildVisionCapturePlan(input(custom))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    const spy = styleStub({ xw: { contain: 'paint' } });
+    expect(buildVisionCapturePlan(input(custom))).toMatchObject({ ok: true });
+    spy.mockRestore();
+
+    const open = page('<div id="sh"></div>');
+    place('#sh', [700, 500, 10, 10]);
+    document.getElementById('sh')!.attachShadow({ mode: 'open' });
+    expect(buildVisionCapturePlan(input(open))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+
+    const closed = page('<div id="cl"></div>');
+    place('#cl', [700, 500, 10, 10]);
+    const g = globalThis as { chrome?: unknown };
+    g.chrome = { dom: { openOrClosedShadowRoot: (el: Element) => (el.id === 'cl' ? ({} as ShadowRoot) : null) } };
+    try { expect(buildVisionCapturePlan(input(closed))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' }); }
+    finally { delete g.chrome; }
+  });
+
+  it('rejects ancestor list markers (outside too) and unrelated markers beside a region', () => {
+    let spy = styleStub({ anc: { display: 'list-item', listStyleType: 'disc', listStylePosition: 'outside' } });
+    expect(buildVisionCapturePlan(input(wrapped()))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    const p = page('<ul id="ul"><li id="li1">항목</li></ul>');
+    place('#li1', [420, 60, 100, 24]);
+    spy = styleStub({ li1: { display: 'list-item', listStyleType: 'disc', fontSize: '20px' } });
+    expect(buildVisionCapturePlan(input(p))).toEqual({ ok: false, code: 'UNSAFE_OVERLAP' });
+    spy.mockRestore();
+    place('#li1', [700, 500, 100, 24]);
+    styleStub({ li1: { display: 'list-item', listStyleType: 'disc', fontSize: '20px' } });
+    expect(buildVisionCapturePlan(input(p))).toMatchObject({ ok: true });
+  });
+
+  it('never plans next to a password/OTP field', () => {
+    const otp = page('<input id="otp" autocomplete="one-time-code">');
+    expect(buildVisionCapturePlan(input(otp))).toMatchObject({ ok: false, code: 'REGISTRY_BLOCKED' });
+  });
+});
+
 describe('VIS01 capture isolation', () => {
   it('hides only the FLECTO host during capture and restores style, focus and values', async () => {
     const p = page();
@@ -279,5 +378,24 @@ describe('VIS01 capture isolation', () => {
     expect(hung).toEqual({ ok: false, code: 'ISOLATION_FAILED' });
     expect(host.getAttribute('style') ?? '').not.toContain('opacity');
     expect(document.querySelector('[data-flecto-private]')).toBeNull();
+  });
+
+  it('refuses to isolate next to a sensitive field and never reads one added during capture', async () => {
+    const p = page();
+    const plan = (buildVisionCapturePlan(input(p)) as { plan: VisionCapturePlan }).plan;
+    const pw = document.createElement('input');
+    pw.type = 'password';
+    Object.defineProperty(pw, 'value', { get() { throw new Error('password value read'); } });
+    document.body.appendChild(pw);
+    let called = false;
+    expect(await withVisionIsolation(document, plan, async () => { called = true; return 1; }, { nextPaint: async () => undefined })).toEqual({ ok: false, code: 'ISOLATION_FAILED' });
+    expect(called).toBe(false);
+    pw.remove();
+    const late = await withVisionIsolation(document, plan, async () => { document.body.appendChild(pw); return 1; }, { nextPaint: async () => undefined });
+    expect(late).toEqual({ ok: false, code: 'STATE_CHANGED' });
+    pw.remove();
+    const field = document.getElementById('name') as HTMLInputElement;
+    const retyped = await withVisionIsolation(document, plan, async () => { field.setAttribute('autocomplete', 'one-time-code'); return 1; }, { nextPaint: async () => undefined });
+    expect(retyped).toEqual({ ok: false, code: 'STATE_CHANGED' });
   });
 });
