@@ -1,14 +1,18 @@
 import { Fragment, useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
+import {
+  ALargeSmall, ArrowLeft, ArrowRight, ChevronDown, ChevronRight, CircleAlert, CircleCheck, Eye, Info, Megaphone,
+  PencilLine, Search, TriangleAlert, X,
+} from 'lucide-react';
 import type {
   FlectoViewModel, PlanStep, PublicNotice, ReviewRow, SourceTask, Template, UserAction, UserSettings, ViewControl,
 } from '@flecto/contracts';
 import {
   DIALOG_NAME, ERROR_BANNER, LOADING, MODE_LABEL, REVIEW_COPY, SPONSOR_LABEL, SPONSOR_NOTE, STATUS, TEMPLATE_INTRO, TEMPLATE_TITLE,
 } from './copy';
-import type { StatusAction, StatusCopy } from './copy';
-import { ControlField, NoticeBlock } from './fields';
-import type { Emit, FieldContext } from './fields';
+import type { StatusAction, StatusCopy, Tone } from './copy';
+import { ControlField, Icon, NoticeBlock } from './fields';
+import type { Emit, FieldContext, IconType } from './fields';
 
 export type FlectoAppProps = { model: FlectoViewModel; onAction: (action: UserAction) => void };
 
@@ -22,6 +26,9 @@ const RESULT_PHASES = new Set(['SUCCESS', 'SOURCE_REJECTED', 'OUTCOME_UNKNOWN'])
 // aimed at the preparing screen (or its sponsor card) cannot land on a new primary button.
 const ARM_DELAY_MS = 500;
 const FOCUSABLE = 'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), a[href], summary, [tabindex]:not([tabindex="-1"])';
+// Stable QA hooks: they name the action a button emits, never an answer or a value.
+const PRIMARY_TESTID = 'flecto-primary-action';
+const TONE_ICON: Record<Tone, IconType> = { success: CircleCheck, danger: CircleAlert, warning: TriangleAlert, info: Info };
 
 export function resolveView(model: FlectoViewModel): View {
   const step = model.steps[model.stepIndex] ?? null;
@@ -90,9 +97,6 @@ function findSubmitTarget(model: FlectoViewModel, step: PlanStep | null): Submit
 }
 const FALLBACK_SUBMIT_LABEL = '신청하기';
 
-// Stable QA hooks: they name the action a button emits, never an answer or a value.
-const PRIMARY_TESTID = 'flecto-primary-action';
-
 const labelKey = (value: string) => value.normalize('NFC').replace(/\s+/g, '');
 
 // SUCCESS: the controller's resultText is "<source heading>\n<label>: <value>" plus the source's
@@ -123,6 +127,10 @@ function BrandMark() {
   );
 }
 
+function ToneChip({ tone, children }: { tone: Tone; children: ReactNode }) {
+  return <span className="fl-tone" data-tone={tone}><Icon icon={TONE_ICON[tone]} />{children}</span>;
+}
+
 function Settings({ settings, emit, idBase }: { settings: UserSettings; emit: Emit; idBase: string }) {
   const update = (patch: Partial<UserSettings>) => emit({ kind: 'UPDATE_SETTINGS', settings: { ...settings, ...patch } });
   const group = <T extends string | number>(legend: string, name: string, current: T, options: Array<[T, string]>, set: (v: T) => void) => (
@@ -137,7 +145,8 @@ function Settings({ settings, emit, idBase }: { settings: UserSettings; emit: Em
     </fieldset>
   );
   return (
-    <section className="fl-settings" id={idBase + 'settings'} aria-label="화면 설정">
+    <section className="fl-settings" id={idBase + 'settings'} aria-labelledby={idBase + 'settings-title'}>
+      <h2 className="fl-settings-title" id={idBase + 'settings-title'}><Icon icon={ALargeSmall} />글자·화면 설정</h2>
       {group<22 | 26 | 30>('글자 크기', 'font', settings.fontSize, [[22, '작게'], [26, '보통'], [30, '크게']], (v) => update({ fontSize: v }))}
       {group<'normal' | 'high'>('화면 대비', 'contrast', settings.contrast, [['normal', '기본'], ['high', '더 진하게']], (v) => update({ contrast: v }))}
       {group<'brief' | 'detailed'>('설명', 'explain', settings.explanation, [['brief', '짧게'], ['detailed', '자세히']], (v) => update({ explanation: v }))}
@@ -182,7 +191,7 @@ function TaskList({ tasks, onPick, onOriginal, idBase }: {
           {task.description ? <span className="fl-task-desc">{task.description}</span> : null}
           {task.disabled ? <span className="fl-task-desc">지금은 선택할 수 없어요</span> : null}
         </span>
-        <span className="fl-task-arrow" aria-hidden="true">→</span>
+        <span className="fl-task-go" aria-hidden="true"><Icon icon={ChevronRight} /></span>
       </button>
     </li>
   );
@@ -190,14 +199,14 @@ function TaskList({ tasks, onPick, onOriginal, idBase }: {
     <>
       <ul className="fl-tasks" role="list">{first.map(item)}</ul>
       {rest.length > 0 && !expanded ? (
-        <button type="button" className="fl-btn fl-more" aria-expanded={false} onClick={() => setExpanded(true)}>
-          다른 작업 보기 ({rest.length}개)
+        <button type="button" className="fl-btn fl-btn-soft fl-more" aria-expanded={false} onClick={() => setExpanded(true)}>
+          <Icon icon={ChevronDown} />다른 작업 보기 ({rest.length}개)
         </button>
       ) : null}
       {expanded ? <ul className="fl-tasks" role="list" aria-label="다른 작업">{rest.map(item)}</ul> : null}
       {!searching ? (
-        <button type="button" className="fl-btn fl-more" aria-expanded={false} onClick={() => setSearching(true)}>
-          다른 일 입력하기
+        <button type="button" className="fl-btn fl-btn-soft fl-more" aria-expanded={false} onClick={() => setSearching(true)}>
+          <Icon icon={Search} />다른 일 입력하기
         </button>
       ) : (
         <section className="fl-section" aria-label="다른 일 찾기">
@@ -224,9 +233,9 @@ function TaskList({ tasks, onPick, onOriginal, idBase }: {
             </>
           ) : (
             <div className="fl-status" role="status">
-              <span className="fl-tone" data-tone="warning">찾지 못했어요</span>
+              <ToneChip tone="warning">찾지 못했어요</ToneChip>
               <p>이 화면에서 확인된 일 중에는 맞는 것이 없어요. 원래 화면에서 계속해 주세요.</p>
-              <button type="button" className="fl-btn fl-more" onClick={onOriginal}>원본에서 계속</button>
+              <button type="button" className="fl-btn fl-btn-soft fl-more" data-action="SHOW_ORIGINAL" onClick={onOriginal}>원래 화면에서 계속하기</button>
             </div>
           )}
         </section>
@@ -328,6 +337,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
 
   let title = model.title;
   let intro: string | null = null;
+  let eyebrow: ReactNode = null;
   let body: ReactNode = null;
   let footer: ReactNode = null;
 
@@ -338,15 +348,17 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
         <div className="fl-loading">
           <span className="fl-dots" aria-hidden="true"><span /><span /><span /></span>
           <div className="fl-status">
-            <p>{loadingLine}</p>
+            <p className="fl-loading-line">{loadingLine}</p>
             {model.statusMessage ? <p className="fl-help">{model.statusMessage}</p> : null}
           </div>
         </div>
         {model.sponsorVisible ? (
           <aside className="fl-sponsor" aria-label={SPONSOR_LABEL}>
             <div className="fl-sponsor-head">
-              <span className="fl-sponsor-label">{SPONSOR_LABEL}</span>
-              <button type="button" className="fl-btn fl-btn-small" onClick={() => emit({ kind: 'DISMISS_SPONSOR' })}>광고 닫기</button>
+              <span className="fl-sponsor-label"><Icon icon={Megaphone} />{SPONSOR_LABEL}</span>
+              <button type="button" className="fl-btn fl-btn-small fl-btn-soft" data-action="DISMISS_SPONSOR" onClick={() => emit({ kind: 'DISMISS_SPONSOR' })}>
+                <Icon icon={X} />광고 닫기
+              </button>
             </div>
             <p className="fl-sponsor-note">{SPONSOR_NOTE}</p>
             <p className="fl-sponsor-body">동네 복지관 가을 건강 강좌 안내 — 예시 문구입니다.</p>
@@ -357,50 +369,47 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
     );
     footer = (
       <>
-        <button type="button" className="fl-btn" onClick={() => emit({ kind: 'CANCEL' })}>준비 멈추기</button>
+        <button type="button" className="fl-btn" data-action="CANCEL" onClick={() => emit({ kind: 'CANCEL' })}>준비 멈추기</button>
         <span className="fl-spacer" />
       </>
     );
   } else if (view.kind === 'status') {
     const copy = view.copy;
     title = copy.title;
+    eyebrow = <ToneChip tone={copy.tone}>{copy.badge}</ToneChip>;
     const isResult = RESULT_PHASES.has(model.phase);
     const errored = model.controls.filter((c) => c.error);
+    const receipt = model.phase === 'SUCCESS' ? receiptParts(model.resultText, model.reviewRows) : null;
     body = (
       <div className="fl-status">
-        <span className="fl-tone" data-tone={copy.tone}>{copy.badge}</span>
         {model.phase === 'OUTCOME_UNKNOWN' ? (
-          <p className="fl-banner"><span aria-hidden="true">⚠</span><span>쉬운 화면은 자동으로 다시 신청하지 않아요. 원래 사이트의 신청 내역에서 결과를 먼저 확인해 주세요.</span></p>
+          <p className="fl-banner"><Icon icon={TriangleAlert} /><span>쉬운 화면은 자동으로 다시 신청하지 않아요. 원래 사이트의 신청 내역에서 결과를 먼저 확인해 주세요.</span></p>
         ) : null}
-        <p>{copy.body}</p>
-        {model.phase === 'SUCCESS' ? (() => {
-          const receipt = receiptParts(model.resultText, model.reviewRows);
-          if (!receipt.headline && receipt.rows.length === 0) return null;
-          return (
-            <section className="fl-receipt" aria-label="원래 사이트의 접수 정보">
-              {receipt.headline ? <p className="fl-receipt-head">{receipt.headline}</p> : null}
-              {receipt.notes.map((note, i) => <p key={i} className="fl-help">{note}</p>)}
-              {receipt.rows.length > 0 ? (
-                <dl className="fl-receipt-rows">
-                  {receipt.rows.map((row) => (
-                    <div className="fl-receipt-row" key={row.ref} data-key={RECEIPT_KEY.test(row.label) || undefined}>
-                      <dt>{row.label}</dt>
-                      <dd>{row.value}</dd>
-                    </div>
-                  ))}
-                </dl>
-              ) : null}
-            </section>
-          );
-        })() : isResult && model.resultText ? (
-          <div>
+        <p className="fl-status-body">{copy.body}</p>
+        {receipt && (receipt.headline || receipt.rows.length > 0) ? (
+          <section className="fl-receipt" aria-label="원래 사이트의 접수 정보">
+            {receipt.headline ? <p className="fl-receipt-head"><Icon icon={CircleCheck} /><span>{receipt.headline}</span></p> : null}
+            {receipt.notes.map((note, i) => <p key={i} className="fl-help">{note}</p>)}
+            {receipt.rows.length > 0 ? (
+              <dl className="fl-receipt-rows">
+                {receipt.rows.map((row) => (
+                  <div className="fl-receipt-row" key={row.ref} data-key={RECEIPT_KEY.test(row.label) || undefined}>
+                    <dt>{row.label}</dt>
+                    <dd>{row.value}</dd>
+                  </div>
+                ))}
+              </dl>
+            ) : null}
+          </section>
+        ) : !receipt && isResult && model.resultText ? (
+          <div className="fl-status-quote">
             <p className="fl-section-title">원래 사이트의 안내</p>
             <p className="fl-quote">{model.resultText}</p>
           </div>
         ) : null}
         {isResult && explain === 'detailed' ? <p className="fl-intro">{TEMPLATE_INTRO.result.detailed}</p> : null}
         {model.phase === 'SOURCE_REJECTED' && errored.length > 0 ? (
-          <ul className="fl-section" aria-label="고칠 부분">
+          <ul className="fl-section fl-fix-list" role="list" aria-label="고칠 부분">
             {errored.map((c) => <li key={c.ref}><strong>{c.label}</strong>: {c.error}</li>)}
           </ul>
         ) : null}
@@ -442,6 +451,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
     const back = step && model.canGoBack
       ? (
         <button type="button" className="fl-btn" data-action="LOCAL_BACK" onClick={() => emit({ kind: 'LOCAL_BACK', fromStep: step.id })}>
+          <Icon icon={sourceReview ? PencilLine : ArrowLeft} />
           {sourceReview ? REVIEW_COPY.source.edit : '이전'}
         </button>
       )
@@ -463,9 +473,9 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
             />
           ) : (
             <div className="fl-status">
-              <span className="fl-tone" data-tone="warning">찾지 못했어요</span>
+              <ToneChip tone="warning">찾지 못했어요</ToneChip>
               <p>이 화면에서 도와드릴 일을 찾지 못했어요. 원래 화면에서 계속하실 수 있어요.</p>
-              <button type="button" className="fl-btn fl-more" onClick={() => emit({ kind: 'SHOW_ORIGINAL' })}>원본에서 계속</button>
+              <button type="button" className="fl-btn fl-btn-soft fl-more" data-action="SHOW_ORIGINAL" onClick={() => emit({ kind: 'SHOW_ORIGINAL' })}>원래 화면에서 계속하기</button>
             </div>
           )}
           {!inIdle && fieldNodes.length ? <section className="fl-section">{fieldNodes}</section> : null}
@@ -483,7 +493,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
       body = (
         <>
           {noticeNodes}
-          <section className="fl-section" aria-labelledby={'fl' + uid + '-review'}>
+          <section className="fl-section fl-review-card" aria-labelledby={'fl' + uid + '-review'}>
             <h2 className="fl-section-title" id={'fl' + uid + '-review'}>{reviewCopy.section}</h2>
             {model.reviewRows.length > 0 ? (
               <dl className="fl-review">
@@ -501,7 +511,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
                           data-testid="flecto-review-edit"
                           onClick={() => emit({ kind: 'LOCAL_BACK', fromStep: step.id, targetRef: row.ref })}
                         >
-                          {REVIEW_COPY.editLabel}
+                          <Icon icon={PencilLine} />{REVIEW_COPY.editLabel}
                         </button>
                       ) : null}
                     </dd>
@@ -511,8 +521,8 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
             ) : <p className="fl-help">원래 사이트의 실제 값을 확인하고 있어요.</p>}
           </section>
           {sourceReview && step && model.canGoBack ? <p className="fl-help">{REVIEW_COPY.source.editHelp}</p> : null}
-          {!submit ? <p className="fl-banner">{REVIEW_COPY.missingAction}</p> : null}
-          {submit && reviewReady ? <p className="fl-help fl-review-help">{reviewCopy.help(submit.label)}</p> : null}
+          {!submit ? <p className="fl-banner"><Icon icon={TriangleAlert} /><span>{REVIEW_COPY.missingAction}</span></p> : null}
+          {submit && reviewReady ? <p className="fl-help fl-review-help"><Icon icon={Info} /><span>{reviewCopy.help(submit.label)}</span></p> : null}
         </>
       );
       footer = (
@@ -567,7 +577,7 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
           <span className="fl-spacer" />
           {step ? (
             <button type="button" className="fl-btn fl-btn-primary" data-testid={PRIMARY_TESTID} data-action="LOCAL_NEXT" disabled={!model.canGoNext || !actionsArmed} onClick={primary({ kind: 'LOCAL_NEXT', fromStep: step.id })}>
-              {nextLabel}
+              {nextLabel}<Icon icon={ArrowRight} />
             </button>
           ) : null}
         </>
@@ -598,28 +608,44 @@ export function FlectoApp({ model, onAction }: FlectoAppProps) {
           <div className="fl-brand">
             <BrandMark />
             <div className="fl-brand-text">
-              <span className="fl-brand-name">FLECTO</span>
-              <span className="fl-brand-title">쉬운 화면</span>
+              <span className="fl-brand-line">
+                <span className="fl-brand-name">FLECTO</span>
+                <span className="fl-brand-title">쉬운 화면</span>
+              </span>
               <span className="fl-source">원래 사이트: <strong>{model.sourceName}</strong></span>
             </div>
           </div>
           <div className="fl-header-actions">
-            <button type="button" className="fl-btn fl-btn-small" aria-expanded={settingsOpen} aria-controls={'fl' + uid + 'settings'} onClick={() => setSettingsOpen((v) => !v)}>
-              글자·화면 설정
+            <button type="button" className="fl-btn fl-btn-small fl-btn-soft" aria-expanded={settingsOpen} aria-controls={'fl' + uid + 'settings'} data-ui="settings" onClick={() => setSettingsOpen((v) => !v)}>
+              <Icon icon={ALargeSmall} />글자·화면 설정
             </button>
-            <button type="button" className="fl-btn fl-btn-small" data-action="SHOW_ORIGINAL" onClick={() => emit({ kind: 'SHOW_ORIGINAL' })}>원래 화면 보기</button>
-            <button type="button" className="fl-btn fl-btn-small" data-action="CLOSE" onClick={() => emit({ kind: 'CLOSE' })}>닫기</button>
+            <button type="button" className="fl-btn fl-btn-small fl-btn-soft" data-action="SHOW_ORIGINAL" onClick={() => emit({ kind: 'SHOW_ORIGINAL' })}>
+              <Icon icon={Eye} />원래 화면 보기
+            </button>
+            <button type="button" className="fl-btn fl-btn-small fl-btn-soft" data-action="CLOSE" onClick={() => emit({ kind: 'CLOSE' })}>
+              <Icon icon={X} />닫기
+            </button>
           </div>
         </div>
       </header>
       <main className="fl-main">
         {settingsOpen ? <Settings settings={s} emit={emit} idBase={'fl' + uid} /> : null}
         <div className="fl-head">
-          {showProgress ? <p className="fl-progress">전체 {model.steps.length}단계 중 {model.stepIndex + 1}단계</p> : null}
+          {eyebrow}
+          {showProgress ? (
+            <div className="fl-progress">
+              <span>전체 {model.steps.length}단계 중 {model.stepIndex + 1}단계</span>
+              <span className="fl-progress-bar" aria-hidden="true">
+                {model.steps.map((item, index) => (
+                  <span key={item.id} data-state={index < model.stepIndex ? 'done' : index === model.stepIndex ? 'current' : 'todo'} />
+                ))}
+              </span>
+            </div>
+          ) : null}
           <h1 className="fl-title" ref={headingRef} tabIndex={-1}>{title}</h1>
           {intro ? <p className="fl-intro">{intro}</p> : null}
         </div>
-        {bannerText ? <p className="fl-banner" data-tone="danger"><span aria-hidden="true">⚠</span><span>{bannerText}</span></p> : null}
+        {bannerText ? <p className="fl-banner" data-tone="danger"><Icon icon={CircleAlert} /><span>{bannerText}</span></p> : null}
         {body}
         <details className="fl-tech">
           <summary>시연 정보</summary>

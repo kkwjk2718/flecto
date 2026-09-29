@@ -479,7 +479,7 @@ describe('task selection', () => {
   it('says it found nothing when there are no tasks', () => {
     const { shadow, actions } = mount({ ...emptyViewModel(), tasks: [] });
     expect(shadow.textContent).toContain('찾지 못했어요');
-    act(() => byText(shadow, 'button', '원본에서 계속')!.click());
+    act(() => byText(shadow, 'button', '원래 화면에서 계속하기')!.click());
     expect(actions).toEqual([{ kind: 'SHOW_ORIGINAL' }]);
   });
 
@@ -503,7 +503,7 @@ describe('task selection', () => {
     expect(actions).toEqual([{ kind: 'START_GOAL', ref: 'g3' }]);
     type(input, '택배 조회');
     expect(qa(shadow, '[aria-label="찾은 일"] .fl-task')).toHaveLength(0);
-    act(() => byText(shadow, 'button', '원본에서 계속')!.click());
+    act(() => byText(shadow, 'button', '원래 화면에서 계속하기')!.click());
     expect(actions.at(-1)).toEqual({ kind: 'SHOW_ORIGINAL' });
     expect(JSON.stringify(actions)).not.toMatch(/김영희|010|택배/);
     expect(actions.some((a) => a.kind === 'START_GOAL' && a.ref === null)).toBe(false);

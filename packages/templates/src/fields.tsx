@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import type { KeyboardEvent as ReactKeyboardEvent, ReactElement } from 'react';
+import { Check, CircleAlert, FileText, Info, TriangleAlert } from 'lucide-react';
 import type { PublicNotice, UserAction, ViewControl } from '@flecto/contracts';
 
 export type Emit = (action: UserAction) => void;
@@ -10,6 +11,12 @@ export type FieldContext = {
   setComposing: (ref: string, composing: boolean) => void;
 };
 
+export type IconType = typeof Check;
+// Decorative only: every icon sits next to visible text, so it never changes an accessible name.
+export function Icon({ icon: Glyph, className }: { icon: IconType; className?: string }) {
+  return <Glyph className={className ? 'fl-ico ' + className : 'fl-ico'} aria-hidden="true" focusable="false" strokeWidth={2.25} />;
+}
+
 export function textOf(value: string | boolean): string {
   return typeof value === 'string' ? value : '';
 }
@@ -19,11 +26,17 @@ export function RequiredBadge({ required, showOptional }: { required: boolean; s
   return showOptional ? <span className="fl-badge fl-badge-optional">선택</span> : null;
 }
 
+const NOTICE_META: Record<PublicNotice['kind'], { label: string; icon: IconType }> = {
+  terms: { label: '원문', icon: FileText },
+  warning: { label: '주의', icon: TriangleAlert },
+  info: { label: '원래 사이트 안내', icon: Info },
+};
+
 export function NoticeBlock({ notice, id }: { notice: PublicNotice; id?: string }) {
-  const label = notice.kind === 'terms' ? '원문' : notice.kind === 'warning' ? '주의' : '원래 사이트 안내';
+  const meta = NOTICE_META[notice.kind] ?? NOTICE_META.info;
   return (
     <div className="fl-notice" data-kind={notice.kind} id={id}>
-      <span className="fl-notice-label">{label}</span>
+      <span className="fl-notice-label"><Icon icon={meta.icon} />{meta.label}</span>
       {notice.text}
     </div>
   );
@@ -50,7 +63,7 @@ function helpParts(control: ViewControl, ctx: FieldContext) {
     ids.push(id);
     error = (
       <p className="fl-error" id={id}>
-        <span aria-hidden="true">⚠</span>
+        <Icon icon={CircleAlert} />
         <span>{control.error}</span>
       </p>
     );
@@ -164,7 +177,7 @@ export function ChoiceField({ control, ctx }: { control: ViewControl; ctx: Field
       </legend>
       {nodes}
       <p className="fl-help">
-        {selectedOption ? '지금 원래 화면에 선택된 값: ' + selectedOption.label : '아직 선택하지 않았어요.'}
+        {selectedOption ? '원래 화면에 선택된 항목: ' + selectedOption.label : '아직 선택하지 않았어요.'}
       </p>
       <div className="fl-choices" role="radiogroup" aria-labelledby={legendId} aria-required={control.required || undefined} aria-invalid={control.error ? true : undefined}>
         {control.options.map((option) => {
@@ -186,7 +199,7 @@ export function ChoiceField({ control, ctx }: { control: ViewControl; ctx: Field
                 <span>{option.label}</span>
                 {option.disabled ? <span className="fl-card-sub">지금은 선택할 수 없어요</span> : null}
               </span>
-              {checked ? <span className="fl-card-state"><span aria-hidden="true">✓ </span>선택됨</span> : null}
+              {checked ? <span className="fl-card-state"><Icon icon={Check} />선택됨</span> : null}
             </label>
           );
         })}
@@ -219,7 +232,7 @@ export function CheckField({ control, ctx }: { control: ViewControl; ctx: FieldC
         <span className="fl-check-text">
           <span>{control.label}</span>
           <RequiredBadge required={control.required} showOptional />
-          <span className="fl-check-state">{checked ? '동의함' : '아직 동의하지 않음'}</span>
+          <span className="fl-check-state">{checked ? <><Icon icon={Check} />동의함</> : '아직 동의하지 않음'}</span>
         </span>
       </label>
       {error}
@@ -231,9 +244,11 @@ export function SourceButton({ control, ctx }: { control: ViewControl; ctx: Fiel
   return (
     <button
       type="button"
-      className="fl-btn"
+      className="fl-btn fl-btn-soft"
       disabled={control.disabled}
       data-flecto-ref={control.ref}
+      data-action="INVOKE_SOURCE"
+      data-intent="navigate"
       onClick={() => ctx.emit({ kind: 'INVOKE_SOURCE', ref: control.ref, intent: 'navigate' })}
     >
       {control.label}
