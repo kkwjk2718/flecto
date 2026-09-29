@@ -72,9 +72,14 @@ type Outcome = {
   count?: Record<'red' | 'green' | 'magenta' | 'blue' | 'black', number>; maskCenter?: number[];
 };
 
+// exposeFunction may be registered only once per Page; the binding survives navigations.
+const shotBound = new WeakSet<import('@playwright/test').Page>();
 async function run(page: import('@playwright/test').Page, variant: string, mode: Mode, overlay = false): Promise<Outcome> {
+  if (!shotBound.has(page)) {
+    await page.exposeFunction('__flectoShot', async () => 'data:image/png;base64,' + (await page.screenshot({ caret: 'initial', animations: 'allow', scale: 'device' })).toString('base64'));
+    shotBound.add(page);
+  }
   await page.goto(origin + '/?v=' + variant);
-  await page.exposeFunction('__flectoShot', async () => 'data:image/png;base64,' + (await page.screenshot({ caret: 'initial', animations: 'allow', scale: 'device' })).toString('base64'));
   await page.addScriptTag({ content: bundle });
   return page.evaluate(async ({ mode, overlay }) => {
     const V = (window as unknown as { __flectoVision: any }).__flectoVision;
@@ -170,4 +175,3 @@ test('T34 fixture: unknown ancestor text/background/pseudo and aria-hidden overl
   expect(await run(page, 'ancestor-pseudo', 'plan-only')).toEqual({ planCode: 'UNSAFE_OVERLAP' });
   expect(await run(page, 'hidden-overlay', 'plan-only')).toEqual({ planCode: 'UNSAFE_OVERLAP' });
 });
-
