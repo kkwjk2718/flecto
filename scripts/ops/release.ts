@@ -2,7 +2,8 @@ import { lstat, mkdir, readFile, rm, writeFile, copyFile } from 'node:fs/promise
 import { dirname, resolve } from 'node:path';
 import { inspectBuild, type BuildFile } from './build-check';
 import { isInside, realpathOrNull, runFile, runWithInput, sha256 } from './common';
-import { gradeEvidence, noEvidence, lowerGrade, type GradeResult } from './evidence';
+import { gradeEvidence, noEvidence, type GradeResult } from './evidence';
+import { inspectRuntimeManifest, RUNTIME_MANIFEST } from './runtime-hash';
 import { collectKnownSecrets, denyReason, isAllowlistedSource, ROOT_FILES, secretFindings, SOURCE_PREFIXES } from './policy';
 
 export const RELEASE_SCHEMA = 'flecto.release.v1';
@@ -76,6 +77,7 @@ export async function createRelease(options: ReleaseOptions): Promise<ReleaseRes
   const build = await inspectBuild(rootReal);
   if (!build.extension.ok) problems.push(...build.extension.problems.map((p) => 'build: ' + p));
   if (!build.culture.ok) problems.push(...build.culture.problems.map((p) => 'culture: ' + p));
+  if (!build.runtime.ok) problems.push(...build.runtime.problems.map((p) => 'runtime: ' + p));
   if (problems.length) throw new ReleaseError('verified build required (npm run build)', problems);
   const buildSha = build.extension.buildSha256!;
   const revoked = (await readRevocations(rootReal)).find((r) => r.extensionBuildSha256 === buildSha);
@@ -95,12 +97,12 @@ export async function createRelease(options: ReleaseOptions): Promise<ReleaseRes
     if (leaks.length) throw new ReleaseError('evidence report contains secret-like content', ['evidence: ' + leaks.join(',')]);
     let parsed: unknown = null;
     try { parsed = JSON.parse(evidenceBody.toString('utf8')); } catch { parsed = null; }
-    grade = gradeEvidence(parsed, buildSha);
+    grade = gradeEvidence(parsed, buildSha, build.runtime.manifest!.runtimeBuildSha256);
     if (grade.grade === 'REVOKED') throw new ReleaseError('evidence marks this build REVOKED; not packaged', grade.reasons);
   }
-  const productGrade = dirty ? lowerGrade(grade.grade, 'UNVERIFIED') : grade.grade;
+  const productGrade = grade.grade;
   const reasons = [...grade.reasons];
-  if (dirty) reasons.unshift(dirty + ' tracked file(s) differ from ' + gitSha.slice(0, 12) + '; packaged sources are not a committed state');
+  if (dirty) reasons.unshift(dirty + ' tracked file(s) differ from ' + gitSha.slice(0, 12) + '; identity verified by runtime content hashes');
 
   const stamp = now.toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
   const releaseId = stamp + '-' + gitSha.slice(0, 8);
@@ -126,6 +128,13 @@ export async function createRelease(options: ReleaseOptions): Promise<ReleaseRes
     }
     const hashesBody = await readPackagedFile(rootReal, 'dist/extension-hashes.json', problems);
     if (hashesBody) await stage('dist/extension-hashes.json', hashesBody);
+    const runtimeBody = await readPackagedFile(rootReal, RUNTIME_MANIFEST, problems);
+    if (runtimeBody) await stage(RUNTIME_MANIFEST, runtimeBody);
+    for (const [path, hash] of Object.entries(build.runtime.manifest!.inputs)) {
+      if (!entries.some((entry) => entry.path === path && entry.sha256 === hash)) problems.push(path + ': runtime input is missing or changed in package (track new inputs before release)');
+    }
+    const rechecked = await inspectRuntimeManifest(rootReal);
+    if (!rechecked.ok || rechecked.manifest?.runtimeBuildSha256 !== build.runtime.manifest!.runtimeBuildSha256) problems.push('runtime changed while packaging');
     if (evidenceBody) await stage('release-evidence/test-report.json', evidenceBody);
     if (problems.length) throw new ReleaseError('release refused: ' + problems.length + ' file problem(s)', problems);
 
@@ -133,7 +142,7 @@ export async function createRelease(options: ReleaseOptions): Promise<ReleaseRes
     const manifest = {
       schema: RELEASE_SCHEMA, releaseId, name, createdAt: now.toISOString(), submitted: false,
       source: { gitSha, branch, trackedModified: dirty },
-      build: { extensionBuildSha256: buildSha, manifestVersion: build.extension.manifestVersion, extension: build.extension.files, cultureAssets: build.culture.files.length },
+      build: { extensionBuildSha256: buildSha, runtimeBuildSha256: build.runtime.manifest!.runtimeBuildSha256, runtimeInputSha256: build.runtime.manifest!.runtimeInputSha256, runtimeManifest: RUNTIME_MANIFEST, manifestVersion: build.extension.manifestVersion, extension: build.extension.files, cultureAssets: build.culture.files.length },
       grade: {
         product: productGrade, derivedFromEvidence: grade.derived, claimed: grade.claimed, operational: grade.operationalGrade,
         evidenceValid: grade.valid, reasons, problems: grade.problems, counts: grade.counts,

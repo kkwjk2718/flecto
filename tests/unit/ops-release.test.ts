@@ -1,10 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { execFileSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { createRelease, ReleaseError, revokeBuild } from '../../scripts/ops/release';
+import { captureRuntimeInputs, writeRuntimeManifest } from '../../scripts/ops/runtime-hash';
 import { inspectBuild } from '../../scripts/ops/build-check';
 import { EVIDENCE_SCHEMA, REQUIRED_IDS } from '../../scripts/ops/evidence';
 
@@ -19,7 +20,9 @@ async function refusal(promise: Promise<unknown>): Promise<ReleaseError> {
   throw new Error('expected release refusal');
 }
 
-beforeEach(() => {
+const seal = async () => writeRuntimeManifest(root, await captureRuntimeInputs(root));
+
+beforeEach(async () => {
   root = mkdtempSync(join(tmpdir(), 'flecto-rel-'));
   put('package.json', '{"name":"flecto"}\n'); put('package-lock.json', '{}\n'); put('README.md', '# demo\n');
   put('apps/planner/src/server.ts', 'export const ok = true;\n');
@@ -35,6 +38,7 @@ beforeEach(() => {
   git('init', '-q'); git('config', 'user.email', 't@example.invalid'); git('config', 'user.name', 't');
   git('add', 'package.json', 'package-lock.json', 'README.md', 'apps/planner', 'apps/leak', 'prompts', 'state', 'archive');
   git('commit', '-qm', 'init');
+  await seal();
 });
 afterEach(() => rmSync(root, { recursive: true, force: true }));
 
@@ -42,7 +46,7 @@ function evidence(buildSha: string, extra: Record<string, unknown> = {}) {
   const results = Object.fromEntries(REQUIRED_IDS.map((id) => [id, { status: 'NOT_RUN' }]));
   results.T01 = { status: 'PASS', kind: 'FIXTURE' } as never;
   const path = join(root, '..', 'evidence-' + Math.random().toString(36).slice(2) + '.json');
-  writeFileSync(path, JSON.stringify({ schema: EVIDENCE_SCHEMA, artifact: { extensionBuildSha256: buildSha }, run: { exitCode: 0, startedAt: 'a', finishedAt: 'b' }, results, claimedGrade: 'FULL_LIVE', ...extra }));
+  writeFileSync(path, JSON.stringify({ schema: EVIDENCE_SCHEMA, artifact: { extensionBuildSha256: buildSha, runtimeBuildSha256: JSON.parse(readFileSync(join(root, 'dist/runtime-hashes.json'), 'utf8')).runtimeBuildSha256 }, run: { exitCode: 0, startedAt: 'a', finishedAt: 'b' }, results, claimedGrade: 'FULL_LIVE', ...extra }));
   return path;
 }
 
@@ -54,7 +58,7 @@ describe('release:pack (REL01)', () => {
     expect(names).toEqual([
       'README.md', 'RELEASE_MANIFEST.json', 'apps/demo-culture/dist/assets/app.js', 'apps/demo-culture/dist/index.html', 'apps/planner/src/server.ts',
       'dist/extension-hashes.json', 'dist/extension/background.js', 'dist/extension/content.js', 'dist/extension/manifest.json',
-      'dist/extension/options.html', 'dist/extension/options.js', 'package-lock.json', 'package.json',
+      'dist/extension/options.html', 'dist/extension/options.js', 'dist/runtime-hashes.json', 'package-lock.json', 'package.json',
     ]);
     const manifest = JSON.parse(execFileSync('unzip', ['-p', result.zipPath, execFileSync('unzip', ['-Z1', result.zipPath]).toString().split('\n').find((n) => n.endsWith('RELEASE_MANIFEST.json'))!]).toString());
     expect(manifest.submitted).toBe(false);
@@ -69,11 +73,11 @@ describe('release:pack (REL01)', () => {
   });
 
   it('refuses when an allowlisted tracked file contains a local runtime token or key material', async () => {
-    put('apps/planner/src/config.ts', 'export const t = "' + TOKEN + '";\n'); git('add', 'apps/planner/src/config.ts'); git('commit', '-qm', 'leak');
+    put('apps/planner/src/config.ts', 'export const t = "' + TOKEN + '";\n'); git('add', 'apps/planner/src/config.ts'); git('commit', '-qm', 'leak'); await seal();
     const error = await refusal(createRelease({ root, env: {} }));
     expect(error.problems.join('\n')).toContain('apps/planner/src/config.ts: local-runtime-secret');
     expect(JSON.stringify([error.message, error.problems])).not.toContain(TOKEN);
-    git('rm', '-q', 'apps/planner/src/config.ts'); put('tests/unit/k.ts', '-----BEGIN ' + 'PRIVATE KEY-----\n'); git('add', 'tests'); git('commit', '-qm', 'key');
+    git('rm', '-q', 'apps/planner/src/config.ts'); put('tests/unit/k.ts', '-----BEGIN ' + 'PRIVATE KEY-----\n'); git('add', 'tests'); git('commit', '-qm', 'key'); await seal();
     expect((await refusal(createRelease({ root, env: {} }))).problems.join()).toContain('private-key-block');
   });
 
@@ -107,12 +111,26 @@ describe('release:pack (REL01)', () => {
     await refusal(createRelease({ root, env: {}, evidencePath: evidence(buildSha, { revoked: true }) }));
   });
 
-  it('caps the grade at UNVERIFIED when tracked sources differ from the commit', async () => {
+  it.each(['apps/planner/src/server.ts', 'apps/planner/src/provider/prompt.ts'])('rejects stale %s even after the changed source is committed', async (path) => {
+    put(path, 'export const value = 1;\n'); git('add', path); await seal();
     const buildSha = (await inspectBuild(root)).extension.buildSha256!;
-    put('apps/planner/src/server.ts', 'export const ok = false;\n');
-    const result = await createRelease({ root, env: {}, evidencePath: evidence(buildSha) });
+    const proof = evidence(buildSha);
+    put(path, 'export const value = 2;\n'); git('add', path); git('commit', '-qm', 'source changed after evidence');
+    expect((await refusal(createRelease({ root, env: {}, evidencePath: proof }))).problems.join()).toContain('runtime/server/prompt/source');
+    await seal();
+    const result = await createRelease({ root, env: {}, evidencePath: proof });
     expect((result.manifest.grade as { product: string }).product).toBe('UNVERIFIED');
-    expect((result.manifest.source as { trackedModified: number }).trackedModified).toBe(1);
-    chmodSync(join(root, '.flecto/releases'), 0o700);
+  });
+
+  it('accepts content-bound evidence built from a dirty tree and after a later commit', async () => {
+    put('apps/planner/src/server.ts', 'export const ok = false;\n'); await seal();
+    const buildSha = (await inspectBuild(root)).extension.buildSha256!;
+    const proof = evidence(buildSha);
+    const dirty = await createRelease({ root, env: {}, evidencePath: proof });
+    expect((dirty.manifest.grade as { product: string }).product).toBe('FIXTURE_ONLY');
+    expect((dirty.manifest.source as { trackedModified: number }).trackedModified).toBe(1);
+    git('add', 'apps/planner/src/server.ts'); git('commit', '-qm', 'commit already tested bytes');
+    const clean = await createRelease({ root, env: {}, evidencePath: proof });
+    expect((clean.manifest.grade as { product: string }).product).toBe('FIXTURE_ONLY');
   });
 });

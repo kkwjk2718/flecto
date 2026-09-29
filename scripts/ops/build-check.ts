@@ -1,6 +1,7 @@
 import { lstat, readFile, readdir } from 'node:fs/promises';
 import { resolve, extname } from 'node:path';
 import { canonicalJson, sha256 } from './common';
+import { inspectRuntimeManifest } from './runtime-hash';
 
 export const EXTENSION_FILES = ['manifest.json', 'content.js', 'background.js', 'options.html', 'options.js'] as const;
 const CULTURE_ASSET_EXT = new Set(['.html', '.js', '.css', '.svg', '.png', '.jpg', '.jpeg', '.webp', '.ico', '.woff', '.woff2', '.txt', '.webmanifest']);
@@ -10,6 +11,7 @@ export type BuildFile = { path: string; sha256: string; bytes: number };
 export type BuildInspection = {
   extension: { ok: boolean; problems: string[]; files: BuildFile[]; buildSha256: string | null; manifestVersion: string | null };
   culture: { ok: boolean; problems: string[]; files: BuildFile[] };
+  runtime: Awaited<ReturnType<typeof inspectRuntimeManifest>>;
 };
 
 async function regularFile(path: string): Promise<Buffer | 'missing' | 'not-regular'> {
@@ -81,5 +83,5 @@ export async function inspectBuild(root: string): Promise<BuildInspection> {
   await walk(resolve(root, 'apps/demo-culture/dist'), '', 0);
   if (!culture.problems.length && !culture.files.some((f) => f.path === 'apps/demo-culture/dist/index.html')) culture.problems.push('apps/demo-culture/dist/index.html missing');
   culture.ok = culture.problems.length === 0;
-  return { extension: ext, culture };
+  return { extension: ext, culture, runtime: await inspectRuntimeManifest(root) };
 }

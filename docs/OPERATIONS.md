@@ -14,7 +14,7 @@ npm run doctor
 - FAIL이 하나라도 있으면 종료 코드 1. WARN은 0.
 - 포트가 사용 중인데 살아 있는 DEMO lock이 없으면 FAIL. doctor는 어떤 프로세스도 종료·신호하지 않는다.
 - 토큰·설정값·환경변수 값·auth 상태는 출력하지 않는다. --json으로 기계 판독 출력.
-- 추적 파일이 커밋과 다르면 WARN과 함께 release 등급이 UNVERIFIED로 제한됨을 알린다.
+- 추적 파일이 커밋과 다르면 기존 doctor는 WARN을 출력한다. 현재 release는 아래 내용 해시로 검증하며 커밋 전후 자체는 등급을 낮추지 않는다.
 
 ## npm run demo:reset — 합성 원본 데이터만 초기화
 
@@ -52,10 +52,10 @@ npm run release:pack -- --revoke <extensionBuildSha256> --reason "안전 결함 
 등급 규칙:
 
 - --evidence가 없으면 UNVERIFIED / 운영 DOCS_ONLY.
-- 보고서는 schema flecto.evidence.v1, artifact.extensionBuildSha256(현재 빌드 manifest의 build.extensionBuildSha256와 같아야 함), run.exitCode·startedAt·finishedAt, T01–T40과 OPER01–OPER15 전부의 results[ID].status, claimedGrade가 필요하다. PASS에는 kind(FIXTURE, LIVE_CODEX, FAULT_INJECTION, CACHE, REPLAY, MANUAL)가 필요하다.
+- 보고서는 schema flecto.evidence.v1, artifact.extensionBuildSha256와 artifact.runtimeBuildSha256(현재 검증된 빌드와 모두 같아야 함), run.exitCode·startedAt·finishedAt, T01–T40과 OPER01–OPER15 전부의 results[ID].status, claimedGrade가 필요하다. PASS에는 kind(FIXTURE, LIVE_CODEX, FAULT_INJECTION, CACHE, REPLAY, MANUAL)가 필요하다.
 - ID 누락, 다른 artifact, .only 실행, kind 없는 PASS는 보고서 전체를 거부해 UNVERIFIED로 둔다. SKIP·FLAKY·재시도된 PASS는 PASS로 세지 않는다. NOT_RUN은 허용되지만 PASS가 아니다.
 - 산출 등급은 claimedGrade를 넘지 않는다. FIXTURE_ONLY는 exit 0·FAIL/SKIP/FLAKY 없음·T01 PASS, SINGLE_SITE_LIVE는 LIVE_CODEX PASS와 live.benefits.cold ≥ 3, LIMITED_LIVE는 추가로 live.culture.cold ≥ 3과 T01–T26 전부 PASS, FULL_LIVE는 T01–T40 전부 PASS와 capabilities.vision = PASS가 필요하다.
-- 추적 파일이 커밋과 다르면 UNVERIFIED로 제한한다. revoked: true 보고서나 --revoke로 등록된 빌드는 패키지를 만들지 않는다(종료 코드 2).
+- 서버·프롬프트·소스·gate·테스트·lock 또는 생성 산출물이 dist/runtime-hashes.json과 다르면 패키징을 거부한다. 확장 해시만 있는 과거 증거는 UNVERIFIED다. 동일 바이트를 나중에 커밋해도 증거는 유지된다. revoked: true 보고서나 --revoke로 등록된 빌드는 패키지를 만들지 않는다(종료 코드 2).
 - 운영 등급 MANAGED_TESTED는 OPER01–OPER15가 모두 FAULT_INJECTION PASS인 보고서에서만 나온다. 이 저장소의 단위 테스트 통과만으로는 부여하지 않는다.
 
 ## 통합 전 patch 검사와 제한 실행 (OPS01 보조 도구)
@@ -73,3 +73,23 @@ npx tsx scripts/ops/run-bounded.ts --deadline-sec 600 -- npx vitest run
 ## 검사 범위
 
 tests/unit/ops-*.test.ts는 임시 git 저장소와 실제 zip/unzip, 실제 소켓, scripts/system.ts로 띄운 실제 QA 서비스 프로세스를 사용한다. 이 테스트는 도구의 동작을 검증한다. 제품 T01–T40, 운영 OPER01–OPER15의 실행 결과로 집계하지 않는다.
+
+## 런타임 해시 통합 — 리드가 build.mjs에 적용할 변경
+
+이 패치는 루트 package/lock과 scripts/build.mjs를 변경하지 않는다. 리드는 기존 빌드에 다음을 연결해야 한다. 연결 전 빌드는 runtime manifest가 없으므로 release가 거부한다. 기존 빌드에 사후 해시만 덧씌우지 말고 전체 빌드를 다시 수행한다.
+
+```js
+import { tsImport } from 'tsx/esm/api';
+const { captureRuntimeInputs, writeRuntimeManifest } =
+  await tsImport('./ops/runtime-hash.ts', import.meta.url);
+// root 결정 후, 첫 Vite build/산출물 변경 전에:
+const runtimeInputs = await captureRuntimeInputs(root);
+// 기존 extension + culture 빌드가 모두 성공한 직후:
+await writeRuntimeManifest(root, runtimeInputs);
+```
+
+`dist/runtime-hashes.json`은 `flecto.runtime.v1`이며 정렬된 경로→SHA-256 입력/산출물 목록과 `runtimeInputSha256`, `runtimeBuildSha256`를 가진다. SHA·시각·절대 경로를 넣지 않아 Git 커밋과 무관하게 내용으로 재현된다. inputs는 apps/packages/scripts/tests의 비문서 파일, spec/ops의 gate 문서, package/lock/TS/검사 설정이다. 코드에 있는 planner prompt와 모델 설정도 포함한다. 비밀 파일·DB·의존성·생성 상태·진행 문서는 읽거나 해시하지 않는다. 외부 런타임의 모델/버전/안전한 설정은 리드가 `apps/planner/` 아래 공개 가능한 고정 JSON으로 기록하고 실제 실행 시 동일한 값인지 검증해야 한다. 비밀 환경변수 값이나 인증 파일은 여기에 넣지 않는다.
+
+빌드 전후 입력 변경은 stamp를 거부한다. release는 입력/출력 전체를 재계산하고, ZIP에 실제 포함한 소스 바이트까지 같은지 확인한다. 새 런타임 입력은 빌드 시 발견하지만 출고 전 `git add`가 필요하다. staged/unstaged 수정은 내용이 같으면 허용한다. 원래의 PASS/FAIL/SKIP/FLAKY·LIVE/vision·revocation 등급 규칙은 그대로다.
+
+OPS-EVIDENCE 체크포인트: 서버/프롬프트 변이, 수정 작업 트리→검사→후속 커밋, 해시 누락/불일치 단위 검증. 다음 단계는 리드의 build.mjs 연결 후 전체 재빌드와 QA 근거 생성이다. 브라우저·서버·제품 수용 게이트는 이 작업자의 실행 범위 밖이다. 공유 state/NEXT_ACTION.md 갱신은 리드가 이 체크포인트를 옮긴다.

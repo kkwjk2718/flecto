@@ -50,7 +50,7 @@ export function noEvidence(reason = 'no evidence report supplied'): GradeResult 
  * @param report parsed JSON of an evidence report (schema flecto.evidence.v1)
  * @param currentBuildSha256 identity of the build being packaged (inspectBuild().extension.buildSha256)
  */
-export function gradeEvidence(report: unknown, currentBuildSha256: string | null): GradeResult {
+export function gradeEvidence(report: unknown, currentBuildSha256: string | null, currentRuntimeBuildSha256: string | null = null): GradeResult {
   const out = noEvidence();
   out.reasons = [];
   const problems = out.problems;
@@ -59,6 +59,7 @@ export function gradeEvidence(report: unknown, currentBuildSha256: string | null
   const artifact = isObj(report.artifact) ? report.artifact : {};
   if (!currentBuildSha256) problems.push('current build is not verified; evidence cannot be bound to it');
   else if (artifact.extensionBuildSha256 !== currentBuildSha256) problems.push('artifact.extensionBuildSha256 does not match the packaged build (evidence from another artifact is not accepted)');
+  if (!currentRuntimeBuildSha256 || artifact.runtimeBuildSha256 !== currentRuntimeBuildSha256) problems.push('artifact.runtimeBuildSha256 does not match the verified runtime/server/prompt/source build');
   const run = isObj(report.run) ? report.run : null;
   if (!run) problems.push('run section missing');
   else {
