@@ -121,7 +121,9 @@ test('T32: preparation timer, sponsor, and local settings mutations do not reque
   const settingsToggle = dialog(page).locator('button[aria-controls][aria-expanded]');
   await expect(settingsToggle).toHaveCount(1);
   await settingsToggle.click();
-  await dialog(page).getByRole('radio', { name: '크게', exact: true }).check();
+  const largeFont = dialog(page).getByRole('radio', { name: '크게', exact: true });
+  if (!await largeFont.isChecked()) await largeFont.click();
+  await expect(largeFont).toBeChecked();
   await expect(dialog(page)).toHaveAttribute('data-font', '30');
   await settingsToggle.click();
   // A deliberately source-looking child belongs to the extension host, so it

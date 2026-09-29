@@ -93,7 +93,7 @@ export const test = existingTest.extend<{ qa: Probe; gateEvidence: void }, { gat
     await use();
     page.off('pageerror', onError);
     await info.attach('qa-gate-provenance', {
-      body: JSON.stringify({ testAuthoredAgainst: 'e11d9d6', gateVersion: 2,
+      body: JSON.stringify({ testAuthoredAgainst: 'e11d9d6', gateVersion: 3,
         productCommit: execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim(),
         mode: qa.exchanges.some(x => x.delayMs > 0) ? 'FIXTURE / FAULT_INJECTION' : 'FIXTURE',
         extensionHashes: JSON.parse(await readFile('dist/extension-hashes.json', 'utf8')),
@@ -114,12 +114,17 @@ export async function fillBenefits(page: Page, order = 'FLECTO-2026-001') {
   await expect(page.locator('main input[name="orderNumber"]')).toHaveValue(order);
   await expect(page.locator('main input[name="purchaseDate"]')).toHaveValue('2026-09-01');
   await ui.getByRole('button', { name: '다음', exact: true }).click();
-  await ui.getByRole('radio', { name: '가전', exact: true }).click();
+  const category = ui.getByRole('radio', { name: '가전', exact: true });
+  await category.click();
+  await expect(category).toBeChecked();
   await expect(page.locator('main select[name="category"]')).toHaveValue('가전');
   await ui.getByRole('button', { name: '다음', exact: true }).click();
   const consent = ui.getByRole('checkbox', { name: /위 신청 조건과 주문 정보 저장/ });
-  // Reused when checking a real saved draft: never toggle a prior user choice off.
-  await consent.check();
+  // The controlled overlay updates after the async source event/readback. check()
+  // asserts immediately after its click; use at most one real user action, then
+  // await both DOMs. A saved draft's existing user consent must not be toggled off.
+  if (!await consent.isChecked()) await consent.click();
+  await expect(consent).toBeChecked();
   await expect(page.locator('main input[name="consent"]')).toBeChecked();
   await ui.getByRole('button', { name: '입력 내용 확인하기', exact: true }).click();
   await expect(ui).toHaveAttribute('data-phase', 'REVIEW');
