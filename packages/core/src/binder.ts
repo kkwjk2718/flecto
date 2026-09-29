@@ -17,11 +17,8 @@ export function readControlValue(binding: PrivateBinding, registry: PrivateBindi
   if (binding.kind === 'checkbox') return (binding.element as HTMLInputElement).checked;
   if (binding.kind === 'radio') {
     const control = registryStates.get(registry)!.snapshot.controls.find(c => c.ref === binding.ref)!;
-    return control.options.find(o => (registry.options.get(o.ref) as HTMLInputElement)?.checked)?.ref ?? '';
-  }
-  if (binding.kind === 'select') {
-    const e = binding.element as HTMLSelectElement;
-    return [...registry.options].find(([, option]) => option === e.selectedOptions[0])?.[0] ?? '';
+    const selected = control.options.map(o => registry.options.get(o.ref) as HTMLInputElement).find(e => e.checked);
+    return selected?.value ?? '';
   }
   return 'value' in binding.element ? (binding.element as HTMLInputElement).value : '';
 }
@@ -48,7 +45,7 @@ export async function applyUserInput(action: Extract<UserAction, { kind: 'SET_TE
     } else {
       const option = registry.options.get(action.optionRef), control = registryStates.get(registry)!.snapshot.controls.find(c => c.ref === action.ref)!;
       if (!option || !control.options.some(o => o.ref === action.optionRef) || !option.isConnected || isDisabled(option) || option.closest('optgroup[disabled]')) throw new FlectoError('STALE_DOCUMENT');
-      expected = action.optionRef;
+      expected = option.value;
       if (binding.kind === 'select' && option.tagName === 'OPTION' && option.closest('select') === element) {
         // Duplicate values cannot be selected by value without confusing identity.
         const select = element as HTMLSelectElement;
@@ -59,6 +56,13 @@ export async function applyUserInput(action: Extract<UserAction, { kind: 'SET_TE
     }
     await settle(element.ownerDocument);
     if (readControlValue(binding, registry) !== expected) throw new FlectoError('SOURCE_REJECTED');
+    if (action.kind === 'SET_CHOICE') {
+      // Native values may coincide (especially radios). Receipt verification
+      // still requires the exact option the user selected to be active.
+      const option = registry.options.get(action.optionRef)!;
+      const selected = binding.kind === 'select' ? (element as HTMLSelectElement).selectedOptions[0] === option : (option as HTMLInputElement).checked;
+      if (!selected) throw new FlectoError('SOURCE_REJECTED');
+    }
     return receipt(action.ref, registry, 'APPLIED', 'DOM_READBACK');
   } catch (error) { return receipt(action.ref, registry, 'REJECTED', 'NONE', error instanceof FlectoError ? error.code : 'SOURCE_REJECTED'); }
 }

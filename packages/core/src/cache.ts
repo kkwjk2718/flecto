@@ -1,12 +1,19 @@
-import { CACHE_VERSION, PROMPT_VERSION, SCHEMA_VERSION, CachedBlueprintSchema, FlectoError, type CachedBlueprint, type PagePlan, type PrivateBindingRegistry, type PublicPageSnapshot } from '@flecto/contracts';
+import { CACHE_VERSION, PROMPT_VERSION, SCHEMA_VERSION, CachedBlueprintSchema, FlectoError, PublicPageSnapshotSchema, type CachedBlueprint, type PagePlan, type PrivateBindingRegistry, type PublicPageSnapshot } from '@flecto/contracts';
 import { verifyPlan } from './verifier';
 
 export async function structuralFingerprint(snapshot: PublicPageSnapshot): Promise<string> {
+  const parsed = PublicPageSnapshotSchema.safeParse(snapshot);
+  if (!parsed.success) throw new FlectoError('SCHEMA_INVALID');
+  snapshot = parsed.data;
   if (snapshot.controls.some(c => c.semanticKey.endsWith('|action-local'))) throw new FlectoError('UNSUPPORTED_CONTROL');
+  const selectedGoal = snapshot.goalRef === null ? null : snapshot.controls.find(c => c.ref === snapshot.goalRef);
+  if (selectedGoal === undefined) throw new FlectoError('STALE_DOCUMENT');
   const formKeys = new Map<string, string>();
   const form = (r: string | null) => { if (r === null) return null; if (!formKeys.has(r)) formKeys.set(r, `form_${formKeys.size}`); return formKeys.get(r)!; };
   const notices = new Map(snapshot.notices.map(n => [n.ref, n.semanticKey]));
-  const body = { schemaVersion: snapshot.schemaVersion, origin: snapshot.origin, goal: snapshot.goal, controls: snapshot.controls.map(({ ref: _ref, formRef, options, noticeRefs, ...c }) => ({ ...c, form: form(formRef), options: options.map(({ ref: _optionRef, ...o }) => o), notices: noticeRefs.map(r => notices.get(r)) })), notices: snapshot.notices.map(({ ref: _ref, formRef, ...n }) => ({ ...n, form: form(formRef) })) };
+  // Only stable public semantics enter the digest. Request/snapshot/document IDs,
+  // revisions and every control/form/option/notice ref are deliberately omitted.
+  const body = { schemaVersion: snapshot.schemaVersion, origin: snapshot.origin, goal: snapshot.goal, selectedGoal: selectedGoal?.semanticKey ?? null, controls: snapshot.controls.map(({ ref: _ref, formRef, options, noticeRefs, ...c }) => ({ ...c, form: form(formRef), options: options.map(({ ref: _optionRef, ...o }) => o), notices: noticeRefs.map(r => { const key = notices.get(r); if (!key) throw new FlectoError('STALE_DOCUMENT'); return key; }) })), notices: snapshot.notices.map(({ ref: _ref, formRef, ...n }) => ({ ...n, form: form(formRef) })) };
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(JSON.stringify(body)));
   return Array.from(new Uint8Array(digest), n => n.toString(16).padStart(2, '0')).join('');
 }

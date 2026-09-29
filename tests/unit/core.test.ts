@@ -90,6 +90,18 @@ describe('public extraction and source verification', () => {
     extracted = page('<form><button disabled>신청</button></form>');
     code(() => verifyPlan(plan(extracted.snapshot), extracted.snapshot, extracted.registry), 'SOURCE_REJECTED');
   });
+  it('requires selected-form and global notices, excludes other-form notices, and requires consent template', () => {
+    const { snapshot, registry } = page('<aside role="note">공통 자격 안내</aside><form><label>성명<input required></label><label>동의<input type="checkbox" required></label><p>첫 신청 기한</p><button>신청</button></form><form><p>다른 신청 기한</p><button>다른 신청</button></form>');
+    const valid = plan(snapshot), globalNotice = snapshot.notices.find(n => n.formRef === null)!;
+    const otherNotice = snapshot.notices.find(n => n.formRef && n.formRef !== snapshot.controls[0].formRef)!;
+    expect(verifyPlan(valid, snapshot, registry)).toEqual(valid);
+    const withoutGlobal = { ...valid, steps: valid.steps.map(s => ({ ...s, noticeRefs: s.noticeRefs.filter(r => r !== globalNotice.ref) })) };
+    code(() => verifyPlan(withoutGlobal, snapshot, registry), 'REQUIRED_MISSING');
+    const withForeign = { ...valid, steps: valid.steps.map((s, i) => ({ ...s, noticeRefs: i === 0 ? [...s.noticeRefs, otherNotice.ref] : s.noticeRefs })) };
+    code(() => verifyPlan(withForeign, snapshot, registry), 'SCHEMA_INVALID');
+    const wrongConsent = { ...valid, steps: valid.steps.map(s => ({ ...s, template: 'grouped_form' as const })) };
+    code(() => verifyPlan(wrongConsent, snapshot, registry), 'SCHEMA_INVALID');
+  });
   it.each(['required','action','notice','replacement','option'])('refuses current DOM change: %s', change => {
     const { snapshot, registry } = page('<form><label>성명<input></label><label>수업<select><option value="x">수학</option></select></label><p>기한 안내</p><button>신청</button></form>');
     if (change === 'required') document.querySelector('input')!.required = true;
@@ -135,12 +147,29 @@ describe('input adapters and review locks', () => {
     const c = snapshot.controls[0];
     expect((await applyUserInput({ kind: 'SET_CHOICE', ref: c.ref, optionRef: c.options[1].ref }, registry)).status).toBe('APPLIED');
     expect(document.querySelector('select')!.value).toBe('music');
+    expect(readControlValue(registry.bindings.get(c.ref)!, registry)).toBe('music');
     expect((await applyUserInput({ kind: 'SET_CHOICE', ref: c.ref, optionRef: snapshot.controls[1].options[0].ref }, registry)).error).toBe('STALE_DOCUMENT');
   });
   it('uses actual radio click and checkbox onChange handlers', async () => {
     const { snapshot, registry } = page('<form><fieldset><legend>시간</legend><label><input type="radio" name="time" value="first">오전</label><label><input type="radio" name="time" value="second">오후</label></fieldset><button>신청</button></form>');
     const c = snapshot.controls[0]; let count = 0; document.querySelectorAll('input')[1].addEventListener('change', () => count++);
     expect((await applyUserInput({ kind: 'SET_CHOICE', ref: c.ref, optionRef: c.options[1].ref }, registry)).status).toBe('APPLIED'); expect(count).toBe(1);
+    expect(readControlValue(registry.bindings.get(c.ref)!, registry)).toBe('second');
+  });
+  it('does not accept a refused radio selection just because another option has the same native value', async () => {
+    const { snapshot, registry } = page('<form><fieldset><legend>시간</legend><label><input type="radio" name="time" value="same" checked>오전</label><label><input type="radio" name="time" value="same">오후</label></fieldset><button>신청</button></form>');
+    const c = snapshot.controls[0];
+    document.querySelectorAll('input')[1].addEventListener('click', e => e.preventDefault());
+    expect((await applyUserInput({ kind: 'SET_CHOICE', ref: c.ref, optionRef: c.options[1].ref }, registry)).error).toBe('SOURCE_REJECTED');
+  });
+  it('accepts a controller-built token after sequentially awaited input actions', async () => {
+    const { snapshot, registry } = page(), [name, consent, submit] = snapshot.controls;
+    let submitted = 0; document.querySelector('form')!.addEventListener('submit', e => { e.preventDefault(); submitted++; });
+    await applyUserInput({ kind: 'SET_TEXT', ref: name.ref, value: '홍길동' }, registry);
+    await applyUserInput({ kind: 'SET_CONSENT_FROM_USER', ref: consent.ref, checked: true }, registry);
+    const { documentInstanceId, semanticRevision, optionRevision, privateValueRevision } = registry;
+    const review = { documentInstanceId, semanticRevision, optionRevision, privateValueRevision, sourceActionRef: submit.ref };
+    expect((await invokeSource(submit.ref, registry, 'submit', review)).status).toBe('PENDING'); expect(submitted).toBe(1);
   });
   it('reaches React checkbox, radio and select handlers without private framework APIs', async () => {
     let observed = '';
@@ -191,6 +220,24 @@ describe('input adapters and review locks', () => {
 });
 
 describe('structure fingerprints and cache rebind', () => {
+  it('excludes every ephemeral ref and revision and expresses the selected goal through its semantic key', async () => {
+    const original = page('<form><label>수업<select aria-describedby="hint"><option value="math">수학</option></select></label><p id="hint">기한 안내</p><button>신청</button></form><form><button>다른 신청</button></form>').snapshot;
+    original.goalRef = original.controls.find(c => c.kind === 'submit')!.ref;
+    const fresh = (r: string | null) => r === null ? null : `new_${r}`;
+    const renamed: PublicPageSnapshot = { ...original, documentInstanceId: 'new_document', requestId: 'new_request', snapshotId: 'new_snapshot', semanticRevision: 42, optionRevision: 19, goalRef: fresh(original.goalRef), controls: original.controls.map(c => ({ ...c, ref: fresh(c.ref)!, formRef: fresh(c.formRef), options: c.options.map(o => ({ ...o, ref: fresh(o.ref)! })), noticeRefs: c.noticeRefs.map(r => fresh(r)!) })), notices: original.notices.map(n => ({ ...n, ref: fresh(n.ref)!, formRef: fresh(n.formRef) })) };
+    expect(await structuralFingerprint(original)).toBe(await structuralFingerprint(renamed));
+    const changedGoal = { ...renamed, goalRef: renamed.controls.at(-1)!.ref };
+    expect(await structuralFingerprint(changedGoal)).not.toBe(await structuralFingerprint(original));
+    await expect(structuralFingerprint({ ...renamed, goalRef: 'missing' })).rejects.toMatchObject({ code: 'STALE_DOCUMENT' });
+  });
+  it('survives actual DOM id/for/ARIA/form-id rewrites and decorative wrappers in a fresh document', async () => {
+    const original = page('<form id="oldForm"><label for="oldInput">성명</label><input id="oldInput" aria-describedby="oldNotice"><p id="oldNotice">기한 안내</p><button>신청</button></form>').snapshot;
+    original.goalRef = original.controls.find(c => c.kind === 'submit')!.ref;
+    const renewed = page('<main class="decoration"><form id="newForm" style="color: blue"><section><label for="newInput">성명</label><input id="newInput" aria-describedby="newNotice"></section><div><p id="newNotice">기한 안내</p><button>신청</button></div></form></main>').snapshot;
+    renewed.goalRef = renewed.controls.find(c => c.kind === 'submit')!.ref;
+    expect(original.goalRef).not.toBe(renewed.goalRef);
+    expect(await structuralFingerprint(original)).toBe(await structuralFingerprint(renewed));
+  });
   it('changes the key for a different form action and never caches private query URLs across documents', async () => {
     const a = page('<form action="/one"><button>신청</button></form>').snapshot;
     const b = page('<form action="/two"><button>신청</button></form>').snapshot;
