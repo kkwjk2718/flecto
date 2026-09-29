@@ -9,7 +9,7 @@ import {
   type PagePlan, type PrivateBindingRegistry, type PublicPageSnapshot,
   type ReviewToken, type UserAction, type ViewControl,
 } from '@flecto/contracts';
-import { applyUserInput, createReviewToken, extractPage, invokeSource, readControlValue, refreshRegistry, structuralFingerprint, verifyPlan, currentSnapshot } from '@flecto/core';
+import { applyUserInput, createReviewToken, extractPage, invokeSource, readControlValues, refreshRegistry, structuralFingerprint, verifyPlan, currentSnapshot } from '@flecto/core';
 
 const messages: Record<ErrorCode, string> = {
   AUTH_REQUIRED: '원래 화면에서 먼저 로그인해 주세요. 로그인 정보는 FLECTO가 읽지 않아요.',
@@ -148,6 +148,7 @@ export class FlectoController {
   }
   private viewControls(): ViewControl[] {
     if (!this.snapshot || !this.registry) return [];
+    const values = readControlValues(this.registry);
     const action = this.plan?.sourceActionRef ? this.snapshot.controls.find((item) => item.ref === this.plan!.sourceActionRef) : null;
     const controls = action ? this.snapshot.controls.filter((control) => control.formRef === action.formRef && (control.actionKind === 'none' || control.ref === action.ref)) : this.snapshot.controls;
     return controls.map((control) => {
@@ -156,7 +157,7 @@ export class FlectoController {
       if (binding) {
         if (control.kind === 'select' || control.kind === 'radio') value = this.selectedOptionRef(control);
         else if (this.drafts.has(control.ref)) value = this.drafts.get(control.ref)!;
-        else value = readControlValue(binding, this.registry!);
+        else value = values.get(control.ref) ?? '';
       }
       const options = control.kind === 'select' && control.required ? control.options.filter((option) => (this.registry!.options.get(option.ref) as HTMLOptionElement | undefined)?.value !== '') : control.options;
       return { ...control, options, value, composing: this.composing.has(control.ref),
@@ -175,8 +176,9 @@ export class FlectoController {
   }
   private captureValues(): void {
     if (!this.registry) return;
+    const values = readControlValues(this.registry);
     for (const binding of this.registry.bindings.values()) {
-      if (inputKinds.has(binding.kind)) this.lastValues.set(binding.ref, readControlValue(binding, this.registry));
+      if (inputKinds.has(binding.kind)) this.lastValues.set(binding.ref, values.get(binding.ref) ?? '');
     }
   }
 
@@ -251,6 +253,12 @@ export class FlectoController {
   }
   private fail(code: ErrorCode): void {
     this.clearDeadline();
+    if (code === 'AUTH_REQUIRED') {
+      if (this.tick) clearInterval(this.tick); this.tick = null;
+      this.observer?.disconnect();
+      if (this.mutationTimer) clearTimeout(this.mutationTimer); this.mutationTimer = null;
+      this.plan = null; this.registry = null; this.snapshot = null;
+    }
     this.review = null;
     const phase = code === 'AUTH_REQUIRED' ? 'AUTH_REQUIRED' : code === 'DEADLINE_EXCEEDED' ? 'TIMED_OUT' :
       code === 'CANCELLED' ? 'CANCELLED' : code === 'SOURCE_REJECTED' ? 'SOURCE_REJECTED' :
@@ -475,14 +483,21 @@ export class FlectoController {
   private sourceEvent = (event: Event): void => {
     if (this.originalEventsSuppressed || !this.registry || event.target === this.host) return;
     if (![...this.registry.bindings.values()].some((binding) => binding.element === event.target)) return;
-    this.pollValues();
+    try { this.pollValues(); } catch (error) { this.observationError(error); }
   };
+  private observationError(error: unknown): void {
+    // Expected source changes become product state. Programming errors stay visible.
+    if (!(error instanceof FlectoError)) throw error;
+    this.cancelPrepare(false);
+    this.fail(error.code);
+  }
   private pollValues(): void {
-    if (!this.registry || !this.plan || this.originalEventsSuppressed || this.pendingSubmit) return;
+    if (!this.registry || !this.plan || this.originalEventsSuppressed || this.pendingSubmit || !['READY', 'REVIEW', 'SOURCE_REJECTED'].includes(this.model.phase)) return;
     let changed = false;
+    const values = readControlValues(this.registry);
     for (const binding of this.registry.bindings.values()) {
       if (!inputKinds.has(binding.kind) || !binding.element.isConnected || this.composing.has(binding.ref) || this.drafts.has(binding.ref)) continue;
-      const value = readControlValue(binding, this.registry);
+      const value = values.get(binding.ref) ?? '';
       if (this.lastValues.has(binding.ref) && value !== this.lastValues.get(binding.ref)) changed = true;
     }
     if (changed) {
@@ -492,7 +507,7 @@ export class FlectoController {
     }
   }
   private async checkStructure(): Promise<void> {
-    if (this.checkingStructure || !this.host || this.composing.size || this.originalEventsSuppressed) return;
+    if (this.model.phase === 'AUTH_REQUIRED' || this.checkingStructure || !this.host || this.composing.size || this.originalEventsSuppressed) return;
     this.checkingStructure = true;
     try {
       if (this.probeOutcome()) return;
@@ -516,7 +531,8 @@ export class FlectoController {
       if (await structuralFingerprint(current.snapshot) !== this.structuralKey) {
         this.review = null; this.fail('STALE_DOCUMENT');
       }
-    } finally { this.checkingStructure = false; }
+    } catch (error) { this.observationError(error); }
+    finally { this.checkingStructure = false; }
   }
   private keyboard = (event: KeyboardEvent): void => {
     if (event.key === 'Escape' && !event.isComposing && !this.composing.size) { event.preventDefault(); void this.close(); }
@@ -547,12 +563,13 @@ export class FlectoController {
         if (this.pendingSubmit && !this.hasSourceForm()) this.fail('OUTCOME_UNKNOWN');
         else {
           this.pendingSubmit = false; this.showTasks();
-          void this.trySourceReview().then(() => this.sendState());
+          void this.trySourceReview().then(() => this.sendState()).catch(error => this.observationError(error));
         }
       }
     }
   }
   private setupObservation(): void {
+    if (this.model.phase === 'AUTH_REQUIRED') return;
     this.doc.addEventListener('input', this.sourceEvent, true);
     this.doc.addEventListener('change', this.sourceEvent, true);
     this.doc.addEventListener('keydown', this.keyboard, true);
@@ -566,15 +583,17 @@ export class FlectoController {
     this.observer.observe(this.doc.documentElement, { subtree: true, childList: true, characterData: true, attributes: true,
       attributeFilter: ['required', 'disabled', 'aria-disabled', 'type', 'name', 'min', 'max', 'pattern', 'value', 'checked', 'selected', 'action'] });
     this.tick = setInterval(() => {
-      if (location.href !== this.lastUrl) { this.sourceNavigation(); return; }
-      if (this.model.phase === 'PREPARING') {
-        const elapsedMs = performance.now() - this.prepareStart;
-        if (elapsedMs >= PREPARE_DEADLINE_MS) { this.cancelPrepare(true); return; }
-        this.patch({ elapsedMs,
-          statusMessage: elapsedMs > SPONSOR_AFTER_MS ? '필요한 입력과 버튼을 정리하고 있어요. 준비되면 바로 열어드릴게요.' : '사용하기 쉬운 화면을 준비하고 있어요.' });
-      } else if (this.pendingSubmit) {
-        if (!this.probeOutcome() && this.submitStart && performance.now() - this.submitStart > 10_000) this.fail('OUTCOME_UNKNOWN');
-      } else this.pollValues();
+      try {
+        if (location.href !== this.lastUrl) { this.sourceNavigation(); return; }
+        if (this.model.phase === 'PREPARING') {
+          const elapsedMs = performance.now() - this.prepareStart;
+          if (elapsedMs >= PREPARE_DEADLINE_MS) { this.cancelPrepare(true); return; }
+          this.patch({ elapsedMs,
+            statusMessage: elapsedMs > SPONSOR_AFTER_MS ? '필요한 입력과 버튼을 정리하고 있어요. 준비되면 바로 열어드릴게요.' : '사용하기 쉬운 화면을 준비하고 있어요.' });
+        } else if (this.pendingSubmit) {
+          if (!this.probeOutcome() && this.submitStart && performance.now() - this.submitStart > 10_000) this.fail('OUTCOME_UNKNOWN');
+        } else this.pollValues();
+      } catch (error) { this.observationError(error); }
     }, 200);
   }
   private sendState(): Promise<BackgroundReply> {
