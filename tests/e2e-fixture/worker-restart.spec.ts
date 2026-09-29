@@ -3,14 +3,14 @@ import { EXTENSION_ID } from '@flecto/contracts';
 import { test, expect, dialog, beginBenefits, sourceReview, configureBenefits, countSourcePosts, benefitsRecords } from './qa-gates';
 
 /**
- * Authored-only checkpoint; no browser run while lead owns the heavy slot.
+ * Restart proof uses CDP state and fresh globals, not Playwright wrapper identity.
  * Primary local API definitions inspected:
  *   node_modules/playwright-core/types/protocol.d.ts, ServiceWorker namespace:
  *   enable, workerVersionUpdated, stopWorker({ versionId }), runningStatus.
  *   node_modules/playwright-core/types/types.d.ts: BrowserContext.newCDPSession.
  * This uses a CDP session on the owned options page, not a debugger attached to
  * the target worker. No runtime.reload(), unregister, stopAllWorkers, browser
- * restart, or storage.session.clear(). Runtime CDP support is still NOT_RUN.
+ * restart, or storage.session.clear(). Failed and successful probes attach events.
  * T25 coverage is only the service-worker lifecycle, not a browser/profile restart.
  */
 
@@ -45,6 +45,9 @@ async function workerControl(context: BrowserContext, options: Page, previousWor
   const events: Array<{ versionId: string; registrationId: string; status: string }> = [];
   let previousClosed = false;
   let replacement: Worker | undefined;
+  const nonceKey = `__qa_worker_restart_${crypto.randomUUID()}`;
+  let nonceBefore: string | null = null;
+  let nonceAfter: { hadPriorMarker: boolean; nonce: string; brokerPresent: boolean } | null = null;
   const onClose = () => { previousClosed = true; };
   const onWorker = (worker: Worker) => { if (worker !== previousWorker && worker.url() === scriptURL) replacement = worker; };
   const onVersions = (event: { versions: Version[] }) => {
@@ -58,6 +61,8 @@ async function workerControl(context: BrowserContext, options: Page, previousWor
   context.on('serviceworker', onWorker);
   cdp.on('ServiceWorker.workerVersionUpdated', onVersions);
   const dispose = async () => {
+    await test.info().attach('worker-stop-diagnostics', { body: JSON.stringify({ events, previousClosed,
+      replacementObserved: !!replacement, nonceBefore, nonceAfter }), contentType: 'application/json' });
     previousWorker.off('close', onClose); context.off('serviceworker', onWorker);
     cdp.off('ServiceWorker.workerVersionUpdated', onVersions);
     try { await cdp.send('ServiceWorker.disable'); } finally { await cdp.detach(); }
@@ -72,21 +77,39 @@ async function workerControl(context: BrowserContext, options: Page, previousWor
     async stopAndWake() {
       const own = [...versions.values()].find(version => version.runningStatus === 'running')!;
       expect(own.scriptURL).toBe(scriptURL);
+      nonceBefore = await previousWorker.evaluate(key => {
+        const value = crypto.randomUUID();
+        // This property cannot be overwritten/deleted in the old execution realm.
+        Object.defineProperty(globalThis, key, { value, writable: false, configurable: false });
+        return value;
+      }, nonceKey);
+      const stopBoundary = events.length;
       await cdp.send('ServiceWorker.stopWorker', { versionId: own.versionId });
-      await expect.poll(() => previousClosed, { message: 'The old Playwright Worker must actually close' }).toBe(true);
-      await expect.poll(() => events.some(event => event.versionId === own.versionId && event.status === 'stopped')).toBe(true);
+      await expect.poll(() => events.slice(stopBoundary).some(event => event.versionId === own.versionId && event.status === 'stopped'),
+        { message: 'CDP must report actual stoppage after stopWorker' }).toBe(true);
       // This is the real extension runtime. Options are not authorized source
       // senders, so the expected AUTH_REQUIRED reply wakes the worker and waits
       // for broker restoration without granting a fake tab/document identity.
       const wake = await options.evaluate(async () => chrome.runtime.sendMessage({ type: 'FLECTO_SETTINGS_GET' }));
       expect(wake).toMatchObject({ ok: false, error: 'AUTH_REQUIRED' });
-      await expect.poll(() => replacement !== undefined, { message: 'A new Worker object must be observed' }).toBe(true);
       await expect.poll(() => versions.get(own.versionId)?.runningStatus).toBe('running');
       expect(versions.get(own.versionId)?.registrationId).toBe(own.registrationId);
-      expect(replacement).not.toBe(previousWorker);
+      // Chromium can retain its target and Playwright Worker wrapper across a
+      // restart. Its new execution context must still have completely fresh globals.
+      const resumed = replacement ?? context.serviceWorkers().find(worker => worker.url() === scriptURL);
+      expect(resumed).toBeDefined();
+      nonceAfter = await resumed!.evaluate(key => {
+        const hadPriorMarker = Object.prototype.hasOwnProperty.call(globalThis, key);
+        if (!hadPriorMarker) Object.defineProperty(globalThis, key, { value: crypto.randomUUID(), writable: false, configurable: false });
+        return { hadPriorMarker, nonce: (globalThis as unknown as Record<string, string>)[key],
+          brokerPresent: !!(globalThis as unknown as Record<symbol, unknown>)[Symbol.for('flecto.background')] };
+      }, nonceKey);
+      expect(nonceAfter.hadPriorMarker).toBe(false);
+      expect(nonceAfter.nonce).not.toBe(nonceBefore);
+      expect(nonceAfter.brokerPresent).toBe(true);
       return { mechanism: 'ServiceWorker.stopWorker + options runtime.sendMessage',
         versionId: own.versionId, registrationId: own.registrationId,
-        previousWorkerClosed: previousClosed, replacementObserved: !!replacement, wakeError: wake.error, events };
+        previousWorkerClosed: previousClosed, replacementObserved: !!replacement, nonceBefore, nonceAfter, wakeError: wake.error, events };
     },
   };
 }
