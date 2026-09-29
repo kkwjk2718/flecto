@@ -76,15 +76,17 @@ const AUTOCOMPLETE: Partial<Record<ViewControl['kind'], string>> = { email: 'ema
 
 // Holds the visible draft locally so the input element and caret stay stable while the
 // controller round-trips SET_TEXT. Echoes of values we already sent never overwrite typing;
-// a genuinely different source value is adopted only outside IME composition.
+// A focused editor owns its visible draft. Source-side conflicts are handled by
+// the controller; a late acknowledgement must not split an active Korean syllable.
 export function TextField({ control, ctx }: { control: ViewControl; ctx: FieldContext }) {
   const external = textOf(control.value);
   const [draft, setDraft] = useState(external);
   const composing = useRef(false);
+  const focused = useRef(false);
   const sent = useRef<string[]>([]);
 
   useEffect(() => {
-    if (composing.current) return;
+    if (composing.current || focused.current) return;
     if (sent.current.includes(external)) {
       if (external === sent.current[sent.current.length - 1]) sent.current = [];
       return;
@@ -115,6 +117,8 @@ export function TextField({ control, ctx }: { control: ViewControl; ctx: FieldCo
     'aria-invalid': control.error ? true : undefined,
     'aria-describedby': describedBy,
     'data-flecto-ref': control.ref,
+    onFocus: () => { focused.current = true; },
+    onBlur: () => { focused.current = false; },
     maxLength: control.constraints.maxLength,
     onChange: (e: { currentTarget: { value: string } }) => {
       const value = e.currentTarget.value;

@@ -204,6 +204,27 @@ describe('grouped form', () => {
     expect(input.value).toBe('박철수');
   });
 
+  it('does not replace a focused Korean draft with a late echo after the newest acknowledgement', () => {
+    const m = formModel();
+    const { shadow, rerender } = mount(m);
+    const input = q<HTMLInputElement>(shadow, 'input[data-flecto-ref="name"]')!;
+    act(() => input.focus());
+    act(() => input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true })));
+    type(input, 'ㅎ'); type(input, '하'); type(input, '한');
+    act(() => input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '한' })));
+    const withValue = (value: string) => ({ ...m, controls: m.controls.map(c => c.ref === 'name' ? { ...c, value } : c) });
+    rerender(withValue('한'));
+    input.setSelectionRange(1, 1);
+    rerender(withValue('하'));
+    expect(input.value).toBe('한');
+    expect(input.selectionStart).toBe(1);
+    act(() => input.dispatchEvent(new CompositionEvent('compositionstart', { bubbles: true })));
+    type(input, '한ㄱ'); type(input, '한그'); type(input, '한글');
+    act(() => input.dispatchEvent(new CompositionEvent('compositionend', { bubbles: true, data: '한글' })));
+    rerender(withValue('한'));
+    expect(input.value).toBe('한글');
+  });
+
   it('moves focus to the first errored control when the step changes', () => {
     const m = formModel({ stepIndex: 1 });
     const { shadow, rerender } = mount(m);
