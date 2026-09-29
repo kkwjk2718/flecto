@@ -8,7 +8,7 @@ import { readVerifiedArtifact } from '../../scripts/qa-report';
 
 export const E2E_MODE = process.env.FLECTO_E2E_MODE === 'LIVE_CODEX' ? 'LIVE_CODEX' : 'FIXTURE';
 export const QA_PORTS = E2E_MODE === 'LIVE_CODEX' ? { planner: 4527, benefits: 4383, culture: 4384 } : { planner: 4427, benefits: 4283, culture: 4284 };
-type AppFixtures = { context: BrowserContext; worker: Worker; activate: (page: Page) => Promise<void>; consoleErrors: string[] };
+type AppFixtures = { context: BrowserContext; worker: Worker; activate: (page: Page, autoPrepare?: boolean) => Promise<void>; consoleErrors: string[] };
 type WorkerFixtures = { system: RunningSystem };
 export const test = base.extend<AppFixtures, WorkerFixtures>({
   system: [async ({}, use) => {
@@ -65,16 +65,16 @@ export const test = base.extend<AppFixtures, WorkerFixtures>({
     await use(errors); expect(errors).toEqual([]);
   },
   activate: async ({ worker }, use) => {
-    await use(async (page) => {
+    await use(async (page, autoPrepare = false) => {
       await page.bringToFront();
       // The installed extension's real action handler, in a test-owned trusted
       // worker. A native toolbar click is verified separately through computer use.
-      await worker.evaluate(async (url) => {
+      await worker.evaluate(async ({ url, autoPrepare }) => {
         const tab = (await chrome.tabs.query({})).find((item) => item.url === url && item.active);
         if (!tab) throw new Error('Test source tab was not found');
-        const broker = (globalThis as unknown as Record<symbol, { activate(tab: chrome.tabs.Tab): Promise<void> }>)[Symbol.for('flecto.background')];
-        await broker.activate(tab);
-      }, page.url());
+        const broker = (globalThis as unknown as Record<symbol, { activate(tab: chrome.tabs.Tab, autoPrepare?: boolean): Promise<void> }>)[Symbol.for('flecto.background')];
+        await broker.activate(tab, autoPrepare);
+      }, { url: page.url(), autoPrepare });
       await expect(page.getByRole('dialog', { name: 'FLECTO 쉬운 화면' })).toBeVisible();
     });
   },

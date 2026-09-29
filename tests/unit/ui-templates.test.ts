@@ -3,7 +3,7 @@ import { describe, expect, it, afterEach, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import type { Root } from 'react-dom/client';
-import { emptyViewModel } from '@flecto/contracts';
+import { emptyViewModel, DEFAULT_SETTINGS } from '@flecto/contracts';
 import type { FlectoViewModel, UserAction, ViewControl, PlanStep } from '@flecto/contracts';
 import { FlectoApp, SPONSOR_NOTE } from '@flecto/templates';
 import { FLECTO_CSS } from '@flecto/design-tokens';
@@ -137,7 +137,7 @@ describe('FLECTO shell', () => {
   });
 
   it('settings emit the full settings object and keep the typed draft and element', () => {
-    const m = formModel();
+    const m = formModel({ settings: { ...DEFAULT_SETTINGS, fontSize: 26 } });
     const { shadow, actions, rerender } = mount(m);
     const input = q<HTMLInputElement>(shadow, 'input[data-flecto-ref="name"]')!;
     type(input, '김영희');
